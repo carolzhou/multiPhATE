@@ -100,3 +100,4 @@ Because the behavior of 3rd party codes can sometimes be unpredictable, it is re
 PLANNED FURTHER DEVELOPMENT
 
 Plans include adding additional functionality to the pipeline, such as HMMER and additional hmm databases.
+# multiPhATE
