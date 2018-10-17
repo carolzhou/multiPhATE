@@ -8,7 +8,7 @@
 #    callers.
 #
 # Updates:
-#    Begin 3 June 2016
+#    12 October 2018
 #
 # Programmer's Notes:
 #
@@ -37,6 +37,7 @@
 import os, re
 import copy
 import CGC_geneCall
+import math
 
 PHATE_PIPELINE = True  # Running this code within the PhATE pipeline. Set this to False if running code independently
 #PHATE_PIPELINE = False
@@ -53,10 +54,10 @@ PHATE_PIPELINE = True  # Running this code within the PhATE pipeline. Set this t
 #    CGC_PROGRESS = 'True'
 
 CGC_WARNINGS = 'True'
-CGC_MESSAGES = 'True'
+CGC_MESSAGES = 'False'
 CGC_PROGRESS = 'True'
-DEBUG = True
-#DEBUG = False
+#DEBUG = True  # Controls verbosity in this code only
+DEBUG = False
 
 p_comment   = re.compile('^#')
 
@@ -68,7 +69,6 @@ class Comparison(object):
         self.uniqueList = []  # list of lists of unique gene calls over all callers; each item in list is a common gene call (>=1 gene caller)
         self.callerList = []  # non-redundant list of callers 
         self.geneCall   = CGC_geneCall.GeneCall()  # a geneCall object
-
 
     ##### IDENTIFY CALLERS ##### 
     # Create a non-redundant list of gene callers
@@ -212,6 +212,26 @@ class Comparison(object):
                 print "CGC_compare says: Compare(): Nothing to Compare"
         return
 
+    ##### SCORE ##### 
+    # Scores each gene call based on its consensus with other callers
+    # Run this method last. This method must be run AFTER merge list is complete,
+    #   and the self.Compare method has been run, generating the self.uniqueList,
+    #   which is a superset of the gene calls called by each of the callers.
+    # Unique gene calls are scored 0.0
+    # Unanimous gene calls are scored 1.0
+    # Gene calls that are in common with one or more other gene callers are scored based on how many
+    #   gene callers were in agreement.
+    def Score(self):
+        self.IdentifyCallers()
+        geneCallerCount = len(self.callerList)
+        geneScore = 0.0
+        # Each identityList contains one or more identical gene calls (ie, calls that were identical between callers)
+        if geneCallerCount > 0:  # No need to score if only one gene caller was invoked
+            for identityList in self.uniqueList:
+                for geneCall in identityList:
+                    geneScore = 1.0/geneCallerCount * len(identityList)
+                    geneCall.score = geneScore 
+        return
 
     ##### PRINT METHODS ##########################################################################################
 
@@ -372,11 +392,30 @@ class Comparison(object):
     def PrintReport(self):  # Final output
         self.PrintStats()
         self.PrintGenecallGrid()
+        self.PrintGenecallScores()
         return
 
     def PrintReport2file(self,FILE_H):  # Final output
         self.PrintStats2file(FILE_H)
         self.PrintGenecallGrid2file(FILE_H)
+        self.PrintGenecallScores2file(FILE_H)
+        return
+
+    def PrintGenecallScores(self):
+        print
+        print "Gene-call Scores:"
+        print 'Caller\t', 'Contig\t', 'Gene No.\t', 'Left End\t', 'Right End\t', 'Strand\t', 'Score'
+        for geneCallList in self.uniqueList:
+            for geneCall in geneCallList:
+                print geneCall.geneCaller, '\t', geneCall.contig, '\t', geneCall.geneNumber, '\t', geneCall.leftEnd, '\t', geneCall.rightEnd, '\t', geneCall.strand, '\t', '%1.2f' % geneCall.score
+        return
+
+    def PrintGenecallScores2file(self,FILE_H):
+        FILE_H.write("\n")
+        FILE_H.write("%s\n" % ("Gene-call Scores:"))
+        for geneCallList in self.uniqueList:
+            for geneCall in geneCallList:
+                FILE_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%0.2f\n" % (geneCall.geneCaller,geneCall.contig,geneCall.geneNumber,geneCall.leftEnd,geneCall.rightEnd,geneCall.strand,geneCall.score))
         return
 
     def PrintStats(self):

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 ################################################################################################
 #
 # Module:  CGC_geneCall.py
@@ -70,6 +68,7 @@ class GeneCall(object):
         self.geneLength  = 0
         self.contig      = "unknown"
         self.proteinName = "unknown"
+        self.score       = 0.0  # Gene-call score, based on consensus among gene callers; calculated in CGC_compare/Score().
 
     def AssignGeneCall(self,geneName,geneCaller,geneNumber,strand,leftEnd,rightEnd,geneLength,contig="unknown",protein="unknown"):
         self.geneName    = geneName
@@ -91,17 +90,30 @@ class GeneCall(object):
         print "rightEnd =",   self.rightEnd
         print "strand =",     self.strand
         print "length =",     self.geneLength
-        print "contig=",      self.contig
-        print "protein=",     self.proteinName
+        print "contig =",     self.contig
+        print "protein =",    self.proteinName
+        print "score =",      self.score
+        return
+
+    def PrintAll2file(self,FILE_H):
+        FILE_H.write("%s%s\n" % ("\ngeneName = ", self.geneName))
+        FILE_H.write("%s%s\n" % ("geneCaller = ", self.geneCaller))
+        FILE_H.write("%s%s\n" % ("geneNumber = ", self.geneNumber))
+        FILE_H.write("%s%s\n" % ("leftEnd = ",    self.leftEnd))
+        FILE_H.write("%s%s\n" % ("rightEnd = ",   self.rightEnd))
+        FILE_H.write("%s%s\n" % ("strand = ",     self.strand))
+        FILE_H.write("%s%s\n" % ("length = ",     self.geneLength))
+        FILE_H.write("%s%s\n" % ("contig = ",     self.contig))
+        FILE_H.write("%s%s\n" % ("protein = ",    self.proteinName))
+        FILE_H.write("%s%s\n" % ("score = ",      self.score))
         return
 
     def PrintAll_brief(self):
-        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName
+        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName, ", score:", self.score
         return
 
     def PrintAll_brief_2file(self, File_H):
         File_H.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % ("Gene No. ",self.geneNumber,", gene caller: ",self.geneCaller,", leftEnd: ", self.leftEnd,", rightEnd: ",self.rightEnd,", strand: ",self.strand,", length: ",self.geneLength,", contig: ",self.contig,", protein: ",self.proteinName))
-        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName
         return
 
 class GeneCallSet(object):

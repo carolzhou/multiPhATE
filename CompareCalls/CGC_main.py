@@ -93,7 +93,7 @@ if argCount > 1:
     if PHATE_PIPELINE:  # First parameter is "log=<logFile>", and remaining parameters are genecall files to compare
         LOG.close()  # close default log; open log in designated subdir
         if argCount > 2:
-            match = re.search(p_log, sys.argv[1].lower())
+            match = re.search(p_log, sys.argv[1])
             if match:
                 LOG_FILE = match.group(1)
                 LOG = open(LOG_FILE,"w")
@@ -153,7 +153,7 @@ callSet_obj = CGC_geneCall.GeneCallSet()
 if CGC_PROGRESS == 'True':
     print "CGCmain says: Iterating through fileSet..."
 if PHATE_PIPELINE:
-    LOG.write("%s%s\n" % ("CGC Main: Iteraing through fileSet at ",datetime.datetime.now()))
+    LOG.write("%s%s\n" % ("CGC Main: Iterating through fileSet at ",datetime.datetime.now()))
     LOG.write("%s%s\n" % ("CGC Main: fileSet is ",fileSet))
 
 for geneFile in fileSet:
@@ -223,9 +223,9 @@ if DEBUG:
     LOG.write("%s\n" % ("CGC Main / DEBUG: Returning from call to caller.SortGeneCalls()"))
     LOG.write("%s\n" % ("CGC Main / DEBUG: Current content of callerList, in detail:"))
     print "CGCmain / DEBUG \n******************Sorted Lists:"
-    for caller in callerList:
-        caller.PrintAll_2file(LOG)
-        caller.PrintAll()
+    for callSet in callerList:
+        callSet.PrintAll2file(LOG)
+        callSet.PrintAll()
         print
 
 ####################################################################################################
@@ -251,6 +251,7 @@ for callSet in callerList:
     compareGCs.Merge(callSet.geneCallList)  # Merge() merges one at a time, adding each gene call list the the existing merge
 
 LOG.write("%s\n" % ("CGC Main: Final merged genes:"))
+
 compareGCs.PrintMergeList2file(LOG)
 
 ####################################################################################################
@@ -264,11 +265,23 @@ if DEBUG:
 
 # Fist, identify unique gene calls
 compareGCs.Compare()
-LOG.write("%s\n" % ("CGC Main: This is the Unique List:"))
-compareGCs.PrintUniqueList2file(LOG)
+if DEBUG:
+    LOG.write("%s\n" % ("CGC Main: This is the Unique List:"))
+    compareGCs.PrintUniqueList2file(LOG)
+
+# Next, score the gene calls
+LOG.write("%s\n" % ("CGC Main: Scoring gene calls...."))
+if CGC_PROGRESS == 'True':
+    print "CGCmain says: Scoring gene calls...."
+compareGCs.Score()
+if DEBUG:
+    LOG.write("%s\n" % ("CGC Main: This is the scored gene-call list:"))
+    compareGCs.PrintGenecallScores2file(LOG)
 
 # Then, identify gene calls in common
 LOG.write("%s\n" % ("CGC Main: Identifying common core..."))
+if CGC_PROGRESS == 'True':
+    print "CGCmain says: Identifying gene calls in common..."
 compareGCs.IdentifyCommonCore()
 LOG.write("%s\n" % ("CGC Main: This is the Common Core List:"))
 compareGCs.PrintCommonCore2file(LOG)
