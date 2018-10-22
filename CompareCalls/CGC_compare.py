@@ -38,6 +38,7 @@ import os, re
 import copy
 import CGC_geneCall
 import math
+from collections import defaultdict
 
 PHATE_PIPELINE = True  # Running this code within the PhATE pipeline. Set this to False if running code independently
 #PHATE_PIPELINE = False
@@ -72,6 +73,7 @@ class Comparison(object):
 
     ##### IDENTIFY CALLERS ##### 
     # Create a non-redundant list of gene callers
+    #################
     def IdentifyCallers(self):
         if self.mergeList:
             for gene in self.mergeList:
@@ -89,6 +91,7 @@ class Comparison(object):
 
     ##### IDENTIFY COMMON CORE #####
     # Run Merge() and Compare() before running this method   
+    #################
     def IdentifyCommonCore(self):
         # First, determine the callers used  
         if self.uniqueList:  # Must have previously called self.Compare() to fill this list 
@@ -121,6 +124,7 @@ class Comparison(object):
  
     ##### IS LESSER ? #####
     # Determine which gene call occurs first along the sequence
+    #################
     def IsLesser(self,gene1,gene2):  # input is 2 geneCall objects
         if (int(gene1.leftEnd) < int(gene2.leftEnd)):
             return True
@@ -132,6 +136,7 @@ class Comparison(object):
     ##### MERGE #####
     # Merge a list of gene call objects with self.mergeList
     # Call this method once for each caller's output (i.e., loop over the set of gene caller outputs) 
+    #################
     def Merge(self,nextGeneSet):  # Merge a list of gene call objects with self.mergeList
         contigList = []           # non-redundant list of contigs from *both* lists (self.mergeList and incoming nextGeneSet)
 
@@ -190,6 +195,7 @@ class Comparison(object):
     ##### COMPARE #####
     # Compares the genes in self.mergeList; creates a list of ordered, unique gene calls 
     # Run this method after having merged all of your gene call sets into self.mergeList
+    #################
     def Compare(self):  
         identityList = []
         if self.mergeList:
@@ -220,18 +226,115 @@ class Comparison(object):
     # Unique gene calls are scored 0.0
     # Unanimous gene calls are scored 1.0
     # Gene calls that are in common with one or more other gene callers are scored based on how many
-    #   gene callers were in agreement.
+    #   gene callers were in agreement. If there is disagreement in the start coordinate only, then additional
+    #   (partial) score is awarded.
+    #################
     def Score(self):
-        self.IdentifyCallers()
-        geneCallerCount = len(self.callerList)
-        geneScore = 0.0
-        # Each identityList contains one or more identical gene calls (ie, calls that were identical between callers)
+        self.IdentifyCallers()  # First, make sure that we have a complete, non-redundant list of callers
+        geneCallerCount = len(self.callerList)  # And we know how many callers there were
+        geneScore_a = 0.0                       # Gene-call score based on identical calls
+        geneScore_b = 0.0                       # Gene-call score "boost" based on same stop coordinate
+        contig_strand_start_stop = ""           # Functions to tally number of identical calls 
+        contig_strand_stop       = ""           # Functions to tally number of calls with same stop coordinate
+        callTally = defaultdict(dict)           # Hash for tallying identical and similar calls; defaultdict is like a Perl hash
+        start = 0; stop = 0                     # start and stop coordinates
+
+        # Compute gene-call scores
         if geneCallerCount > 0:  # No need to score if only one gene caller was invoked
+        
+            # First, tally up the number of instances of identical and same-stop gene calls, on each contig
             for identityList in self.uniqueList:
                 for geneCall in identityList:
-                    geneScore = 1.0/geneCallerCount * len(identityList)
-                    geneCall.score = geneScore 
+                    start = 0; stop = 0
+                    if geneCall.strand == '+':
+                        start = geneCall.leftEnd
+                        stop  = geneCall.rightEnd
+                    elif geneCall.strand == '-':
+                        start = geneCall.rightEnd
+                        stop  = geneCall.leftEnd
+                    else:
+                        if CGC_WARNINGS:
+                            print "WARNING: CGC_compare says, Unrecognized strand:", geneCall.strand 
+                contig_strand_start_stop = geneCall.contig + '_' + geneCall.strand + '_' + str(start) + '_' + str(stop) 
+                contig_strand_stop       = geneCall.contig + '_' + geneCall.strand + '_'                    + str(stop)
+                if callTally[contig_strand_start_stop]:
+                    callTally[contig_strand_start_stop] += 1
+                else:
+                    callTally[contig_strand_start_stop] = 1 
+                if callTally[contig_strand_stop]:
+                    callTally[contig_strand_stop] += 1
+                else:
+                    callTally[contig_strand_stop] = 1 
+
+            # Next, compute score for each gene call; this is done is two steps: identity, then similarity
+            for identityList in self.uniqueList:
+                for geneCall in identityList:
+                    geneScore_a = 0; geneScore_b = 0  # initialize 
+
+                    # Compute gene score part a 
+                    geneScore_a = len(identityList)/float(geneCallerCount)
+
+                    if geneScore_a < 1.0:  # Compute part b, since there may be call(s) with same end, different start
+                        # Compute gene score parb b 
+                        if geneCall.strand == '+':
+                            start = geneCall.leftEnd
+                            stop  = geneCall.rightEnd
+                        elif geneCall.strand == '-':
+                            start = geneCall.rightEnd
+                            stop  = geneCall.leftEnd
+                        else:
+                            if DEBUG:
+                                print "DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand 
+                        contig_strand_start_stop = geneCall.contig + '_' + geneCall.strand + '_' + str(start) + '_' + str(stop) 
+                        contig_strand_stop       = geneCall.contig + '_' + geneCall.strand + '_'                    + str(stop)
+                        if DEBUG:
+                            print "geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop 
+
+                        if callTally[contig_strand_stop]:
+                            if callTally[contig_strand_stop] > 0:
+                                geneScore_b = 0.5 * callTally[contig_strand_stop] / float(geneCallerCount) 
+                            else:
+                                geneScore_b = 0.0
+                        else:
+                            if DEBUG:
+                                print "DEBUG: CGC_compare says, contig_strand_stop", contig_strand_stop, "has no data."
+                        if DEBUG:
+                            print "geneScore_b is", geneScore_b, "for gene call", contig_strand_stop
+
+                    # Compute and record final gene-call score
+                    geneCall.score1 = geneScore_a + geneScore_b
         return
+
+    ##### IsIdentical #####
+    # Determines whether two gene calls are identical
+    #################
+    def IsIdentical(self, geneCall1, geneCall2):
+        if geneCall1.geneCaller == geneCall2.geneCaller and \
+            geneCall1.contig    == geneCall2.contig     and \
+            geneCall1.leftEnd   == geneCall2.leftEnd    and \
+            geneCall1.rightEnd  == geneCall2.rightEnd   and \
+            geneCall1.strand    == geneCall2.strand:
+            return True
+        else:
+            return False 
+
+    ##### SameSaveStartCoordinates #####
+    # Determines whether two gene calls are identical except for the start coordinates
+    ################
+    def SameSaveStartCoordinates(self, geneCall1, geneCall2):
+        if geneCall1.geneCaller == geneCall2.geneCaller and \
+            geneCall1.contig    == geneCall2.contig     and \
+            geneCall1.strand    == geneCall2.strand:
+            if geneCall1.strand == '+':
+                if geneCall1.leftEnd   != geneCall2.leftEnd and \
+                    geneCall1.rightEnd == geneCall2.rightEnd: 
+                    return True
+            elif geneCall1.strang == '-':
+                if geneCall1.leftEnd   == geneCall2.leftEnd and \
+                    geneCall1.rightEnd != geneCall2.rightEnd:
+                    return True
+            else:
+                return False 
 
     ##### PRINT METHODS ##########################################################################################
 
@@ -407,7 +510,7 @@ class Comparison(object):
         print 'Caller\t', 'Contig\t', 'Gene No.\t', 'Left End\t', 'Right End\t', 'Strand\t', 'Score'
         for geneCallList in self.uniqueList:
             for geneCall in geneCallList:
-                print geneCall.geneCaller, '\t', geneCall.contig, '\t', geneCall.geneNumber, '\t', geneCall.leftEnd, '\t', geneCall.rightEnd, '\t', geneCall.strand, '\t', '%1.2f' % geneCall.score
+                print geneCall.geneCaller, '\t', geneCall.contig, '\t', geneCall.geneNumber, '\t', geneCall.leftEnd, '\t', geneCall.rightEnd, '\t', geneCall.strand, '\t', '%1.2f' % geneCall.score1, '\t', '%1.2f' % geneCall.score2
         return
 
     def PrintGenecallScores2file(self,FILE_H):
@@ -415,7 +518,7 @@ class Comparison(object):
         FILE_H.write("%s\n" % ("Gene-call Scores:"))
         for geneCallList in self.uniqueList:
             for geneCall in geneCallList:
-                FILE_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%0.2f\n" % (geneCall.geneCaller,geneCall.contig,geneCall.geneNumber,geneCall.leftEnd,geneCall.rightEnd,geneCall.strand,geneCall.score))
+                FILE_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%0.2f\t%0.2f\n" % (geneCall.geneCaller,geneCall.contig,geneCall.geneNumber,geneCall.leftEnd,geneCall.rightEnd,geneCall.strand,geneCall.score1,geneCall.score2))
         return
 
     def PrintStats(self):
