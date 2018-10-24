@@ -65,11 +65,12 @@ p_comment   = re.compile('^#')
 class Comparison(object):
     
     def __init__(self):
-        self.commonCore = []  # list of lists of identical CGC_geneCall object calls (ie, different callers, same call) 
-        self.mergeList  = []  # combined list of CGC_geneCall objects, merged by self.Merge()
-        self.uniqueList = []  # list of lists of unique gene calls over all callers; each item in list is a common gene call (>=1 gene caller)
-        self.callerList = []  # non-redundant list of callers 
-        self.geneCall   = CGC_geneCall.GeneCall()  # a geneCall object
+        self.commonCore      = []  # list of lists of identical CGC_geneCall object calls (ie, different callers, same call) 
+        self.mergeList       = []  # combined list of CGC_geneCall objects, merged by self.Merge()
+        self.uniqueList      = []  # list of lists of unique gene calls over all callers; each item in list is a common gene call (>=1 gene caller)
+        self.callerList      = []  # non-redundant list of callers 
+        self.geneCall        = CGC_geneCall.GeneCall()  # a geneCall object
+        self.averageScores   = defaultdict(dict)  # Holds average gene-call score for each caller 
 
     ##### IDENTIFY CALLERS ##### 
     # Create a non-redundant list of gene callers
@@ -191,7 +192,6 @@ class Comparison(object):
 
         return
 
-
     ##### COMPARE #####
     # Compares the genes in self.mergeList; creates a list of ordered, unique gene calls 
     # Run this method after having merged all of your gene call sets into self.mergeList
@@ -239,10 +239,13 @@ class Comparison(object):
         callTally = defaultdict(dict)           # Hash for tallying identical and similar calls; defaultdict is like a Perl hash
         start = 0; stop = 0                     # start and stop coordinates
 
+        if DEBUG:
+            self.PrintUniqueList()
+
         # Compute gene-call scores
         if geneCallerCount > 0:  # No need to score if only one gene caller was invoked
         
-            # First, tally up the number of instances of identical and same-stop gene calls, on each contig
+            # First, tally up the number of instances of identical and same-stop (similar) gene calls, on each contig
             for identityList in self.uniqueList:
                 for geneCall in identityList:
                     start = 0; stop = 0
@@ -255,57 +258,91 @@ class Comparison(object):
                     else:
                         if CGC_WARNINGS:
                             print "WARNING: CGC_compare says, Unrecognized strand:", geneCall.strand 
-                contig_strand_start_stop = geneCall.contig + '_' + geneCall.strand + '_' + str(start) + '_' + str(stop) 
-                contig_strand_stop       = geneCall.contig + '_' + geneCall.strand + '_'                    + str(stop)
-                if callTally[contig_strand_start_stop]:
-                    callTally[contig_strand_start_stop] += 1
-                else:
-                    callTally[contig_strand_start_stop] = 1 
-                if callTally[contig_strand_stop]:
-                    callTally[contig_strand_stop] += 1
-                else:
-                    callTally[contig_strand_stop] = 1 
+                    contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
+                    contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
+
+                    if callTally[contig_strand_start_stop]:      # If returns 'none', then this key does not yet exist in "hash"
+                        callTally[contig_strand_start_stop] += 1
+                    else:
+                        callTally[contig_strand_start_stop] = 1  
+
+                    if callTally[contig_strand_stop]:
+                        callTally[contig_strand_stop] += 1   
+                    else:
+                        callTally[contig_strand_stop] = 1  
+            if DEBUG:
+                print "gene caller count:", geneCallerCount
+                print "callTally:", callTally
 
             # Next, compute score for each gene call; this is done is two steps: identity, then similarity
             for identityList in self.uniqueList:
                 for geneCall in identityList:
-                    geneScore_a = 0; geneScore_b = 0  # initialize 
+                    # initialize
+                    geneScore_a = 0.0; geneScore_b = 0.0 
+                    identicals = 0; similars = 0        
+                    start = 0; stop = 0
 
-                    # Compute gene score part a 
+                    # Formulate keys for callTally hash
+                    if geneCall.strand == '+':
+                        start = geneCall.leftEnd
+                        stop  = geneCall.rightEnd
+                    elif geneCall.strand == '-':
+                        start = geneCall.rightEnd
+                        stop  = geneCall.leftEnd
+                    else:
+                        if DEBUG:
+                            print "DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand 
+                    contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
+                    contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
+
+                    # Compute number of identicals and similars wrt current gene call
+                    if callTally[contig_strand_start_stop]:
+                        identicals = callTally[contig_strand_start_stop]
+                    if callTally[contig_strand_stop]:
+                        similars = callTally[contig_strand_stop] 
+
+                    # Compute gene score part a  # score based on identical calls
                     geneScore_a = len(identityList)/float(geneCallerCount)
 
-                    if geneScore_a < 1.0:  # Compute part b, since there may be call(s) with same end, different start
-                        # Compute gene score parb b 
-                        if geneCall.strand == '+':
-                            start = geneCall.leftEnd
-                            stop  = geneCall.rightEnd
-                        elif geneCall.strand == '-':
-                            start = geneCall.rightEnd
-                            stop  = geneCall.leftEnd
-                        else:
-                            if DEBUG:
-                                print "DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand 
-                        contig_strand_start_stop = geneCall.contig + '_' + geneCall.strand + '_' + str(start) + '_' + str(stop) 
-                        contig_strand_stop       = geneCall.contig + '_' + geneCall.strand + '_'                    + str(stop)
-                        if DEBUG:
-                            print "geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop 
-
-                        if callTally[contig_strand_stop]:
-                            if callTally[contig_strand_stop] > 0:
-                                geneScore_b = 0.5 * callTally[contig_strand_stop] / float(geneCallerCount) 
-                            else:
-                                geneScore_b = 0.0
-                        else:
-                            if DEBUG:
-                                print "DEBUG: CGC_compare says, contig_strand_stop", contig_strand_stop, "has no data."
-                        if DEBUG:
-                            print "geneScore_b is", geneScore_b, "for gene call", contig_strand_stop
+                    # Compute gene score part b  # score based on similar calls: stop coordinates same, start coordinates differ
+                    # Only need to compute geneScore_b if at least 1 similar call exists (different start)
+                    if (geneScore_a < 1.0) or (similars - identicals) > 0:  # geneScore_a == 1.0 ==> unanimous among all callers
+                        if callTally[contig_strand_stop] > 1:               # must be at least 2 similars 
+                            geneScore_b = 0.5 / float(geneCallerCount)      # at a fractional score to "boost" due to similarity
+                    if DEBUG:
+                        print "geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop 
+                        print "geneScore_b is", geneScore_b, "for gene call", contig_strand_stop
 
                     # Compute and record final gene-call score
                     geneCall.score1 = geneScore_a + geneScore_b
+
+            # Lastly, compute the average gene-call scores for each gene caller
+            self.AverageGeneCallScores()
+
         return
 
-    ##### IsIdentical #####
+    ##### COMPUTE SUMMARY GENE SCORE
+    # Averages the gene-call scores for each gene caller
+    #################
+    def AverageGeneCallScores(self):
+        cumulativeScores = defaultdict(dict)
+        callCounts       = defaultdict(dict)
+
+        for identityList in self.uniqueList:
+            for geneCall in identityList:
+                if cumulativeScores[geneCall.geneCaller]:   # First check if this key exists yet
+                    cumulativeScores[geneCall.geneCaller] += geneCall.score1 
+                    callCounts[geneCall.geneCaller]       += 1
+                else:
+                    cumulativeScores[geneCall.geneCaller] = geneCall.score1  # Initialize this key and record 1st value
+                    callCounts[geneCall.geneCaller]       = 1
+
+        for caller in self.callerList:
+            self.averageScores[caller] = cumulativeScores[caller] / callCounts[caller]
+
+        return
+
+    ##### IS IDENTICAL #####
     # Determines whether two gene calls are identical
     #################
     def IsIdentical(self, geneCall1, geneCall2):
@@ -318,7 +355,7 @@ class Comparison(object):
         else:
             return False 
 
-    ##### SameSaveStartCoordinates #####
+    ##### SAME SAVE START COORDINATES #####
     # Determines whether two gene calls are identical except for the start coordinates
     ################
     def SameSaveStartCoordinates(self, geneCall1, geneCall2):
@@ -406,6 +443,12 @@ class Comparison(object):
         for caller in self.callerList:
             FILE_H.write("%s\t" % (caller)) 
 
+    def PrintAverageScore1s(self):
+        print "\nGene-call Consensus Scores:"
+        for caller in self.callerList:
+            print "Caller", caller, "average gene-call score: %0.2f" % self.averageScores[caller]
+        return
+
     # Formats the unique calls list and prints to standard out; this is the final comparison data set
     # *** CONTINUE HERE: NEED TO ADJUST ORDERS OF GENE CALLS DUE TO TRIPE SORT, WHICH JUMBLES ALPHABETICAL ORDER OF GENE CALLERS ******************************************
     def PrintGenecallGrid(self): # Prints an ordered, complete list of gene calls, each caller's in a column, identical calls in same row
@@ -414,6 +457,7 @@ class Comparison(object):
                 count = 1
 
                 # Print column headers, for as many gene callers as we have
+                print "\nGene-call Table:"
                 print "count\t",
                 for i in xrange(0,len(self.callerList)):
                     print "caller\tstrand\tleftEnd\trightEnd\tlength\tcontig\t",
@@ -457,6 +501,7 @@ class Comparison(object):
                 count = 1
 
                 # Print column headers, for as many gene callers as we have
+                FILE_H.write("%s\n" % ("Gene-call Table:"))
                 FILE_H.write("%s" % ("count\t"))
                 for i in xrange(0,len(self.callerList)):
                     FILE_H.write("%s\n" % ("caller\tstrand\tleftEnd\trightEnd\tlength\tcontig\t"))
@@ -496,6 +541,7 @@ class Comparison(object):
         self.PrintStats()
         self.PrintGenecallGrid()
         self.PrintGenecallScores()
+        self.PrintAverageScore1s()
         return
 
     def PrintReport2file(self,FILE_H):  # Final output

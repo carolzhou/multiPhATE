@@ -68,7 +68,8 @@ class GeneCall(object):
         self.geneLength  = 0
         self.contig      = "unknown"
         self.proteinName = "unknown"
-        self.score       = 0.0  # Gene-call score, based on consensus among gene callers; calculated in CGC_compare/Score().
+        self.score1      = 1.0  # Gene-call score, based on consensus among gene callers; calculated in CGC_compare/Score().
+        self.score2      = 0.0  # Annotation score, based broadly on similarity to entries in the databases.
 
     def AssignGeneCall(self,geneName,geneCaller,geneNumber,strand,leftEnd,rightEnd,geneLength,contig="unknown",protein="unknown"):
         self.geneName    = geneName
@@ -92,7 +93,8 @@ class GeneCall(object):
         print "length =",     self.geneLength
         print "contig =",     self.contig
         print "protein =",    self.proteinName
-        print "score =",      self.score
+        print "score1 =",     self.score1
+        print "score2 =",     self.score2
         return
 
     def PrintAll2file(self,FILE_H):
@@ -105,15 +107,16 @@ class GeneCall(object):
         FILE_H.write("%s%s\n" % ("length = ",     self.geneLength))
         FILE_H.write("%s%s\n" % ("contig = ",     self.contig))
         FILE_H.write("%s%s\n" % ("protein = ",    self.proteinName))
-        FILE_H.write("%s%s\n" % ("score = ",      self.score))
+        FILE_H.write("%s%s\n" % ("score1 = ",     self.score1))
+        FILE_H.write("%s%s\n" % ("score2 = ",     self.score2))
         return
 
     def PrintAll_brief(self):
-        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName, ", score:", self.score
+        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName, ", score1:", self.score1, ", score2:", self.score2
         return
 
     def PrintAll_brief_2file(self, File_H):
-        File_H.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % ("Gene No. ",self.geneNumber,", gene caller: ",self.geneCaller,", leftEnd: ", self.leftEnd,", rightEnd: ",self.rightEnd,", strand: ",self.strand,", length: ",self.geneLength,", contig: ",self.contig,", protein: ",self.proteinName))
+        File_H.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % ("Gene No. ",self.geneNumber,", gene caller: ",self.geneCaller,", leftEnd: ", self.leftEnd,", rightEnd: ",self.rightEnd,", strand: ",self.strand,", length: ",self.geneLength,", contig: ",self.contig,", protein: ",self.proteinName,", score1: ", self.score1,", score2: ", self.score2))
         return
 
 class GeneCallSet(object):

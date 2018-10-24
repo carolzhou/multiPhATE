@@ -297,6 +297,7 @@ if DEBUG:
     compareGCs.PrintAll()
 compareGCs.PrintReport2file(LOG)
 compareGCs.PrintReport()
+compareGCs.PrintUniqueList2file(LOG)
 
 ##### CLEAN UP #####
 
