@@ -61,15 +61,19 @@ CODE_BASE = "CGC_main"
 CODE_FILE = CODE_BASE + ".py"
 LOG_FILE  = CODE_BASE + ".log"
 OUT_FILE  = CODE_BASE + ".out"
+GFF_FILE  = CODE_BASE + ".gff"
 
 infile = ""
 #OUT = open(OUT_FILE,"w") 
 LOG = open(LOG_FILE,"w")
+GFF = open(GFF_FILE,"w")
 
 ##### PATTERNS
 
 p_comment  = re.compile('^#')
 p_order    = re.compile('Order')
+p_log      = re.compile("log=([\w\d\_\-\.\\\/]+)")
+p_gff      = re.compile("gff=([\w\d\_\-\.\\\/]+)")
 
 ##### CONSTANTS
 
@@ -83,26 +87,32 @@ INFO_STRING = "This code currently supports the following gene callers:  GeneMar
 
 ##### GET INPUT PARAMETERS
 
-p_log = re.compile("log=([\w\d\_\-\.\\\/]+)")
 fileSet = []
 argCount = len(sys.argv)
 if DEBUG:
     print "sys.argv is", sys.argv
 if argCount > 1:
 
-    if PHATE_PIPELINE:  # First parameter is "log=<logFile>", and remaining parameters are genecall files to compare
+    if PHATE_PIPELINE:  # First parameter is "log=<logFile>", second is "gff=<gffFile>", and remaining parameters are genecall files to compare
         LOG.close()  # close default log; open log in designated subdir
-        if argCount > 2:
-            match = re.search(p_log, sys.argv[1])
-            if match:
-                LOG_FILE = match.group(1)
+        GFF.close()  # close default gff out file; open gff out file in designated subdir
+        #if argCount > 2:
+        if argCount > 3:
+            match_log = re.search(p_log, sys.argv[1])
+            match_gff = re.search(p_gff, sys.argv[2])
+            if match_log:
+                LOG_FILE = match_log.group(1)  # override as named above
                 LOG = open(LOG_FILE,"w")
                 LOG.write("%s%s\n" % ("Opening log at ",datetime.datetime.now()))
                 if DEBUG:
                     print "DEBUG CGC_main: LOG has been opened"
             else:
                 print "ERROR: CGC_main.py expects name of log file as first input parameter. Parameter was:", sys.argv[1]
-            fileSet = sys.argv[2:]  # collect remaining command-line arguments
+            if match_gff:
+                GFF_FILE = match_gff.group(1)  # override as named above
+                GFF = open(GFF_FILE,"w")
+            #fileSet = sys.argv[2:]  # collect remaining command-line arguments
+            fileSet = sys.argv[3:]  # collect remaining command-line arguments
             if DEBUG:
                 print "DEBUG CGC_main: fileSet is", fileSet
         else:
@@ -139,7 +149,8 @@ if argCount > 1:
 else:
     LOG.write("%s\n" % ("Incorrect number of command-line arguments provided"))
     print USAGE_STRING
-    LOG.close(); exit(0)
+    LOG.close()
+    exit(0)
 
 ##### BEGIN MAIN ################################################################################### 
 
@@ -251,7 +262,6 @@ for callSet in callerList:
     compareGCs.Merge(callSet.geneCallList)  # Merge() merges one at a time, adding each gene call list the the existing merge
 
 LOG.write("%s\n" % ("CGC Main: Final merged genes:"))
-
 compareGCs.PrintMergeList2file(LOG)
 
 ####################################################################################################
@@ -287,7 +297,14 @@ LOG.write("%s\n" % ("CGC Main: This is the Common Core List:"))
 compareGCs.PrintCommonCore2file(LOG)
 
 ####################################################################################################
-# Print final report 
+# Print GFF output file and final report 
+
+# Print GFF
+LOG.write("%s\n" % ("CGC Main: Printing gene-call superset in GFF format"))
+if CGC_PROGRESS == 'True':
+    print "CGC Main: printing GFF formatted gene-call file...."
+compareGCs.PrintGenecalls2file_gff(GFF,"superset")
+compareGCs.PrintGenecalls2file_gff(LOG,"superset")
 
 LOG.write("%s\n" % ("CGC Main: Printing report...."))
 if CGC_PROGRESS == 'True':
@@ -305,5 +322,6 @@ if CGC_PROGRESS == 'True':
     print "CGC: complete."
 if DEBUG:
     print "CGC: complete."
+GFF.close()
 LOG.write("%s%s\n" % ("CGC: complete at ",datetime.datetime.now()))
 LOG.close()

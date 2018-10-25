@@ -65,6 +65,7 @@ if len(sys.argv) == 1:
 fastaFileName = sys.argv[1]
 outputFolder = sys.argv[2] + "/"
 cgcLog = outputFolder + "cgc.log"
+cgcGff = outputFolder + "cgc.gff"
 
 # booleans to control gene finding
 if len(sys.argv) == 4:
@@ -215,6 +216,47 @@ def processPhanotate(line):
         geneCall("NA", "PHANOTATE", split[3], split[0], split[1], split[2], "NA")
         #geneCall("NA", "PHANOTATE", "NA", split[0], split[1], split[2], "NA")
         callCounts['phanotate'] += 1
+
+def Convert_cgc2gff(cgcFile,gffFile):
+    p_caller   = re.compile('^#\s([\w\d\.\-]+)\sgene\scalls')  # caller is names in first line of file
+    p_dataLine = re.compile('^\d')   # data lines begin with a digit
+
+    # Initialize gff fields and caller
+    seqid = '.'; source = '.'; type = 'cds'
+    start = '0'; end = '0'; strand = '.'
+    phase = '.'; attributes = '.'; score = '.'
+    caller = 'unknown'
+
+    # Open input/output files
+    CGC_H = open(cgcFile,"r")
+    GFF_H = open(gffFile,"w")
+    GFF_H.write("%s\n" % ("##gff-version 3"))
+
+    # Walk through input file (cgc-formatted gene-calls), and write to gff output file
+    cLines = CGC_H.read().splitlines()
+    for cLine in cLines:
+        match_caller   = re.search(p_caller,cLine)
+        match_dataLine = re.search(p_dataLine,cLine) 
+        if match_dataLine:
+            (geneNo,strand,leftEnd,rightEnd,length,contig,protein) = cLine.split('\t')
+            seqid  = contig
+            source = caller
+            if strand == '+':           # GFF lists start/end, rather than left/right
+                start = str(leftEnd)
+                end   = str(rightEnd)
+            elif strand == '-':
+                start = str(rightEnd)
+                end   = str(leftEnd) 
+            else:
+                if PHATE_WARNINGS == 'True':
+                    print "WARNING: phate_geneCall says, Unexpected strand:", strand
+            GFF_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (seqid,source,type,start,end,strand,phase,attributes))
+        elif match_caller:
+            caller = match_caller.group(1)
+
+    # Clean up
+    CGC_H.close()
+    GFF_H.close()
 
 ########## PRODIGAL ##########
 
@@ -397,10 +439,31 @@ if runCGC:
     #systemCall('python ' + cgcPath + 'CGC_main.py ' + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
     if DEBUG:
         print "DEBUG: calling CGC, cgcLog is", cgcLog
-    systemCall('python ' + cgcPath + 'CGC_main.py log=' + cgcLog + ' ' + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
+    #systemCall('python ' + cgcPath + 'CGC_main.py log=' + cgcLog + ' '                         + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
+    systemCall('python ' + cgcPath + 'CGC_main.py log=' + cgcLog + ' ' + 'gff=' + cgcGff + ' ' + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
     
 else:
     logfile.write("%s\n" % ("Not running CGC code: too few gene callers to meaningfully compare"))
 
+# Lastly, convert cgc-formatted gene-call files to gff and write to output
+# For each gene caller, open and process its caller.cgc file, format to gff, then write to cgc_caller.gff
+if GENEMARKS_CALLS:
+    cgcFile = outputFolder + 'geneMarkS'       + '.cgc'
+    gffFile = outputFolder + 'phate_geneMarkS' + '.gff'
+    Convert_cgc2gff(cgcFile,gffFile)
+if PRODIGAL_CALLS:
+    cgcFile = outputFolder + 'prodigal'        + '.cgc'
+    gffFile = outputFolder + 'phate_prodigal'  + '.gff'
+    Convert_cgc2gff(cgcFile,gffFile)
+
+if GLIMMER_CALLS:
+    cgcFile = outputFolder + 'glimmer'         + '.cgc'
+    gffFile = outputFolder + 'phate_glimmer'   + '.gff'
+    Convert_cgc2gff(cgcFile,gffFile)
+
+if PHANOTATE_CALLS:
+    cgcFile = outputFolder + 'phanotate'       + '.cgc'
+    gffFile = outputFolder + 'phate_phanotate' + '.gff'
+    Convert_cgc2gff(cgcFile,gffFile)
 
 logfile.close()
