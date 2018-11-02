@@ -448,7 +448,7 @@ else:
 # Lastly, convert cgc-formatted gene-call files to gff and write to output
 # For each gene caller, open and process its caller.cgc file, format to gff, then write to cgc_caller.gff
 if GENEMARKS_CALLS:
-    cgcFile = outputFolder + 'geneMarkS'       + '.cgc'
+    cgcFile = outputFolder + 'genemark'       + '.cgc'
     gffFile = outputFolder + 'phate_geneMarkS' + '.gff'
     Convert_cgc2gff(cgcFile,gffFile)
 if PRODIGAL_CALLS:

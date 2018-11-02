@@ -4,23 +4,26 @@
 #
 # Program Title:  multiPhate.py (/Code3/)
 #
-# Last Update:  17 September 2018
+# Last Update:  08 October 2018
 #
-# Description: Runs the phate annotation pipeline over a set of input phage genomes.  This code runs under Python 2.7, and requires
-#    dependent packages. multiPhate.py inputs a configuration file (e.g., myGenomeSet.config), and uses it to construct a set of
+# Description: Script multiPhate.py runs the phate annotation pipeline over a set of input phage genomes.  This code runs under 
+#    Python 2.7, and requires dependent packages and databases as listed in the README file.
+#    multiPhate.py inputs a configuration file (e.g., myGenomeSet.config), and uses it to construct a set of
 #    configuration files, one for each genome. Then, multiPhate.py executes phate_runPipeline.py over all of the genomes in the set.
-#    Once the phate_runPipeline runs have completed, multiPhate.py invokes CGP (Compare Gene Profiles) to map predicted genes from 
-#    each genome to the genes of every other genome in the set.
+#    (future version: Once the phate_runPipeline runs have completed, multiPhate.py invokes CGP (Compare Gene Profiles)  
+#    to map predicted genes from each genome to the genes of every other genome in the set.)
 #
 # Usage:  python multiPhate.py myGenomeSet.config
 #    (see myGenomeSet_sample.config for how to create your configuration file)
 #
 # What more you need to know:
-# 1) Set certain user configurations in the phate_runPipeline.py code (ie, verbosity, blast parameters). These are controlled globally as environment variables and will therefore be the same for all instances of the pipeline being run.
-# 2) Your myGenomeSet.config file will specify how each config file for phate_runPipeline.py execution should be written.
-# 3) You may run multiPhate.py with any number of input genomes. Specify in your set config file (ie, copy/modify sample_set.config) your genomes and meta-data.
-# 4) Run this code in the same code directory where phate_runPipeline.py resides. It is recommended to set up your directories according to the structure in the phate_runPipeline.py README file.
-# 5) multiPhate.py runs phate_runPipeline.py in serial. Parallel execution is system dependent. Modify this code (multiPhate.py) to implement parallelism on your system.
+# *) Your myGenomeSet.config file will specify how each config file for phate_runPipeline.py execution should be written.
+# *) You may run multiPhate.py with any number of input genomes. Specify in your set config file 
+#    your genomes and meta-data (ie, copy and modify the sample_multiPhate.config file).
+# *) Run this code in the same code directory where phate_runPipeline.py resides. It is recommended to set up your 
+#    directories according to the structure in the phate_runPipeline.py README file.
+# *) multiPhate.py runs phate_runPipeline.py in serial. Parallel execution is system dependent. Modify this code 
+#    (multiPhate.py) to implement parallelism on your system. Programming expertise will be required to parallelize the code.
 #
 ################################################################
 
@@ -34,16 +37,17 @@ import subprocess
 #import logging
 
 #############################################################################################
-################################ USER CONFIGURATION #########################################
+################################ USER CONFIGURATION PART 1 ##################################
 #
 # 1) If you are running under a linux system, set PHATE_OUT and PHATE_ERR to 'True'. This will capture standard errors to files. Cannot
 # guarantee this will work under other operating systems.
-PHATE_OUT = 'True'
+PHATE_OUT = 'False'
 PHATE_ERR = 'True'
 #
 # 2) Name your machine, if you like, and be sure it is set to "True"; (one machine at a time!)
-MYCLUSTER   = False    # Your production machine
-DEVELOPMENT = True    # Your development/test machine
+MACHINE1 = False    # Could be your production machine. If using only 1 machine, use MACHINE1.
+MACHINE2 = True     # Could be your development/test machine
+# Configure the locations of dependent codes and databases below, under "if MACHINE1:".
 #
 # 3) Environment variables, which are global to any instance of this code's execution
 # You need to set these environment variables according to where the data sets and codes reside
@@ -51,23 +55,24 @@ DEVELOPMENT = True    # Your development/test machine
 # You may control verbosity here
 # Turn all messages on when you are installing/testing code and running at the command line.
 # Turn all messages off once you are confident of proper execution, or if code has been implemented in parallel/throughput.
-CLEAN_RAW_DATA = 'False'   # if 'False', the raw Blast and Hmm outputs will be saved in the PipelineOutput folder
-PHATE_WARNINGS = 'True'
-PHATE_MESSAGES = 'True'
+CLEAN_RAW_DATA = 'True'   # if 'False', the raw Blast and Hmm outputs will be saved in the PipelineOutput folder
+PHATE_WARNINGS = 'False'
+PHATE_MESSAGES = 'False'
 PHATE_PROGRESS = 'True'
 CGC_WARNINGS   = 'False'
 CGC_MESSAGES   = 'False'
 CGC_PROGRESS   = 'False'
-DEBUG         = True     # Controls debug settings in this (local) code only
-#DEBUG          = False
+#DEBUG         = True     # Controls debug settings in this (local) code only
+DEBUG          = False    # Leave False, unless debugging
 #
-# Env:  BLAST parameters
+# Env:  BLAST parameters. Normally leave these settings alone. These are minimum cutoffs. Configure stringency in config file.
 BLASTP_IDENTITY_DEFAULT  = '60'
 BLASTP_HIT_COUNT_DEFAULT = '3'
 BLASTN_HIT_COUNT_DEFAULT = '3'
-#############################################################################################
+################################ END USER CONFIGURATION PART 1 ###############################
 
-# Constants; defaults will apply if not specified in config file 
+# Constants; defaults will apply if not specified in config file
+# Leave all this stuff alone! 
 
 # Standard directories
 DEFAULT_PIPELINE_INPUT_DIR  = 'PipelineInput/'    # Default
@@ -133,20 +138,39 @@ PSAT                             = False
 PSAT_FILE                        = ""
 
 # Which machine is this code to be run on?
-if MYCLUSTER:  # machine running code
-    BASE_DIR                                    = "/"    # fill this in
-    DATABASE_DIR                                = "/"    # fill this in
-    SOFTWARE_DIR                                = "/"    # fill this in
+if MACHINE1:  # machine running code; could be production machine / cluster. Use this machine only, if not also using an alternate (e.g., development).
+
+    #####################################################################################################
+    ######################## USER CONFIGURATION PART 2 ##################################################
+    # The BASE_DIR is the highest directory in which this code and dependent databases reside
+    # Place multiPhATE.py and phate_runPipeline.py in this directory
+    BASE_DIR                                    = "/"    # fill this in. Ex: /Home/MyName/MyCodeDirectory/multiPhATE/
+
+    # The DATABASE_DIR is the subdirectory (under BASE_DIR) where you have placed the dependent databases
+    DATABASE_DIR                                = "/"    # fill this in. Ex: Databases/
+    # The fully qualified location of your databases will be computed below.
+
+    # The SOFTWARE_DIR is the subdirectory (under BASE_DIR) where you have placed the dependent softwares (e.g., PHANOTATE, Prodigal)
+    SOFTWARE_DIR                                = "/"    # fill this in. Ex: DependentSoftware/
+    # The fully qualified location of the software codes will be computed below.
+
+    # It is most convenient to locate the supporting software codes and databases in the above-indicated subdirectories.
+    # However, if any of your supporting databases or softwares reside elsewhere, then fill in their explicit locations below.
+    # This will likely the the case for large databases that you may already have on your compute cluster (e.g., NR),
+    # and for software packages, such as EMBOSS or gene finders that you may already have installed on your system.
+
     PIPELINE_INPUT_DIR                          = BASE_DIR + DEFAULT_PIPELINE_INPUT_DIR   # Default
     PIPELINE_OUTPUT_DIR                         = BASE_DIR + DEFAULT_PIPELINE_OUTPUT_DIR  # Default
     PHATE_BASE_DIR                              = BASE_DIR
+    EMBOSS_CODE                                 = "EMBOSS/EMBOSS-6.6.0/emboss/"  # Modify this for the version you have
+    EMBOSS_PHATE_HOME                           = SOFTWARE_DIR + EMBOSS_CODE     # if installed in SOFTWARE_DIR, else enter actual location
     os.environ["BASE_DIR"]                      = BASE_DIR
     os.environ["DATABASE_DIR"]                  = DATABASE_DIR
     os.environ["SOFTWARE_DIR"]                  = SOFTWARE_DIR
     os.environ["PIPELINE_INPUT_DIR"]            = PIPELINE_INPUT_DIR
     os.environ["PIPELINE_OUTPUT_DIR"]           = PIPELINE_OUTPUT_DIR
     os.environ["PHATE_BASE_DIR"]                = PHATE_BASE_DIR
-    os.environ["EMBOSS_HOME"]                   = ".../EMBOSS/EMBOSS-6.6.0/emboss/" #*** code is transeq.c; may be installed global
+    os.environ["EMBOSS_PHATE_HOME"]             = EMBOSS_PHATE_HOME 
     os.environ["PIPELINE_DIR"]                  = BASE_DIR
     os.environ["PSAT_OUT_DIR"]                  = BASE_DIR
 
@@ -205,21 +229,24 @@ if MYCLUSTER:  # machine running code
     os.environ["CGC_WARNINGS"]                  = CGC_WARNINGS
     os.environ["CGC_MESSAGES"]                  = CGC_MESSAGES
     os.environ["CGC_PROGRESS"]                  = CGC_PROGRESS
+    ######################## END USER CONFIGURATION PART 2 ##############################################
 
-elif DEVELOPMENT:  # alternate machine, for code development or testing
-    BASE_DIR = "/Users/carolzhou/DEV/PhATE/Code3/"
+elif MACHINE2:  # alternate machine; could be for code development or testing
+    BASE_DIR                                    = "/Users/carolzhou/DEV/PhATE/Code3/"
     DATABASE_DIR                                = "/"    # fill this in
     SOFTWARE_DIR                                = "/Users/carolzhou/DEV/PhATE/OtherCodes/"    # fill this in
     PHATE_BASE_DIR                              = BASE_DIR
     PIPELINE_INPUT_DIR                          = BASE_DIR + DEFAULT_PIPELINE_INPUT_DIR   # Default
     PIPELINE_OUTPUT_DIR                         = BASE_DIR + DEFAULT_PIPELINE_OUTPUT_DIR  # Default
+    EMBOSS_CODE                                 = "EMBOSS/EMBOSS-6.6.0/emboss/"
+    EMBOSS_PHATE_HOME                           = SOFTWARE_DIR + EMBOSS_CODE
     os.environ["BASE_DIR"]                      = BASE_DIR
     os.environ["DATABASE_DIR"]                  = DATABASE_DIR
     os.environ["SOFTWARE_DIR"]                  = SOFTWARE_DIR
     os.environ["PIPELINE_INPUT_DIR"]            = PIPELINE_INPUT_DIR
     os.environ["PIPELINE_OUTPUT_DIR"]           = PIPELINE_OUTPUT_DIR
     os.environ["PHATE_BASE_DIR"]                = PHATE_BASE_DIR
-    os.environ["EMBOSS_HOME"]                   = "/Users/carolzhou/DEV/PhATE/OtherCodes/EMBOSS/EMBOSS-6.6.0/emboss/" #*** name of code is transeq.c
+    os.environ["EMBOSS_PHATE_HOME"]             = EMBOSS_PHATE_HOME 
     os.environ["PIPELINE_DIR"]                  = BASE_DIR
     os.environ["PSAT_OUT_DIR"]                  = BASE_DIR # only on LLNL system
 
