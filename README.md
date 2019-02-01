@@ -102,7 +102,7 @@ You must specify in the multiPhate.config file the locations of the data sets th
 
 SUPPORTING 3rd PARTY CODES
 
-Note that some third-party codes are required for multiPhATE, but others are optional, as indicated below:
+Note that some third-party codes are required for multiPhATE, but others are optional, as indicated below. Install these codes globally, following the instructions provided with each package.
 
 BioPython - https://biopython.org/wiki/Download (required)
 
