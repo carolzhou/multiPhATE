@@ -29,7 +29,7 @@ Procedure:
 1) Make a copy of the file, sample.multiPhate.config, and name it appropriately (hereafter referred to as 'multiPhate.config').
 
 2) List of Genomes:
-For each genome to be processed, provide six lines under "Genome List:" and before "END of list":  for each genome, you need to list the genome number, the name of the genome fasta file, the genome type (typically 'phage', but could be 'bacteria'), the species (no spaces), the name of the genome, and a name for the output directory to hold this genome's output files, in that order. Simple copy/paste the six lines provided, and fill in the information appropriate for each genome.
+For each genome to be processed, provide six lines under "Genome List:" and before "END of list":  for each genome, you need to list the genome number, the name of the genome fasta file, the genome type (typically 'phage', but could be 'bacteria'), the species (no spaces), the name of the genome, and a name for the output directory to hold this genome's output files, in that order. Simply copy/paste the six lines provided, and fill in the information appropriate for each genome.
 
 3) Processing Information:
 You may configure the pipeline to perform gene finding only, or gene finding plus functional annotation. For example, you may want to examine the results of multiple gene finders before going forward with functional annotation. In order to configure phate to run gene finding only, set translate_only to 'true'. If you set translate_only to 'false', then the pipeline will proceed with functional annotation of the predicted genes (ie, blast and/or hmm). Normally the genetic_code should be set to '11', for prokaryotic.
@@ -62,7 +62,7 @@ NCBI-associated file:  accession2taxid file - ftp://ftp.ncbi.nlm.nih.gov/pub/tax
 
 NCBI Refseq Protein - download using blast+: /bin/update_blastdb.pl refseq_protein
 
-NCBI Refseq Gene - download using blast+: /bin/update_blastdb.pl refseqgene. This database contains primarily human sequences. To acquire bacterial gene sequences you may need to download them via http://ncbi.nlm.nih.gov/gene and process the data to generate a fasta data set. Support for doing this is not provided with the multiPhaTE distribution.
+NCBI Refseq Gene - download using blast+: /bin/update_blastdb.pl refseqgene. This database contains primarily human sequences. To acquire bacterial gene sequences you may need to download them via http://ncbi.nlm.nih.gov/gene and process the data to generate a fasta data set. Support for doing this is not provided with the multiPhATE distribution.
 
 NCBI Swissprot - download using blast+: /bin/update_blastdb.pl swissprot
 
@@ -133,7 +133,7 @@ CGC_results.txt - side-by-side comparison of all gene finder results (if at leas
 
 phate_sequenceAnnotation_main.out - tabbed integrated annotation results (also written in gff format)
 
-BLAST/ directory - raw blast results for genome (under Genome/) and proteins (under Protein/) (if CLEAN_RAW_DATA switch in phate_runPipeline.py is 'False')
+BLAST/ directory - raw blast results for genome (under Genome/) and proteins (under Protein/) (if CLEAN_RAW_DATA switch in multiPhate.config file is 'false')
 
 pVOG groupings comprising alignment-ready fasta files (under BLAST/Protein/) based on best blast hits
 
@@ -168,6 +168,6 @@ Plans include adding additional functionality to the pipeline:
 1) Adding HMMER and additional hmm databases
 2) Implementing an optional "custom" database for blasting or doing hmm analysis. (Actually, you can do custom blast now by substituting your custom nucleotide blast database for the refseq_gene_blast process, or substituting your custom protein blast database for one of the protein processes (swissprot, nr, refseq_protein, or ncbi_virus_protein), by specifying the location of your custom database in the multiPhate.config file and turning the corresponding annotation process to 'true'.)
 
-Feel free to suggest future improvements by emailing the developers at:  zhou4@llnl.gov. Thank you for using multiPhATE.
+Feel free to report bugs or problems, or to suggest future improvements, by emailing the developers at:  zhou4@llnl.gov. Thank you for using multiPhATE.
 
 multiPhATEb v.0.5
