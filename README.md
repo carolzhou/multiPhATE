@@ -1,5 +1,5 @@
-# multiPhATEb v.0.5
-/Code6b/ - multiPhATE (beta version)
+# multiPhATE v.0.5
+/Code6_2to3/ - multiPhATE (beta version)
 
 This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence Livermore National Laboratory.
 
@@ -170,4 +170,4 @@ Plans include adding additional functionality to the pipeline:
 
 Feel free to report bugs or problems, or to suggest future improvements, by emailing the developers at:  zhou4@llnl.gov. Thank you for using multiPhATE.
 
-multiPhATEb v.0.5
+multiPhATE v.0.5
