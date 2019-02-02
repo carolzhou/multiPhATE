@@ -117,17 +117,17 @@ argCount = len(sys.argv)
 if argCount in ACCEPTABLE_ARG_COUNT:
     match = re.search("help", sys.argv[1].lower())
     if match:
-        print HELP_STRING
+        print(HELP_STRING)
         LOGFILE.close()
         exit(0)
     match = re.search("input", sys.argv[1].lower())
     if match:
-        print INPUT_STRING
+        print(INPUT_STRING)
         LOGFILE.close()
         exit(0)
     match = re.search("usage", sys.argv[1].lower())
     if match:
-        print USAGE_STRING
+        print(USAGE_STRING)
         LOGFILE.close()
         exit(0)
 
@@ -136,7 +136,7 @@ if argCount in ACCEPTABLE_ARG_COUNT:
         geneCaller    = sys.argv[1].lower()  # case insensitive
         geneCallerOut = sys.argv[2]
     else:
-        print USAGE_STRING
+        print(USAGE_STRING)
         LOGFILE.write("%s\n" % ("Incorrect number of command-line arguments provided"))
         LOGFILE.close()
         exit(0)
@@ -145,7 +145,7 @@ if argCount in ACCEPTABLE_ARG_COUNT:
         userOutfile   = sys.argv[3]
         userOutdir = os.path.dirname(userOutfile)
 else:
-    print USAGE_STRING
+    print(USAGE_STRING)
     LOGFILE.write("%s\n" % ("Incorrect number of command-line arguments provided"))
     LOGFILE.close()
     exit(0)
@@ -161,7 +161,7 @@ if userOutdir != "":
         RUNLOGOPEN = True
     except IOError as e:
         fileError = True
-        print e
+        print(e)
 
 if userOutdir != "":
     try:
@@ -170,13 +170,13 @@ if userOutdir != "":
         TMPOPEN = True
     except IOError as e:
         fileError = True
-        print e
+        print(e)
 
 try:
     INFILE = open(geneCallerOut,"r")
 except IOError as e:
     fileError = True
-    print e
+    print(e)
 
 try:
     if userOutdir == "":
@@ -186,7 +186,7 @@ try:
     OUTFILE = open(outfile,"w")
 except IOError as e:
     fileError = True
-    print e
+    print(e)
 
 if fileError:
     LOGFILE.write("%s%s%s\n" % ("ERROR: problem with input file:",geneCallerOut,e))
@@ -200,7 +200,7 @@ if USER_OUT_PROVIDED:
         USER_OUT = open(userOutfile,"w")
     except IOError as e:
         fileError = True
-        print e
+        print(e)
 
 ##### FUNCTIONS
 
@@ -238,7 +238,7 @@ def ProcessGenemark(fLines,OUT):
                 if USER_OUT_PROVIDED:
                     USER_OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
                 if CGC_WARNINGS == 'True':
-                    print "ERROR in CGC_parser module: unexpected strand designator,", strand
+                    print("ERROR in CGC_parser module: unexpected strand designator,", strand)
                 return
             if contig == '':
                 contig = 'unknown'  # Contig name may be absent in input file
@@ -295,7 +295,7 @@ def ProcessGlimmer(fLines,OUT):
                 if USER_OUT_PROVIDED:
                     USER_OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
                 if CGC_WARNINGS == 'True':
-                    print "ERROR in CGC_parser module: unexpected strand designator,", strand
+                    print("ERROR in CGC_parser module: unexpected strand designator,", strand)
                 return
 
             length = rightEnd - leftEnd + 1
@@ -389,7 +389,7 @@ def ProcessProdigal(fLines,OUT):
                 strand   =     match_dataLine.group(4)
                 length   = int(rightEnd) - int(leftEnd) + 1 
                 count += 1; geneNo = count  # Re-number gene number assigned by Prodigal
-                print "Writing next prodigal gene", geneNo, strand, leftEnd, rightEnd, length, contig, protein
+                print("Writing next prodigal gene", geneNo, strand, leftEnd, rightEnd, length, contig, protein)
                 OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
                 if USER_OUT_PROVIDED:
                     USER_OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
@@ -455,7 +455,7 @@ def ProcessPHANOTATE(fLines,OUT):      # SDSU code
 ##### BEGIN MAIN 
 
 if CGC_PROGRESS == 'True':
-    print "CGC_parser: Parsing gene call outputs."
+    print("CGC_parser: Parsing gene call outputs.")
 
 # First, determine which gene caller was used
 

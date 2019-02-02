@@ -68,22 +68,22 @@ argCount = len(sys.argv)
 if argCount == 2 or argCount == 3:
     match = re.search("help", sys.argv[1].lower())
     if match:
-        print HELP_STRING
+        print(HELP_STRING)
         LOG.close(); exit(0)
     match = re.search("input", sys.argv[1].lower())
     if match:
-        print INPUT_STRING
+        print(INPUT_STRING)
         LOG.close(); exit(0)
     match = re.search("usage", sys.argv[1].lower())
     if match:
-        print USAGE_STRING
+        print(USAGE_STRING)
         LOG.close(); exit(0)
     else:
         infile = sys.argv[1]  # skip 0th element = name of code
         contig = sys.argv[2]
 else:
     LOG.write("%s\n" % ("Incorrect number of command-line arguments provided"))
-    print USAGE_STRING
+    print(USAGE_STRING)
     LOG.close(); exit(0)
 
 # Open input file
@@ -107,7 +107,7 @@ count = 0
 # For each user-provided gene call file, create a call set and add to list of call sets
 
 if CGC_MESSAGES == 'True':
-    print "CGC convertGenbank module says: Input parameters are: genbank protein fasta file is", infile, "and contig name is", contig
+    print("CGC convertGenbank module says: Input parameters are: genbank protein fasta file is", infile, "and contig name is", contig)
 
 iLines = IN.read().splitlines()
 OUT.write("%s\n" % ("#gff-version3"))

@@ -86,7 +86,7 @@ PVOG_MISSING_PROTEINS_H = open(PVOG_MISSING_PROTEINS, 'r')
 PVOG_MISSING_FASTAS_H   = open(PVOG_MISSING_FASTAS, 'w')
 LOG_H                   = open(LOG, 'w')
 LOG_H.write("%s%s\n" % ("Processing began at ",datetime.datetime.now()))
-print "LOG file is", LOG
+print("LOG file is", LOG)
 
 ##### Find fasta files for pVOGs in "missing" list
 
@@ -125,24 +125,24 @@ LOG_H.write("%s%s\n" % ("pVOG wanted list has this many members: ",len(pVOGwante
 # For each ncbi identifier, pull the fasta from NR and write to out file
 count = 0
 if CHATTY:
-    print pVOGwantedList
+    print(pVOGwantedList)
 
 fastaSequences = SeqIO.parse(open(NR_FASTA_DB),'fasta')
 for ncbiID in pVOGwantedList:
     count += 1
-    print count, "Processing ncibID", ncbiID
+    print(count, "Processing ncibID", ncbiID)
     for seq in fastaSequences:
         if seq.id == ncbiID:
-            print "Writing fasta sequence for", ncbiID
+            print("Writing fasta sequence for", ncbiID)
             SeqIO.write([seq], PVOG_MISSING_FASTAS_H, "fasta") 
 
-print pVOGwantedList
+print(pVOGwantedList)
 
 # Clean up
 
 PVOG_MISSING_PROTEINS_H.close()
 PVOG_MISSING_FASTAS_H.close()
 
-print "Processing complete!"
+print("Processing complete!")
 LOG_H.write("%s%s\n" % ("Processing completed at ",datetime.datetime.now()))
 LOG_H.close()

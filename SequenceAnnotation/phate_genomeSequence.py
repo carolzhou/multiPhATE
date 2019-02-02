@@ -40,10 +40,10 @@ import phate_annotation
 import re, os, copy
 import subprocess
  
-BLAST_HOME    = os.environ["BLAST_HOME"] 
-EMBOSS_HOME   = os.environ["EMBOSS_HOME"] 
-CODE_BASE_DIR = ""
-OUTPUT_DIR    = ""
+BLAST_HOME          = os.environ["BLAST_HOME"] 
+EMBOSS_PHATE_HOME   = os.environ["EMBOSS_PHATE_HOME"] 
+CODE_BASE_DIR       = ""
+OUTPUT_DIR          = ""
 
 # Verbosity
 
@@ -63,7 +63,9 @@ annotationObj = phate_annotation.annotationRecord()
 fastaObj      = phate_fastaSequence.fasta()
 
 # Reverse complement
-complements = string.maketrans('acgtrymkbdhvACGTRYMKBDHV', 'tgcayrkmvhdbTGCAYRKMVHDB')
+#complements = string.maketrans('acgtrymkbdhvACGTRYMKBDHV', 'tgcayrkmvhdbTGCAYRKMVHDB') # Python 2
+complements = str.maketrans('acgtrymkbdhvACGTRYMKBDHV', 'tgcayrkmvhdbTGCAYRKMVHDB')     # Python 3
+
 
 class genome(object):
 
@@ -121,11 +123,11 @@ class genome(object):
         for fa in self.contigSet.fastaList:
             if fa.header == contig:
                 if DEBUG:
-                    print "Getting subsequence from A to B:", int(start)-1, int(end)
+                    print("Getting subsequence from A to B:", int(start)-1, int(end))
                 subSeq = fa.getSubsequence(int(start)-1,int(end)) #*** ???
             else:
                 if PHATE_WARNINGS == 'True':
-                    print "WARNING in genomeSequence module: fa.header", fa.header, "did not match contig", contig
+                    print("WARNING in genomeSequence module: fa.header", fa.header, "did not match contig", contig)
         return subSeq           
 
     def getSubsequence(self,start,end,contig):  # Note: tailored to RAST
@@ -202,7 +204,7 @@ class genome(object):
                 geneCallFile = geneCallInfo['geneCallFile']
             else:
                 if PHATE_WARNINGS == 'True':
-                    print "WARNING in genomeSequence module: processGeneCalls(), no geneCall file provided"
+                    print("WARNING in genomeSequence module: processGeneCalls(), no geneCall file provided")
                 return (0)
 
         # Read gene-call lines from gene caller output file and create a new gene object
@@ -211,7 +213,7 @@ class genome(object):
             match_geneCall = re.search('^\d+',fLine)
             if match_geneCall:
                 if DEBUG:
-                    print "Translating:", fLine
+                    print("Translating:", fLine)
                 # Format output by CGCparser.py is 6 columns, tabbed; final column is protein, but ignore
                 columns  = fLine.split('\t')
                 geneNo   = columns[0]
@@ -252,7 +254,7 @@ class genome(object):
                 else:
                     newGene.strand = 'x'
                     if PHATE_WARNINGS == 'True':
-                        print "ERROR in genomeSequence module: anomalous strand setting in processGeneCalls, phate_genomeSequence module:", newGene.strand
+                        print("ERROR in genomeSequence module: anomalous strand setting in processGeneCalls, phate_genomeSequence module:", newGene.strand)
 
                 #*** BANDAID - to compensate for PHANOTATE sometimes starting gene at 0
                 if newGene.start == 0:
@@ -260,11 +262,11 @@ class genome(object):
 
                 # Extract gene from genome sequence
                 if DEBUG:
-                    print "Invoking translation...start,end,strand,contig:",newGene.start,newGene.end,newGene.strand,contig
+                    print("Invoking translation...start,end,strand,contig:",newGene.start,newGene.end,newGene.strand,contig)
                 sequence = self.getCGCsubsequence(newGene.start,newGene.end,newGene.strand,contig)
                 newGene.sequence = sequence
                 if DEBUG:
-                    print "newGene.sequence is", newGene.sequence
+                    print("newGene.sequence is", newGene.sequence)
 
                 # Reverse complement the string if on reverse strand
                 if newGene.strand == '-':
@@ -335,7 +337,7 @@ class genome(object):
                 protein.addAnnotation(newPSAT)
                 PSAT_H.close()
         else:
-            print "First you need to set the PSAT filename in phate_genomeSequence object" 
+            print("First you need to set the PSAT filename in phate_genomeSequence object") 
         return 0
 
     def countAllAnnotations(self):
@@ -362,18 +364,18 @@ class genome(object):
         geneCount       = len(self.geneSet.fastaList)
         proteinCount    = len(self.proteinSet.fastaList)
         annotationCount = len(self.annotationList)
-        print self.genomeType, "genome", self.name, self.genomeName, self.species
-        print "Number of contigs:", contigCount
-        print "Names of contigs:",
+        print(self.genomeType, "genome", self.name, self.genomeName, self.species)
+        print("Number of contigs:", contigCount)
+        print("Names of contigs:", end=' ')
         for fa in self.contigSet.fastaList:
-            print fa.header,
-        print "  gene calls:", geneCount
-        print "  proteins:", proteinCount
-        print "  annotations:", annotationCount
+            print(fa.header, end=' ')
+        print("  gene calls:", geneCount)
+        print("  proteins:", proteinCount)
+        print("  annotations:", annotationCount)
         if annotationCount > 0:
-            print "Annotations:"
+            print("Annotations:")
             for annot in self.annotationList:
-                print "  ", annot
+                print("  ", annot)
 
     def printGenomeData_tab(self):
         FIRST = True
@@ -386,9 +388,9 @@ class genome(object):
         annotationCount = self.countAllAnnotations()
         #tabOut = 'Genome:' + self.filename + '\tName:' + self.name + '\tType:' + self.genomeType
         tabOut = 'Genome:' + self.genomeName + '\tName:' + self.name + '\tType:' + self.genomeType
-        print tabOut
+        print(tabOut)
         tabOut = 'Contigs:' + contigCount + '\tGenes:' + geneCount + '\tProteins:' + proteinCount + '\tAnnotations:' + str(annotationCount)
-        print tabOut
+        print(tabOut)
 
         # Print annotations for the genome sequence
         if self.annotationList:
@@ -480,24 +482,24 @@ class genome(object):
 
     def printGenomeData2file_GFF(self,FILE_HANDLE):
         FILE_HANDLE.write("%s\n" % (GFF_COMMENT))
-        print "There are", len(self.geneSet.fastaList), "genes, and", len(self.proteinSet.fastaList), "proteins"
-        print "Writing data to GFF file"
+        print("There are", len(self.geneSet.fastaList), "genes, and", len(self.proteinSet.fastaList), "proteins")
+        print("Writing data to GFF file")
         #for gene in self.geneSet.fastaList:
         #    gene.printData2file_GFF(FILE_HANDLE,'gene')
         #for protein in self.proteinSet.fastaList:
         #    protein.printData2file_GFF(FILE_HANDLE,'CDS')
         #*** NOTE: The following code assumes that the list of proteins corresponds precisely to
         #*** the list of genes.  Oh, for the want of a pointer!!!
-        for i in xrange(0, len(self.geneSet.fastaList)-1):
+        for i in range(0, len(self.geneSet.fastaList)-1):
             self.geneSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'gene')
             self.proteinSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'CDS')
 
     def printAll(self):
-        print "Contigs ====================================================="
+        print("Contigs =====================================================")
         self.contigSet.printAll()
-        print "Genes ======================================================="
+        print("Genes =======================================================")
         self.geneSet.printAll()
-        print "Proteins ===================================================="
+        print("Proteins ====================================================")
         self.proteinSet.printAll()
 
     def printAll2file(self,FILE_HANDLE):  # For reporting / debugging
@@ -509,22 +511,22 @@ class genome(object):
         self.proteinSet.printAll2file(FILE_HANDLE)
 
     def printGenes(self):
-        print self.filename
-        print self.name
+        print(self.filename)
+        print(self.name)
         self.geneSet.printAll()
 
     def printFastas2file(self,kvargs): # Prints to the file holding fastas (not a report/debug file) 
         mtype = ""
         # Get arguments that were provided
-        if "mtype" in kvargs.keys():
+        if "mtype" in list(kvargs.keys()):
             mtype = kvargs["mtype"]
         else:
             mtype = "gene"
-        if "headerType" in kvargs.keys():
+        if "headerType" in list(kvargs.keys()):
             hdrType = kvargs["headerType"]
         else:
             hdrType = "short"
-        if "filename" in kvargs.keys():
+        if "filename" in list(kvargs.keys()):
             filename = kvargs["filename"]
             OPEN_FILE = open(filename,"w")
         else:
@@ -590,31 +592,31 @@ class genome(object):
         #result = subprocess.check_output(command,shell=True)
         PROT_H = open(tempProtFile,"r")
         fLines = PROT_H.read().splitlines()
-        for i in xrange(1,(len(fLines))):
+        for i in range(1,(len(fLines))):
             proteinString += fLines[i] 
         PROT_H.close()
         return proteinString
 
     def translateGenes(self,kvargs):  # Clear proteinSet; translate geneSet fastas and load to proteinSet
-        if "geneticCode" in kvargs.keys():
+        if "geneticCode" in list(kvargs.keys()):
             geneticCode = kvargs["geneticCode"]
         else:
             geneticCode = 11 # default is bacteria
-        if "geneFile" in kvargs.keys():    #*** should check that files exist
+        if "geneFile" in list(kvargs.keys()):    #*** should check that files exist
             geneFile = kvargs["geneFile"]
-        if "proteinFile" in kvargs.keys():
+        if "proteinFile" in list(kvargs.keys()):
             protFile = kvargs["proteinFile"]
-        command = EMBOSS_HOME + "transeq" + " -sequence " + geneFile + " -outseq " + protFile + " -table " + str(geneticCode)
+        command = EMBOSS_PHATE_HOME + "transeq" + " -sequence " + geneFile + " -outseq " + protFile + " -table " + str(geneticCode)
         result = os.system(command)
         return result 
     
     # MOVING THIS METHOD TO CLASS BLAST    
     def makeBlastDB(self,kvargs): # Create blast DBs for contigs, genes, proteins
-        if "dbType" in kvargs.keys():
+        if "dbType" in list(kvargs.keys()):
             databaseType = kvargs["dbType"].lower()
         else:
             databaseType = "nucl"
-        if "filename" in kvargs.keys():
+        if "filename" in list(kvargs.keys()):
             filename = kvargs["filename"]
         else:
             return False

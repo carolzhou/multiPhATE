@@ -127,7 +127,7 @@ class fasta(object):
         if gi != "" and int(gi) > 0: 
             giString = "gi\|" + gi + "\|"
         else:
-            print "problem with gi"
+            print("problem with gi")
             return(0)
         for record in SeqIO.parse(nrLocation,"fasta"):
             match = re.findall(giString,record.id)
@@ -231,7 +231,7 @@ class fasta(object):
         elif headerType == 'custom':
             return ('>' + self.customHeader)
         else:
-            print "Invalid header type:", hdrType, "--Choose full, clean, trunc, short, compound, blast"
+            print("Invalid header type:", hdrType, "--Choose full, clean, trunc, short, compound, blast")
 
     def assignSequence(self,seq):      # Input is single string or a list of strings
         if isinstance(seq,str):
@@ -302,8 +302,8 @@ class fasta(object):
     def printFasta(self):
         hdr = self.getFullHeader()
         seq = self.sequence
-        print hdr
-        print seq
+        print(hdr)
+        print(seq)
 
     def printFasta2file(self,FILE_HANDLE,headerType="short"):
         if headerType.lower() == "compound":
@@ -346,53 +346,53 @@ class fasta(object):
         FILE_HANDLE.write("%s%s" % (seq,"\n"))
 
     def printAll(self):  # Dump everything: useful for testing  
-        print "Header:                   ", self.header
-        print "CleanHeader:              ", self.cleanHeader
-        print "TruncHeader:              ", self.truncHeader
-        print "ShortHeader:              ", self.shortHeader
-        print "CompoundHeader:           ", self.compoundHeader
-        print "BlastHeader:              ", self.blastHeader
-        print "SequentialHeader:         ", self.sequentialHeader
-        print "Name:                     ", self.name
-        print "Type:                     ", self.sequenceType
-        print "ParentSequence:           ", self.parentSequence
-        print "Order in multi-fasta list:", self.order
-        print "Truncation:               ", self.truncation
-        print "Start codon count:        ", self.startCodonCount
-        print "Codon start locations:",
+        print("Header:                   ", self.header)
+        print("CleanHeader:              ", self.cleanHeader)
+        print("TruncHeader:              ", self.truncHeader)
+        print("ShortHeader:              ", self.shortHeader)
+        print("CompoundHeader:           ", self.compoundHeader)
+        print("BlastHeader:              ", self.blastHeader)
+        print("SequentialHeader:         ", self.sequentialHeader)
+        print("Name:                     ", self.name)
+        print("Type:                     ", self.sequenceType)
+        print("ParentSequence:           ", self.parentSequence)
+        print("Order in multi-fasta list:", self.order)
+        print("Truncation:               ", self.truncation)
+        print("Start codon count:        ", self.startCodonCount)
+        print("Codon start locations:", end=' ')
         if self.codonStartLocs:
             for location in self.codonStartLocs:
-                print "   ", location,
-            print '\n'
+                print("   ", location, end=' ')
+            print('\n')
         else:
-            print "none"
-        print "Sequence length is:", self.getSequenceLength()
+            print("none")
+        print("Sequence length is:", self.getSequenceLength())
         count = 0
         if self.annotationList:
             count += 1
             self.printAnnotations()
         else:
-            print "There are no annotations"
+            print("There are no annotations")
         count = 0
         if self.paralogList:
             for paralog in paralogList:
                 count += 1
-                print "Paralog No.", count, ":", paralog
+                print("Paralog No.", count, ":", paralog)
         else:
-             print "Paralog detection not yet in service"  #***
-        print "Sequence:", self.sequence
+             print("Paralog detection not yet in service")  #***
+        print("Sequence:", self.sequence)
 
     def printAll_tab(self):
         tabLine = 'Header:' + self.header + '\tName:' + self.name + '\tType:' + self.sequenceType + '\tOrder:' + str(self.order)
-        print tabLine
+        print(tabLine)
         if self.annotationList:
             self.printAnnotations_tab()
         else:
-            print "There are no annotations"
+            print("There are no annotations")
         if len(self.sequence) < 1000:
-            print self.sequence
+            print(self.sequence)
         else:
-            print "Sequence too long to print. See file."
+            print("Sequence too long to print. See file.")
 
     def printAll2file_tab(self,FILE_HANDLE):
         tabLine = 'Header:' + self.header + '\tName:' + self.name + '\tType:' + self.sequenceType + '\tOrder:' + str(self.order)
@@ -426,7 +426,7 @@ class fasta(object):
     def splitToList(self,lineLength):  # Returns a list of sequence lines
         nextLine = ""
         sequenceList = []
-        numberList = list(xrange(0,len(self.sequence),lineLength))
+        numberList = list(range(0,len(self.sequence),lineLength))
         for number in numberList:
             nextSegment = self.sequence[int(number):int(number+lineLength)]
             sequenceList.append(nextSegment)
@@ -439,8 +439,8 @@ class fasta(object):
         count = 0
         for annot in self.annotationList:
             count += 1
-            print "Annotation item", count
-            print 'Source\tMethod\tType\t'
+            print("Annotation item", count)
+            print('Source\tMethod\tType\t')
             annot.printAnnotationRecord()
 
     def printAnnotations_tab(self): # Streamlined output
@@ -496,14 +496,14 @@ class multiFasta(object):
 
     def reportStats(self):
         stats = []
-        print "Sequence from file name:", self.filename
+        print("Sequence from file name:", self.filename)
         stats.append("Sequence from file name:" + self.filename)
-        print "Number of fasta sequences:", len(self.fastaList)
+        print("Number of fasta sequences:", len(self.fastaList))
         stats.append("Number of fasta sequence:" + str(len(self.fastaList)))
-        print "Number of annotations:", len(self.annotationList)
+        print("Number of annotations:", len(self.annotationList))
         stats.append("Number of annotations:" + str(len(self.annotationList)))
-        print "Annotations:", self.annotationList
-        print "No. of fasta sequences with paralogs:", self.countParalogs() 
+        print("Annotations:", self.annotationList)
+        print("No. of fasta sequences with paralogs:", self.countParalogs()) 
         stats.append("No. of fasta sequence with paralogs: " + str(self.countParalogs()))
         return stats
 
@@ -557,7 +557,7 @@ class multiFasta(object):
 
     def addFastasFromFile(self,mtype):
         if self.filename == "unknown" or self.filename == '':
-            print "ERROR: First you must set the filename in addFastasFromFile()"
+            print("ERROR: First you must set the filename in addFastasFromFile()")
         else:
             fastaFile = open(self.filename,"r")
             fLines = fastaFile.read().splitlines()
@@ -592,12 +592,12 @@ class multiFasta(object):
 
     def printAll(self):
         count = 0
-        print "Number of fastas:", len(self.fastaList)
+        print("Number of fastas:", len(self.fastaList))
         for fa in self.fastaList:
             count += 1
-            print "*****List item no.", count, ":"
+            print("*****List item no.", count, ":")
             fa.printAll()
-            print "\n"
+            print("\n")
 
     def printAll2file(self,FILE_HANDLE):
         count = 0

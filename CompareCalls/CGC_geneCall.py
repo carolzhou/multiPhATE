@@ -84,17 +84,17 @@ class GeneCall(object):
         return
 
     def PrintAll(self):
-        print "\ngeneName =", self.geneName
-        print "geneCaller =", self.geneCaller
-        print "geneNumber =", self.geneNumber
-        print "leftEnd =",    self.leftEnd
-        print "rightEnd =",   self.rightEnd
-        print "strand =",     self.strand
-        print "length =",     self.geneLength
-        print "contig =",     self.contig
-        print "protein =",    self.proteinName
-        print "score1 =",     self.score1
-        print "score2 =",     self.score2
+        print("\ngeneName =", self.geneName)
+        print("geneCaller =", self.geneCaller)
+        print("geneNumber =", self.geneNumber)
+        print("leftEnd =",    self.leftEnd)
+        print("rightEnd =",   self.rightEnd)
+        print("strand =",     self.strand)
+        print("length =",     self.geneLength)
+        print("contig =",     self.contig)
+        print("protein =",    self.proteinName)
+        print("score1 =",     self.score1)
+        print("score2 =",     self.score2)
         return
 
     def PrintAll2file(self,FILE_H):
@@ -112,7 +112,7 @@ class GeneCall(object):
         return
 
     def PrintAll_brief(self):
-        print "Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName, ", score1:", self.score1, ", score2:", self.score2
+        print("Gene No.", self.geneNumber, "gene caller: ", self.geneCaller, ", leftEnd:", self.leftEnd, ", rightEnd:", self.rightEnd, ", strand:", self.strand, ", length:", self.geneLength, ", contig:", self.contig, ", protein:", self.proteinName, ", score1:", self.score1, ", score2:", self.score2)
         return
 
     def PrintAll_brief_2file(self, File_H):
@@ -168,7 +168,7 @@ class GeneCallSet(object):
                     self.GetGeneCalls(fLines,caller)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print "ERROR in CGC_geneCall: gene caller not recognized in geneCall.GeneCallSet,", caller, line
+                        print("ERROR in CGC_geneCall: gene caller not recognized in geneCall.GeneCallSet,", caller, line)
         return
 
     # Determine which of 2 gene calls occurs first along the sequence (left to right, regardless of orientation) 
@@ -192,7 +192,7 @@ class GeneCallSet(object):
 
         # Second, make a list of the contigs on which genes were called; then sort (alphabetically)
         contigList = []
-        for index in xrange(0,len(self.geneCallList)):
+        for index in range(0,len(self.geneCallList)):
             contig = self.geneCallList[index].contig
             if contig not in contigList:
                 contigList.append(contig) 
@@ -206,12 +206,12 @@ class GeneCallSet(object):
             END_FOUND = False              # controls search for given contig's data start/end within self.geneCallList
 
             # Find position where this contig's data begins
-            for index1 in xrange(0,len(self.geneCallList)):
+            for index1 in range(0,len(self.geneCallList)):
                 if self.geneCallList[index1].contig == contig:  # walk through list until position where contig starts is found
                     startIndex = index1
                     break
             # Find position where this contig's data ends 
-            for index2 in xrange(index1,len(self.geneCallList)):
+            for index2 in range(index1,len(self.geneCallList)):
                 if self.geneCallList[index2].contig != contig:
                     endIndex = index2
                     END_FOUND = True
@@ -220,7 +220,7 @@ class GeneCallSet(object):
                 endIndex = len(self.geneCallList)
 
             # Order the gene call objects for the current contig only
-            for i in xrange(startIndex,endIndex):
+            for i in range(startIndex,endIndex):
                 temp.append(self.geneCallList[i])
 
             # First sort by gene caller, then by second coordinate, then by first
@@ -242,7 +242,7 @@ class GeneCallSet(object):
         return 
 
     def PrintAll(self):
-        print "Gene Caller: ",self.geneCaller
+        print("Gene Caller: ",self.geneCaller)
         for gene in self.geneCallList:
             gene.PrintAll()
         return
@@ -254,7 +254,7 @@ class GeneCallSet(object):
         return
 
     def PrintAll_brief(self):
-        print "Gene Caller: ",self.geneCaller
+        print("Gene Caller: ",self.geneCaller)
         for gene in self.geneCallList:
             gene.PrintAll_brief()
         return

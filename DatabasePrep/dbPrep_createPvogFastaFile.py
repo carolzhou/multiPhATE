@@ -72,23 +72,23 @@ LOG_H.write("%s%s\n" % ("Processing began at ",datetime.datetime.now()))
 # Capture fastas from ncbi phage fasta file
 
 if CHATTY:
-    print "Reading ncbi phage fasta file"
+    print("Reading ncbi phage fasta file")
 ncbiPhageSeqs = dbPrep_fastaSequence.multiFasta()
 fastaLines = NCBI_PHAGE_FAA_H.read().splitlines()
 ncbiPhageSeqs.addFastas(fastaLines,'aa')
 if CHATTY:
-    print "done!"
+    print("done!")
 
 # Read in the pVOG identifiers and their associated accession numbers
 
 if CHATTY:
-    print "Reading pVOGs from pVOG file"
+    print("Reading pVOGs from pVOG file")
 pVOGdb = dbPrep_pVOG.pVOGs()
 pVOGlines = PROTEIN_LIST_H.read().splitlines()
 #pVOGdb.addPvogs_old(pVOGlines,LOG_H)
 pVOGdb.addPvogs(PVOG_LIB_DIR,LOG_H)
 if CHATTY:
-    print "pVOGs have been recorded"
+    print("pVOGs have been recorded")
 LOG_H.write("%s%s%s\n" % ("There are ",len(pVOGdb.pVOGlist)," pVOGs"))
 accessionCount = pVOGdb.getAccessionCount()
 LOG_H.write("%s%s\n" % ("The total number of accessions is ",accessionCount))
@@ -97,7 +97,7 @@ LOG_H.write("%s%s\n" % ("The total number of accessions is ",accessionCount))
 # Modify the header of each identified fasta to reflect its membership in the pVOG cluster
 
 if CHATTY:
-    print "Searching sequences for each pVOG-associated accession"
+    print("Searching sequences for each pVOG-associated accession")
 
 # Create a fasta object (to be replicated as needed)
 nextFasta = dbPrep_fastaSequence.fasta()
@@ -111,7 +111,7 @@ for pVOG in pVOGdb.pVOGlist:
     for accession in pVOG.accessionList:                            # For each accession (approx 200k of them, members of pVOG groups)
         accnCount += 1
         if CHATTY:
-            print "Processing pVOG", pVOG.pVOGid, "and accession", accession
+            print("Processing pVOG", pVOG.pVOGid, "and accession", accession)
         LOG_H.write("%s%s%s%s\n" % ("Processing pVOG ",pVOG.pVOGid," and accession ",accession))
         nextFasta = ncbiPhageSeqs.findStringInHeader(accession)     # Search sequence headers in phage/virus database; find this accn, if exists
         if nextFasta:
@@ -130,13 +130,13 @@ for pVOG in pVOGdb.pVOGlist:
                 missingCount += 1
                 PVOG_MISSING_PROTEINS_H.write("%s%s\n" % ("No pVOG found for accession ", accession))
 if CHATTY:
-    print "pVOG accession sequences have been tagged"
+    print("pVOG accession sequences have been tagged")
 # Write the pVOG-tagged fastas to file
 if CHATTY:
-    print "Writing pVOG-tagged fasta sequences to file"
+    print("Writing pVOG-tagged fasta sequences to file")
 ncbiPhageSeqs.printMultiFasta2file_custom(PVOG_TAGGED_PROTEINS_H)
 if CHATTY:
-    print "done!"
+    print("done!")
 
 LOG_H.write("%s%s\n" % ("Number accessions = ", accnCount))
 LOG_H.write("%s%s\n" % ("Number of fasta sequences found = ", foundCount))
@@ -148,6 +148,6 @@ PROTEIN_LIST_H.close()
 NCBI_PHAGE_FAA_H.close()
 PVOG_TAGGED_PROTEINS_H.close()
 PVOG_MISSING_PROTEINS_H.close()
-print "Processing complete!"
+print("Processing complete!")
 LOG_H.write("%s%s\n" % ("Processing completed at ",datetime.datetime.now()))
 LOG_H.close()

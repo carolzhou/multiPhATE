@@ -55,11 +55,11 @@ files = {
 # Input Parameters
 
 if PHATE_MESSAGES == 'True':
-    print "There are", len(sys.argv), "input parameters:", sys.argv
+    print("There are", len(sys.argv), "input parameters:", sys.argv)
 
 if len(sys.argv) == 1:
     if PHATE_WARNINGS == 'True':
-        print "Usage: /usr/local/bin/python3.4 annotatePhage.py fastaFile.fa outFolder", "Exiting now."
+        print("Usage: /usr/local/bin/python3.4 annotatePhage.py fastaFile.fa outFolder", "Exiting now.")
     exit(0)
 
 fastaFileName = sys.argv[1]
@@ -91,7 +91,7 @@ logfile = open(logfilefullpath,"w")
 logfile.write("%s%s\n" % ("Input parameters are:",sys.argv))
 workingFolder = os.getcwd()
 if PHATE_MESSAGES == 'True':
-    print "workingFolder is", workingFolder
+    print("workingFolder is", workingFolder)
 if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
 logfile.write("%s%s\n" % ("output folder is ", outputFolder))
@@ -128,16 +128,16 @@ class geneCall:
         self.score = score
 
     def printall(self):
-        print self.ID, self.method, self.contig, self.start, self.stop, self.strand, self.score
+        print(self.ID, self.method, self.contig, self.start, self.stop, self.strand, self.score)
         for gene in geneCallList:
-            print gene
+            print(gene)
 
 ########## FUNCTIONS ##########
 
 def systemCall(command):
     #print("\nSYSTEM CALL: "+command)
     if PHATE_MESSAGES == 'True':
-        print "\nSYSTEM CALL: ", command
+        print("\nSYSTEM CALL: ", command)
     logfile.write("%s%s\n" % ("command is ",command))
     os.system(command)
 
@@ -165,7 +165,7 @@ def processProdigal(line):
         ID = getProdigalId(lineSplit[8])
 
         if PHATE_MESSAGES == 'True':
-	    print "   ID=",ID,"method=",method,"contig=",contig,"start/stop=",start,'/',stop,"strand=",strand,"score=",score
+            print("    ID=",ID,"method=",method,"contig=",contig,"start/stop=",start,'/',stop,"strand=",strand,"score=",score)
         geneCall(ID, method, contig, start, stop, strand, score)
         callCounts['prodigal'] += 1
 
@@ -249,7 +249,7 @@ def Convert_cgc2gff(cgcFile,gffFile):
                 end   = str(leftEnd) 
             else:
                 if PHATE_WARNINGS == 'True':
-                    print "WARNING: phate_geneCall says, Unexpected strand:", strand
+                    print("WARNING: phate_geneCall says, Unexpected strand:", strand)
             GFF_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (seqid,source,type,start,end,strand,phase,attributes))
         elif match_caller:
             caller = match_caller.group(1)
@@ -266,7 +266,7 @@ def Convert_cgc2gff(cgcFile,gffFile):
 
 if PRODIGAL_CALLS:
     if PHATE_PROGRESS == 'True':
-        print "Genecall module says: running Prodigal."
+        print("Genecall module says: running Prodigal.")
     if PHATE_MESSAGES == 'True':
         print("\n########## Prodigal ##########")
     logfile.write("%s\n" % ("Processing Prodigal"))
@@ -299,7 +299,7 @@ if DEBUG:
     logfile.write("%s%s\n" % ("GLIMMER_CALLS is ",GLIMMER_CALLS))
 if GLIMMER_CALLS:
     if PHATE_PROGRESS == 'True':
-        print "Genecall module says: running Glimmer."
+        print("Genecall module says: running Glimmer.")
     if PHATE_MESSAGES == 'True':
         print("\n########## Glimmer ##########")
     logfile.write("%s\n" % ("Processing Glimmer"))
@@ -345,7 +345,7 @@ if DEBUG:
     logfile.write("%s%s\n" % ("GENEMARKS_CALLS is ",GENEMARKS_CALLS))
 if GENEMARKS_CALLS:
     if PHATE_PROGRESS == 'True':
-        print "Genecall module says: running GeneMarkS."
+        print("Genecall module says: running GeneMarkS.")
     if PHATE_MESSAGES == 'True':
         print("\n########## GeneMarkS ##########")
     logfile.write("%s\n" % ("Processing GeneMarkS"))
@@ -369,7 +369,7 @@ if DEBUG:
 
 if PHANOTATE_CALLS:
     if PHATE_PROGRESS == 'True':
-        print "Genecall module says: running Phanotate."
+        print("Genecall module says: running Phanotate.")
     if PHATE_MESSAGES == 'True':
         print("\n########## PHANOTATE ##########")
     logfile.write("%s\n" % ("Processing PHANOTATE"))
@@ -393,7 +393,7 @@ results.write("ID\tSTART\tSTOP\tSTRAND\tSCORE\tMETHOD\tCONTIG\n")
 
 if DEBUG:
     logfile.write("%s\n" % ("GENE_CALL_TESTING"))
-    print "Printing all gene calls:"
+    print("Printing all gene calls:")
     #geneCall.printall()
 
 logfile.write("%s\n" % ("Writing genecall data to results file..."))
@@ -403,15 +403,15 @@ results.close
 
 logfile.write("%s\n" % ("Printing tallied genecall method call counts..."))
 for method in callCounts:
-    print(method + ": " + str(callCounts[method]))
+    print((method + ": " + str(callCounts[method])))
 
 print()
 
 logfile.write("%s\n" % ("Printing file info..."))
 for fileType in files:
     #print(fileType,files[fileType],sep=": ")
-    print fileType, ": ", files[fileType],
-print
+    print(fileType, ": ", files[fileType], end=' ')
+print()
 
 logfile.write("%s\n" % ("Parsing genecall files into CGC format..."))
 callerCount = 0
@@ -434,11 +434,11 @@ if callerCount >= 2:
     runCGC = True
 
 if DEBUG:
-    print "DEBUG: next, running CGC_main.py"
+    print("DEBUG: next, running CGC_main.py")
 if runCGC:
     #systemCall('python ' + cgcPath + 'CGC_main.py ' + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
     if DEBUG:
-        print "DEBUG: calling CGC, cgcLog is", cgcLog
+        print("DEBUG: calling CGC, cgcLog is", cgcLog)
     #systemCall('python ' + cgcPath + 'CGC_main.py log=' + cgcLog + ' '                         + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
     systemCall('python ' + cgcPath + 'CGC_main.py log=' + cgcLog + ' ' + 'gff=' + cgcGff + ' ' + outputFolder + '*.cgc > ' + outputFolder + 'CGC_results.txt')
     

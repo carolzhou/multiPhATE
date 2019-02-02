@@ -82,11 +82,11 @@ class Comparison(object):
                     self.callerList.append(gene.geneCaller)
             self.callerList.sort()
             if DEBUG:
-                print "DEBUG: CGC_compare/IdentifyCallers(): self.callerList is", self.callerList
+                print("DEBUG: CGC_compare/IdentifyCallers(): self.callerList is", self.callerList)
             return len(self.callerList)
         else:
             if CGC_WARNINGS == 'True':
-                print "WARNING in CGC_compare module: IdentifyCallers(): No callers to extract: call method Merge() to establish mergeList before calling this method" 
+                print("WARNING in CGC_compare module: IdentifyCallers(): No callers to extract: call method Merge() to establish mergeList before calling this method") 
             return 0
 
 
@@ -113,13 +113,13 @@ class Comparison(object):
                             count += 1
                 else:
                     if CGC_WARNINGS == 'True':
-                        print "WARNING in CGC_compare: IdentifyCommonCore(): callerCount is zero! cannot process"
+                        print("WARNING in CGC_compare: IdentifyCommonCore(): callerCount is zero! cannot process")
             else:
                 if CGC_WARNINGS == 'True':
-                    print "WARNING in CGC_compare module: IdentifyCommonCore(): MergeList is empty:  need to run self.Merge()"
+                    print("WARNING in CGC_compare module: IdentifyCommonCore(): MergeList is empty:  need to run self.Merge()")
         else:
             if CGC_WARNINGS == 'True':
-                print "WARNING in CGC_compare module: IdentifyCommonCore(): No data available to identify common core"
+                print("WARNING in CGC_compare module: IdentifyCommonCore(): No data available to identify common core")
         return 
 
  
@@ -147,7 +147,7 @@ class Comparison(object):
             self.mergeList.append(newGeneCall)
 
         # For bookkeeping, compile a non-redundant list of the contigs upon which genes were called; then sort the list
-        for index in xrange(0,len(self.mergeList)):
+        for index in range(0,len(self.mergeList)):
             contig = self.mergeList[index].contig
             if contig not in contigList:
                 contigList.append(contig)
@@ -164,12 +164,12 @@ class Comparison(object):
             END_FOUND = False              # catches last contig group at end of list
 
             # Find position where this contig's data begins
-            for index1 in xrange(0,len(self.mergeList)):
+            for index1 in range(0,len(self.mergeList)):
                 if self.mergeList[index1].contig == contig:   # walk through list until position where contig starts is found
                     startIndex = index1
                     break
             # Find position where this contig's data ends
-            for index2 in xrange(index1,len(self.mergeList)):
+            for index2 in range(index1,len(self.mergeList)):
                 if self.mergeList[index2].contig != contig:  # continue walking through list until contig changes
                     endIndex = index2 
                     END_FOUND = True
@@ -178,7 +178,7 @@ class Comparison(object):
                 endIndex = len(self.mergeList)
 
             # Order the gene call objects for the current contig only
-            for i in xrange(startIndex,endIndex):   
+            for i in range(startIndex,endIndex):   
                 temp.append(self.mergeList[i])  # copy out these gene call objects
 
             # Sort by gene caller, then by second coordinate, then by first
@@ -202,7 +202,7 @@ class Comparison(object):
             callCount = len(self.mergeList)               # number of total gene calls, all callers
             nextCall  = copy.deepcopy(self.mergeList[0])  # capture 1st gene call
             identityList.append(nextCall)                 # each addition to list is identical to existing in list
-            for i in xrange(1,callCount):                 # start with 2nd gene call
+            for i in range(1,callCount):                 # start with 2nd gene call
                 nextCall = copy.deepcopy(self.mergeList[i])
                 if self.mergeList[i].strand   != self.mergeList[i-1].strand  or \
                    self.mergeList[i].leftEnd  != self.mergeList[i-1].leftEnd or \
@@ -215,7 +215,7 @@ class Comparison(object):
                 self.uniqueList.append(identityList)
         else:
             if CGC_MESSAGES == 'True':
-                print "CGC_compare says: Compare(): Nothing to Compare"
+                print("CGC_compare says: Compare(): Nothing to Compare")
         return
 
     ##### SCORE ##### 
@@ -257,7 +257,7 @@ class Comparison(object):
                         stop  = geneCall.leftEnd
                     else:
                         if CGC_WARNINGS == 'True':
-                            print "WARNING: CGC_compare says, Unrecognized strand:", geneCall.strand 
+                            print("WARNING: CGC_compare says, Unrecognized strand:", geneCall.strand) 
                     contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
                     contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
 
@@ -271,8 +271,8 @@ class Comparison(object):
                     else:
                         callTally[contig_strand_stop] = 1  
             if DEBUG:
-                print "gene caller count:", geneCallerCount
-                print "callTally:", callTally
+                print("gene caller count:", geneCallerCount)
+                print("callTally:", callTally)
 
             # Next, compute score for each gene call; this is done is two steps: identity, then similarity
             for identityList in self.uniqueList:
@@ -291,7 +291,7 @@ class Comparison(object):
                         stop  = geneCall.leftEnd
                     else:
                         if DEBUG:
-                            print "DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand 
+                            print("DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand) 
                     contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
                     contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
 
@@ -310,8 +310,8 @@ class Comparison(object):
                         if callTally[contig_strand_stop] > 1:               # must be at least 2 similars 
                             geneScore_b = 0.5 / float(geneCallerCount)      # at a fractional score to "boost" due to similarity
                     if DEBUG:
-                        print "geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop 
-                        print "geneScore_b is", geneScore_b, "for gene call", contig_strand_stop
+                        print("geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop) 
+                        print("geneScore_b is", geneScore_b, "for gene call", contig_strand_stop)
 
                     # Compute and record final gene-call score
                     geneCall.score1 = geneScore_a + geneScore_b
@@ -395,7 +395,7 @@ class Comparison(object):
                     end    = str(callList[0].leftEnd)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print "WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand
+                        print("WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand)
                 if len(callList) == len(self.callerList):      # all callers agreed
                     attributes = 'unanimous call'
                     source     = 'all callers'
@@ -424,18 +424,18 @@ class Comparison(object):
                     end    = str(callList[0].leftEnd)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print "WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand
+                        print("WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand)
                 FILE_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (seqid,source,type,start,end,strand,phase,attributes))
         else:
             if CGC_WARNINGS == 'True':
-                print "WARNING: CGC_compare says, dataSet not recognized:", dataSet 
+                print("WARNING: CGC_compare says, dataSet not recognized:", dataSet) 
         return
 
     def PrintMergeList(self):
-        print "\n***************Merge List"
+        print("\n***************Merge List")
         count = 1 
         for gene in self.mergeList:
-            print count,
+            print(count, end=' ')
             gene.PrintAll_brief()
             count += 1
         return
@@ -450,12 +450,12 @@ class Comparison(object):
         return
 
     def PrintUniqueList(self):
-        print "\n***************Unique List"
+        print("\n***************Unique List")
         count = 1 
         for list in self.uniqueList:
-            print "Unique gene call", count
+            print("Unique gene call", count)
             for gene in list:
-                print "  --  ", 
+                print("  --  ", end=' ') 
                 gene.PrintAll_brief()
             count += 1
         return
@@ -472,10 +472,10 @@ class Comparison(object):
         return
 
     def PrintCommonCore(self):
-        print "\n***************Common Core"
+        print("\n***************Common Core")
         count = 1 
         for gene in self.commonCore:
-            print count,
+            print(count, end=' ')
             gene.PrintAll_brief()
             count += 1
         return
@@ -490,9 +490,9 @@ class Comparison(object):
         return
 
     def PrintCallerList(self):
-        print "\n***************List of Gene Callers"
+        print("\n***************List of Gene Callers")
         for caller in self.callerList:
-            print caller 
+            print(caller) 
 
     def PrintCallerList2file(self,FILE_H):
         FILE_H.write("%s\n" % ("\n***************List of Gene Callers"))
@@ -500,9 +500,9 @@ class Comparison(object):
             FILE_H.write("%s\t" % (caller)) 
 
     def PrintConsensusScores(self):
-        print "\nGene-call Consensus Scores:"
+        print("\nGene-call Consensus Scores:")
         for caller in self.callerList:
-            print "Caller", caller, "gene-call consensus score: %0.2f" % self.averageScores[caller]
+            print("Caller", caller, "gene-call consensus score: %0.2f" % self.averageScores[caller])
         return
 
     def PrintConsensusScores2file(self,FILE_H):
@@ -518,22 +518,22 @@ class Comparison(object):
                 count = 1
 
                 # Print column headers, for as many gene callers as we have
-                print "\nGene-call Table:"
-                print "count\t",
-                for i in xrange(0,len(self.callerList)):
-                    print "caller\tstrand\tleftEnd\trightEnd\tlength\tcontig\t",
-                print 
+                print("\nGene-call Table:")
+                print("count\t", end=' ')
+                for i in range(0,len(self.callerList)):
+                    print("caller\tstrand\tleftEnd\trightEnd\tlength\tcontig\t", end=' ')
+                print() 
 
                 # Format each gene call as a single line of output, arranging gene callers in order left to right
                 for geneList in self.uniqueList:
 
                     # Create an empty array for printing identical gene calls in order going across by gene caller
                     printArray = [] # initialize
-                    for i in xrange(0,len(self.callerList)): # Make the array as big as it needs to be for current gene call 
+                    for i in range(0,len(self.callerList)): # Make the array as big as it needs to be for current gene call 
                         printArray.append('')
 
                     # Fill the print array in order by gene caller # will be at least 1 gene caller's call 
-                    for i in xrange(0,len(geneList)):
+                    for i in range(0,len(geneList)):
                         currentCaller = geneList[i].geneCaller
                         printColumn = self.callerList.index(currentCaller) # capture index of this gene caller in self.callerList
                         printArray[printColumn] = geneList[i].geneCaller + '\t' + geneList[i].strand   + '\t' \
@@ -541,18 +541,18 @@ class Comparison(object):
                                                 + geneList[i].geneLength + '\t' + geneList[i].contig + '\t'
 
                     # Print the current row: horizontal list of identical gene calls 
-                    print count, '\t',
+                    print(count, '\t', end=' ')
                     for geneCallString in printArray:
                         if geneCallString == '':
-                            print "\t\t\t\t\t\t",
+                            print("\t\t\t\t\t\t", end=' ')
                         else:
-                            print geneCallString, 
-                    print 
+                            print(geneCallString, end=' ') 
+                    print() 
                     count += 1
             else:
-                print "PrintGenecallGrid(): uniqueList is empty"
+                print("PrintGenecallGrid(): uniqueList is empty")
         else:
-            print "PrintGenecallGrid(): callerList is empty"
+            print("PrintGenecallGrid(): callerList is empty")
         return
 
     # Formats the unique calls list and prints to a file; this is the final comparison data set
@@ -564,7 +564,7 @@ class Comparison(object):
                 # Print column headers, for as many gene callers as we have
                 FILE_H.write("%s\n" % ("Gene-call Table:"))
                 FILE_H.write("%s" % ("count\t"))
-                for i in xrange(0,len(self.callerList)):
+                for i in range(0,len(self.callerList)):
                     FILE_H.write("%s\n" % ("caller\tstrand\tleftEnd\trightEnd\tlength\tcontig\t"))
 
                 # Format each gene call as a single line of output, arranging gene callers in order left to right
@@ -572,11 +572,11 @@ class Comparison(object):
 
                     # Create an empty array for printing identical gene calls in order going across by gene caller
                     printArray = [] # initialize
-                    for i in xrange(0,len(self.callerList)): # Make the array as big as it needs to be for current gene call 
+                    for i in range(0,len(self.callerList)): # Make the array as big as it needs to be for current gene call 
                         printArray.append('')
 
                     # Fill the print array in order by gene caller # will be at least 1 gene caller's call 
-                    for i in xrange(0,len(geneList)):
+                    for i in range(0,len(geneList)):
                         currentCaller = geneList[i].geneCaller
                         printColumn = self.callerList.index(currentCaller) # capture index of this gene caller in self.callerList
                         printArray[printColumn] = geneList[i].geneCaller + '\t' + geneList[i].strand   + '\t' \
@@ -612,12 +612,12 @@ class Comparison(object):
         return
 
     def PrintGenecallScores(self):
-        print
-        print "Gene-call Scores:"
-        print 'Caller\t', 'Contig\t', 'Gene No.\t', 'Left End\t', 'Right End\t', 'Strand\t', 'gcScore'
+        print()
+        print("Gene-call Scores:")
+        print('Caller\t', 'Contig\t', 'Gene No.\t', 'Left End\t', 'Right End\t', 'Strand\t', 'gcScore')
         for geneCallList in self.uniqueList:
             for geneCall in geneCallList:
-                print geneCall.geneCaller, '\t', geneCall.contig, '\t', geneCall.geneNumber, '\t', geneCall.leftEnd, '\t', geneCall.rightEnd, '\t', geneCall.strand, '\t', '%1.2f' % geneCall.score1
+                print(geneCall.geneCaller, '\t', geneCall.contig, '\t', geneCall.geneNumber, '\t', geneCall.leftEnd, '\t', geneCall.rightEnd, '\t', geneCall.strand, '\t', '%1.2f' % geneCall.score1)
         return
 
     def PrintGenecallScores2file(self,FILE_H):
@@ -632,19 +632,19 @@ class Comparison(object):
     def PrintStats(self):
 
         # Print a list of the callers 
-        print "The following gene callers were considered:",
+        print("The following gene callers were considered:", end=' ')
         for caller in self.callerList:
-            print ',', caller,
-        print
-        print "The number of distinct gene calls over all gene callers is", len(self.uniqueList)
-        print "The number of gene calls in common among all callers is", len(self.commonCore) 
+            print(',', caller, end=' ')
+        print()
+        print("The number of distinct gene calls over all gene callers is", len(self.uniqueList))
+        print("The number of gene calls in common among all callers is", len(self.commonCore)) 
 
         # Calculate number of gene calls that are not shared between any 2 gene callers
         loneCallCount = 0
         for callerList in self.uniqueList:
             if len(callerList) == 1:
                 loneCallCount += 1
-        print "The number of unique (non-matching) gene calls is", loneCallCount 
+        print("The number of unique (non-matching) gene calls is", loneCallCount) 
 
         # For each gene caller, calculate the number of calls it made 
         for caller in self.callerList:
@@ -663,8 +663,8 @@ class Comparison(object):
                     if minLength > intLength:
                         minLength = intLength
             aveLength = cumulativeLength / callCount
-            print "Caller", caller, "produced", callCount, "gene calls."
-            print "Caller", caller, "gene-call length stats:  min:", minLength, ", max:", maxLength, ", ave:", aveLength
+            print("Caller", caller, "produced", callCount, "gene calls.")
+            print("Caller", caller, "gene-call length stats:  min:", minLength, ", max:", maxLength, ", ave:", aveLength)
 
     def PrintStats2file(self,FILE_H):
 
@@ -720,17 +720,17 @@ class Comparison(object):
 
     def PrintAll_verbose(self):
         self.PrintCallerList()
-        print "\n***************Merge List"
+        print("\n***************Merge List")
         for gene in self.mergeList:
             gene.PrintAll()
-        print "\n***************Unique List"
+        print("\n***************Unique List")
         for list in self.uniqueList:
             for gene in list:
                 gene.PrintAll()
-        print "\n***************Common Core"
+        print("\n***************Common Core")
         for gene in self.commonCore:
             gene.PrintAll()
-        print "\n***************GeneCall Grid"
+        print("\n***************GeneCall Grid")
         self.PrintGenecallGrid()
         return
 

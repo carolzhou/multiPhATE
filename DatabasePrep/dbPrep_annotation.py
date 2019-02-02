@@ -1,5 +1,5 @@
 ###########################################################
-# Module: phate_annotation.py
+# Module: dbPrep_annotation.py
 # Programmer: Carol L. Ecale Zhou
 #
 # Data of last update:  October 2016 - code being modified from CGP code base
@@ -74,7 +74,7 @@ class annotationRecord(object):
 
     def removeRedundancy(self,inList): # Eliminate redundancy in list; Different PSAT annotations sources can return same annotation
         outList = []
-        for i in xrange(len(inList)):
+        for i in range(len(inList)):
             item = inList.pop()
             if item not in inList:
                 outList.append(item)
@@ -84,14 +84,14 @@ class annotationRecord(object):
     # PRINT METHODS
 
     def printAnnotationRecord(self):
-        print "Annotation source:", self.source, '| Method:', self.method, '| Type:', self.annotationType
-        print "Contig:", self.contig, "| Start:", self.start, "| End:", self.end, "| Strand:", self.strand
-        print "Name:", self.name, "Description:", self.description
-        print "Annotations:", self.annotationList
+        print("Annotation source:", self.source, '| Method:', self.method, '| Type:', self.annotationType)
+        print("Contig:", self.contig, "| Start:", self.start, "| End:", self.end, "| Strand:", self.strand)
+        print("Name:", self.name, "Description:", self.description)
+        print("Annotations:", self.annotationList)
 
     def printAnnotationRecord_tabHeader(self):
         header = 'Source\tMethod\tType\tCategory\tStart-End/strand\tName\tDescription'
-        print header
+        print(header)
 
     def printAnnotationRecord_tab(self):
         annotationString = ""
@@ -102,7 +102,7 @@ class annotationRecord(object):
         tabLine = self.source + '\t' + self.method + '\t' + self.annotationType + '\t' + self.category + '\t'
         tabLine += str(self.start) + '-' + str(self.end) + '/' + self.strand + '\t'
         tabLine += self.name + '\t' + self.description + '\t' + annotationString
-        print tabLine
+        print(tabLine)
 
     def printAnnotationRecord2file_tabHeader(self,FILE_HANDLE):
         header = 'Source\tMethod\tType\tCategory\tStart-End/strand\tName\tDescription'
@@ -125,26 +125,26 @@ class annotationRecord(object):
         FILE_HANDLE.write("%s%s%s" % ("Annotations:",self.annotationList,"\n"))
 
     def printAll(self):
-        print "=== Annotation record ==="
-        print "Source:", self.source 
-        print "Method:", self.method 
-        print "Type:", self.annotationType
-        print "Contig:", self.contig
-        print "Start:", self.start
-        print "End:", self.end
-        print "Strand:", self.strand 
-        print "Reading Frame:", self.readingFrame
-        print "Identifier:", self.identifier
-        print "Locus Tag:", self.locusTag
-        print "Name:", self.name
-        print "Description:", self.description
-        print "Category:", self.category
-        print "Wraparound:", self.wraparound
-        print "Annotation List:"
+        print("=== Annotation record ===")
+        print("Source:", self.source) 
+        print("Method:", self.method) 
+        print("Type:", self.annotationType)
+        print("Contig:", self.contig)
+        print("Start:", self.start)
+        print("End:", self.end)
+        print("Strand:", self.strand) 
+        print("Reading Frame:", self.readingFrame)
+        print("Identifier:", self.identifier)
+        print("Locus Tag:", self.locusTag)
+        print("Name:", self.name)
+        print("Description:", self.description)
+        print("Category:", self.category)
+        print("Wraparound:", self.wraparound)
+        print("Annotation List:")
         for annot in self.annotationList:
-            print "  ", annot
-        print "Category:", self.category
-        print "========================"
+            print("  ", annot)
+        print("Category:", self.category)
+        print("========================")
 
     def printAll2file(self,FILE_HANDLE):
         FILE_HANDLE.write("%s" % ("Annotation record ===\n"))

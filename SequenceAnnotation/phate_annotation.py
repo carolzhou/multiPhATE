@@ -117,7 +117,7 @@ class annotationRecord(object):
 
     def removeRedundancy(self,inList): # Eliminate redundancy in list; Different PSAT annotations sources can return same annotation
         outList = []
-        for i in xrange(len(inList)):
+        for i in range(len(inList)):
             item = inList.pop()
             if item not in inList:
                 outList.append(item)
@@ -153,12 +153,12 @@ class annotationRecord(object):
         tempList = []; columns = []
 
         if PHATE_MESSAGES == 'True':
-            print "Annotation module says: Recording PSAT annotations."
+            print("Annotation module says: Recording PSAT annotations.")
 
         ### Capture lines corresponding to the gene
         pLines = PSAT_H.read().splitlines()
         if DEBUG:
-            print "There are this many pLines:", len(pLines)
+            print("There are this many pLines:", len(pLines))
 
         # Capture all annotation lines for this gene
         for pLine in pLines:
@@ -168,13 +168,13 @@ class annotationRecord(object):
             if match_gene:
                 tempList.append(pLine)
         if DEBUG:
-            print "Protein", proteinHeader, "Temp list:", tempList
+            print("Protein", proteinHeader, "Temp list:", tempList)
 
         ### Parse each annotation line, capture annotations and format for genbank
         for line in tempList:
 
             if DEBUG:
-                print "Processing PSAT hit line:", line
+                print("Processing PSAT hit line:", line)
             annotationString = ""
             EC = ""
             ecDescription = ""
@@ -259,7 +259,7 @@ class annotationRecord(object):
                         end      = match_signalp2.group(2)
                     else:
                         if DEBUG:
-                            print "DID NOT FIND A signalp2 MATCH for YES", pLine
+                            print("DID NOT FIND A signalp2 MATCH for YES", pLine)
                     
                 annotationString = "signal_peptide:" + signalp1 + ' ' + signalp2 
                 self.annotationList.append(annotationString)
@@ -275,7 +275,7 @@ class annotationRecord(object):
         self.updatePSATcount()
 
         if PHATE_PROGRESS == 'True':
-            print "Annotation module says: PSAT annotations complete."
+            print("Annotation module says: PSAT annotations complete.")
         return 
 
     def updatePSATcount(self):
@@ -300,7 +300,8 @@ class annotationRecord(object):
             searchTerm = self.name
         command = 'grep ' + searchTerm + ' ' + database
         proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True) 
-        out, err = proc.communicate()
+        (rawout, err) = proc.communicate()
+        out = rawout.decode('utf-8')   # Python3
         if out != "":
             lines  = out.split('\n')
             for line in lines:
@@ -310,7 +311,7 @@ class annotationRecord(object):
                         dbxref = fields[1]
                     else:
                         if PHATE_WARNINGS == 'True':
-                            print "WARNING in annotation module: no dbxref found for", self.name, "in database", database, "given line", line
+                            print("WARNING in annotation module: no dbxref found for", self.name, "in database", database, "given line", line)
                     idList.append(dbxref)
         return idList
 
@@ -320,13 +321,13 @@ class annotationRecord(object):
         DATABASE_H = open(database,"r")
         dLines = DATABASE_H.read().splitlines()
         if DEBUG:
-            print "TESTING: original searchTerm is", searchTerm
+            print("TESTING: original searchTerm is", searchTerm)
         match_truncate = re.search(p_truncatedSearchTerm,searchTerm)
         if match_truncate:
             truncatedSearchTerm = match_truncate.group(1)
             searchTerm = truncatedSearchTerm
             if DEBUG:
-                print "TESTING: searchTerm was changed to", searchTerm 
+                print("TESTING: searchTerm was changed to", searchTerm) 
         for dLine in dLines:
             match_searchTerm = re.search(searchTerm,dLine)
             if match_searchTerm:
@@ -353,7 +354,7 @@ class annotationRecord(object):
                 dbxrefList.append(infoString) 
         else:
             if PHATE_WARNINGS == 'True':
-                print "WARNING in annotation module:  Unexpected name encountered in phate_annotation.py/getFigDescription:", self.name 
+                print("WARNING in annotation module:  Unexpected name encountered in phate_annotation.py/getFigDescription:", self.name) 
         return dbxrefList 
 
     def getPvogMembers(self,database): # database should be the pVOGs headers file, but fasta file will work (slowly)
@@ -376,10 +377,9 @@ class annotationRecord(object):
         ncbiTaxonList = []
         p_version = re.compile('(\w+_\d+)\.\d+')
         p_taxID   = re.compile('[\d\w\_]\s+[\d\w\_\.]+\s+([\d]+)\s+[\d]+')
-        #NCBI_TAXON_LINK = "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id="
         if self.name == '' and self.name == 'none':
             if DEBUG:
-                print "name field blank in getNCBItaxonomy" 
+                print("name field blank in getNCBItaxonomy") 
         else:
             fields = self.name.split('|')  # Hit's fasta header has several fields, delimited w/'|'
             if len(fields) > 4:
@@ -395,11 +395,11 @@ class annotationRecord(object):
                     searchTerm = searchTermString
                 command = 'grep \"' + searchTerm + '\" ' + database
                 if DEBUG:
-                    print "command is", command 
+                    print("command is", command) 
                 proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
                 out, err = proc.communicate()
                 if DEBUG:
-                    print "Result of grep is", out
+                    print("Result of grep is", out)
                 if out != '':
                     match_taxID = re.search(p_taxID,out)
                     taxonomyID = match_taxID.group(1)
@@ -409,9 +409,9 @@ class annotationRecord(object):
                     ncbiTaxonList.append(ncbiTaxonLink)
             else:
                 if PHATE_WARNINGS == 'True':
-                    print "WARNING: NCBI hit header has improper format or is missing:", self.name
+                    print("WARNING: NCBI hit header has improper format or is missing:", self.name)
         if DEBUG:
-            print "ncbiTaxonList is", ncbiTaxonList
+            print("ncbiTaxonList is", ncbiTaxonList)
         return ncbiTaxonList
 
     def link2databaseIdentifiers(self,database,dbName):
@@ -424,7 +424,7 @@ class annotationRecord(object):
 
         if self.name == "" or self.name == "none":
             if PHATE_WARNINGS == 'True':
-                print "No name for identification of dbxref in phate_annotation/link2databaseIdentifiers"
+                print("No name for identification of dbxref in phate_annotation/link2databaseIdentifiers")
             return 
         else:
             if dbName.lower() == 'kegg':
@@ -467,10 +467,10 @@ class annotationRecord(object):
  
             else:
                 if PHATE_WARNINGS == 'True':
-                    print "WARNING in annotation module: Unrecognized database:", dbName 
+                    print("WARNING in annotation module: Unrecognized database:", dbName) 
 
         if DEBUG: 
-            print "dbxrefList:", dbxrefList
+            print("dbxrefList:", dbxrefList)
 
         for annotation in dbxrefList:
             nextAnnot = ' | ' + annotation
@@ -482,14 +482,14 @@ class annotationRecord(object):
     # PRINT METHODS
 
     def printAnnotationRecord(self):
-        print "Annotation source:", self.source, '| Method:', self.method, '| Type:', self.annotationType
-        print "Contig:", self.contig, "| Start:", self.start, "| End:", self.end, "| Strand:", self.strand
-        print "Name:", self.name, "Description:", self.description
-        print "Annotations:", self.annotationList
+        print("Annotation source:", self.source, '| Method:', self.method, '| Type:', self.annotationType)
+        print("Contig:", self.contig, "| Start:", self.start, "| End:", self.end, "| Strand:", self.strand)
+        print("Name:", self.name, "Description:", self.description)
+        print("Annotations:", self.annotationList)
 
     def printAnnotationRecord_tabHeader(self):
         header = 'Source\tMethod\tType\tCategory\tStart-End/strand\tName\tDescription'
-        print header
+        print(header)
 
     def printAnnotationRecord_tab(self):
         annotationString = ""
@@ -500,7 +500,7 @@ class annotationRecord(object):
         tabLine = self.source + '\t' + self.method + '\t' + self.annotationType + '\t' + self.category + '\t'
         tabLine += str(self.start) + '-' + str(self.end) + '/' + self.strand + '\t'
         tabLine += self.name + '\t' + self.description + '\t' + annotationString
-        print tabLine
+        print(tabLine)
 
     def printAnnotationRecord2file_tabHeader(self,FILE_HANDLE):
         header = 'Source\tMethod\tType\tCategory\tStart-End/strand\tName\tDescription'
@@ -531,7 +531,7 @@ class annotationRecord(object):
             annot = 'homolog ' + self.method + ' ' + newName
             annotationList.append(annot)
         if len(annotationList) > 0:
-            for i in xrange(0, len(annotationList)):
+            for i in range(0, len(annotationList)):
                 if i > 0:
                     self.annotationString += '; ' + annotationList[i] 
                 else:
@@ -545,26 +545,26 @@ class annotationRecord(object):
         FILE_HANDLE.write("%s%s%s" % ("Annotations:",self.annotationList,"\n"))
 
     def printAll(self):
-        print "=== Annotation record ==="
-        print "Source:", self.source 
-        print "Method:", self.method 
-        print "Type:", self.annotationType
-        print "Contig:", self.contig
-        print "Start:", self.start
-        print "End:", self.end
-        print "Strand:", self.strand 
-        print "Reading Frame:", self.readingFrame
-        print "Identifier:", self.identifier
-        print "Locus Tag:", self.locusTag
-        print "Name:", self.name
-        print "Description:", self.description
-        print "Category:", self.category
-        print "Wraparound:", self.wraparound
-        print "Annotation List:"
+        print("=== Annotation record ===")
+        print("Source:", self.source) 
+        print("Method:", self.method) 
+        print("Type:", self.annotationType)
+        print("Contig:", self.contig)
+        print("Start:", self.start)
+        print("End:", self.end)
+        print("Strand:", self.strand) 
+        print("Reading Frame:", self.readingFrame)
+        print("Identifier:", self.identifier)
+        print("Locus Tag:", self.locusTag)
+        print("Name:", self.name)
+        print("Description:", self.description)
+        print("Category:", self.category)
+        print("Wraparound:", self.wraparound)
+        print("Annotation List:")
         for annot in self.annotationList:
-            print "  ", annot
-        print "Category:", self.category
-        print "========================"
+            print("  ", annot)
+        print("Category:", self.category)
+        print("========================")
 
     def printAll2file(self,FILE_HANDLE):
         FILE_HANDLE.write("%s" % ("Annotation record ===\n"))

@@ -90,7 +90,8 @@ class pVOGs(object):
         elif SYSTEM == 'LINUX':
             command = 'ls ' + pVOGdir
             proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-            (listing, err) = proc.communicate()
+            (rawlisting, err) = proc.communicate()
+            listing = rawlisting.decode('utf-8')   # Python3
             fileList = listing.split('\n')
         else:
             cwd = os.getcwd()
@@ -99,13 +100,13 @@ class pVOGs(object):
             os.chdir(cwd)
 
         if DEBUG:
-            print "fileList is", fileList
+            print("fileList is", fileList)
 
         # From each file, extract pVOG and associated data fields
         fileList.pop(0)  # remove system message, "Terminal Saved Output".
         for fileName in fileList:
             if DEBUG:
-                print "Processing fileName", fileName
+                print("Processing fileName", fileName)
             # initialize
             pVOGid = ''; peptideCount = ''; genomeCount = ''
             family = ''; species = ''; genomeAccn = ''; peptideAccn = ''; location = ''; number = 0; description = ''
@@ -114,7 +115,7 @@ class pVOGs(object):
             # prepend directory
             nextFile = pVOGdir + fileName
             if DEBUG:
-                print "nextFile is", nextFile
+                print("nextFile is", nextFile)
             if os.path.isfile(nextFile):
            
                 # open next pVOG library file
@@ -124,7 +125,7 @@ class pVOGs(object):
                 lines = file_h.read().splitlines()
                 for line in lines:
                     if DEBUG:
-                        print "Processing line", line
+                        print("Processing line", line)
 
                     # what information is on this line?
                     match_pVOG       = re.search(p_pVOG,line)
@@ -165,12 +166,12 @@ class pVOGs(object):
                             pVOG.accessionList.append(nextPvogRecord['peptideAccn'])
                             # Check for potential redundancy, an add current peptide accession to the cumulative non-redundant list accordingly
                             if nextPvogRecord['peptideAccn'] in self.accnList:
-                                print "WARNING:  Redudancy encountered: peptideAccn", peptideAccn, "is already in the non-redundant list, filename", fileName
+                                print("WARNING:  Redudancy encountered: peptideAccn", peptideAccn, "is already in the non-redundant list, filename", fileName)
                                 logFile_h.write("%s%s%s%s\n" % ("WARNING:  Redundancy encountered: peptideAccn ",peptideAccn," is already in the non-redundant list, file ",fileName))
                             else:
                                 self.accnList.append(peptideAccn)
                         else:
-                            print "WARNING: Irregularity in pVOG library file:", fileName, "line", line, "pVOG", pVOG.pVOGid 
+                            print("WARNING: Irregularity in pVOG library file:", fileName, "line", line, "pVOG", pVOG.pVOGid) 
                             logFile_h.write("%s%s%s%s%s%s\n" % ("WARNING:  Irregularity in pVOG library file ", fileName," line ",line," pVOG ",pVOG.pVOGid))
 
                 if PVOG:
@@ -186,7 +187,7 @@ class pVOGs(object):
                 progressCount += 1
                 progress = progressCount % 100
                 if progress == 0:
-                    print "Working...", progressCount, "pVOGs have been processed"  
+                    print("Working...", progressCount, "pVOGs have been processed")  
                     logFile_h.write("%s%s%s\n" % ("Working... ", progressCount, " pVOGs have been processed"))
 
     def addPvogs_old(self,pVOGlines,logFile_h):
@@ -204,7 +205,7 @@ class pVOGs(object):
                 progressCount += 1
                 progress = progressCount % 100
                 if progress == 0:
-                    print "Working...", progressCount, "pVOGs have been processed"
+                    print("Working...", progressCount, "pVOGs have been processed")
                     logFile_h.write("%s%s%s\n" % ("Working... ",progressCount," pVOGs have been processed."))
                 pVOGid       = match_pVOG.group(1)
                 count        = match_pVOG.group(2)
@@ -224,10 +225,10 @@ class pVOGs(object):
                             if accession not in pVOG.accessionList:  # no duplicates allowed
                                 pVOG.accessionList.append(accession) 
                             else:
-                                print "WARNING: for pVOG", pVOGid, "member", member, "accession", accession, "is redundant"
+                                print("WARNING: for pVOG", pVOGid, "member", member, "accession", accession, "is redundant")
                                 logFile_h.write("%s%s%s%s%s%s%s\n" % ("WARNING: for pVOG ",pVOGid," member ",member," accession ",accession," is redundant "))
                         else:
-                            print "WARNING: for pVOG", pVOGid, "there is a redundant member:", member
+                            print("WARNING: for pVOG", pVOGid, "there is a redundant member:", member)
                             logFile_h.write("%s%s%s%s\n" % ("WARNING: for pVOG ",pVOGid," there is a redundant member: ",member))
                     # Add the new pVOG object to the pVOGlist
                     self.pVOGlist.append(pVOG)
