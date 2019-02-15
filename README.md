@@ -26,22 +26,22 @@ Availability and locations of supporting databases and codes are to be specified
 
 Procedure:
 
-1) Make a copy of the file, sample.multiPhate.config, and name it appropriately (hereafter referred to as 'multiPhate.config').
+1) At the command line, make a copy of the file, sample.multiPhate.config, and name it appropriately (hereafter referred to as 'multiPhate.config'):  $ cp sample.multiPhate.config multiPhate.config.  Then, edit your config file as described below.
 
 2) List of Genomes:
-For each genome to be processed, provide six lines under "Genome List:" and before "END of list":  for each genome, you need to list the genome number, the name of the genome fasta file, the genome type (typically 'phage', but could be 'bacteria'), the species (no spaces), the name of the genome, and a name for the output directory to hold this genome's output files, in that order. Simply copy/paste the six lines provided, and fill in the information appropriate for each genome.
+For each genome to be processed, provide six lines under "Genome List:" and before "END of list":  for each genome, you need to list the genome number, the name of the genome fasta file, the genome type (typically 'phage', but could be 'bacteria'), the species, if known (no spaces), the name of the genome, and a name for the output directory to hold this genome's output files (again, no spaces), in that order. You can simply copy/paste the six lines provided as many times as needed, and fill in the information appropriate for each genome.
 
 3) Processing Information:
-You may configure the pipeline to perform gene finding only, or gene finding plus functional annotation. For example, you may want to examine the results of multiple gene finders before going forward with functional annotation. In order to configure phate to run gene finding only, set translate_only to 'true'. If you set translate_only to 'false', then the pipeline will proceed with functional annotation of the predicted genes (ie, blast and/or hmm). Normally the genetic_code should be set to '11', for prokaryotic.
+You may configure the pipeline to perform gene finding only, or gene finding plus functional annotation. For example, you may want to examine the results of multiple gene finders before going forward with functional annotation. In order to configure phate to run gene finding only, set translate_only to 'true'; in this way, only gene-calling and translation (to peptide sequence) will be performed. If you set translate_only to 'false', then the pipeline will not stop at the translation step, but will proceed with functional annotation of the predicted genes (ie, blast and/or hmm). Normally the genetic_code should be set to '11', for prokaryotic.
 
 4) Gene Callers:
 The gene_caller option specifies which gene caller's results (ie, gene calls) will be used for subsequent functional annotation. The choices are:  'phanotate', 'genemarks', 'prodigal', or 'glimmer'.  To run a gene caller, you must have acquired that third-party code and installed it locally for use with multiPhATE. For each gene caller you wish to have run, set that caller's parameter to 'true'. In the usual case, you will want to specify gene_caller='phanotate' for annotation of phage genomes.
 
 5) Annotation:
-Set to 'true' each blast or hmm process that you want to be run. Note that you must have acquired the associated database, and in the next section (Databases) you must configure the location of that database. You may also set the desired blast parameters. The blast_identity sets the minimum identity that will be considered; any blast result below that threshold will be ignored. The hit_count parameters will determine how many top hits will be reported. Currently the only hmm_program that is supported by multiPhate is 'jackhmmer', and it is only run with the pVOGs database (future releases of multiPhate are expected to support additional hmm analyses).
+Set to 'true' each blast or hmm process that you want to be run. Note that you must have acquired the associated database, and in the next section (Databases) you must configure the location of each database. You may also set the desired blast parameters. The blast_identity sets the minimum identity that will be considered; any blast result below that threshold will be ignored. The hit_count parameters will determine how many top hits will be reported. Currently the only hmm_program that is supported by multiPhate is 'jackhmmer', and it is only run with the pVOGs database (future releases of multiPhate are expected to support additional hmm analyses).
 
 6) Databases:
-For each database that you have in-house, specify the full path/filename. Note that you must prepare in advance all blast databases by running the "makeblastdb" utility (see instructions with blast+ code for how to do that). MultiPhate will only run with blast+; it does not support legacy blast. For instructions where to download the databases, see the SUPPORTING DATABASES section below. Note that KEGG is available by license. Note also that in some cases additional files are required. In this case, place the additional file(s) in the same directory as the associated blast database. For example, place the NCBI accession2taxid file in the same directory as your NCBI virus genome file (see below).
+For each database that you have in-house, specify the full path/filename. Note that you must prepare in advance all blast databases by running the "makeblastdb" utility (see instructions with blast+ code for how to do that). MultiPhate will only run with blast+; it does not support legacy blast. For instructions where to download the databases, see the SUPPORTING DATABASES section below. Note that KEGG is available by license. Note also that in some cases additional files are required. In this case, place the additional file(s) in the same directory as the associated blast database. For example, place the NCBI accession2taxid file in the same directory as your NCBI virus genome file (see below). If you are downloading datasets that you anticipate using specifically with multiPhATE, then it is suggested, for convenience, that you save them in the Databases/ folder in the multiPhATE distribution, but any database can be located anywhere on your local system; you need only indicate in the multiPhate.config file the full path/filename for each database.
 
 7) Verbosity:
 You may up- or down-regulate verbosity in the multiPhate.config file, under "# VERBOSITY". This includes an option to clean the (voluminous) raw blast and hmm search data from the output directories. It is suggested that clean_raw_data, phate_progress, and cgc_progress be set to 'true'. The warnings and messages, when set to 'true', will generate voluminous output; set these to 'true' when trouble-shooting the pipeline.
@@ -49,12 +49,12 @@ You may up- or down-regulate verbosity in the multiPhate.config file, under "# V
 
 PIPELINE EXECUTION
 
-Run the PhATE pipeline at the command line by passing the multiPhate.config file as an argument to the multiPhate.py pipeline driver script, as follows: $ python multiPhate.py multiPhate.config
+Run the PhATE pipeline at the command line by passing your multiPhate.config file as an argument to the multiPhate.py pipeline driver script, as follows: $ python multiPhate.py multiPhate.config
 
 
 SUPPORTING DATABASES
 
-It is recommended that the user acquire as many of the following sequence databases and associated codes as is feasible, although none are actually required to run the code. (You may specify "translate_only='true'" to do gene finding and stop at that point.) Databases are listed with at least one way of acquiring them, but there may be additional sources, and it is possible to substitute subsets of blast databases (e.g., a subset of the NCBI gene database in place of Refseq Gene).
+It is recommended that the user acquire as many of the following sequence databases and associated codes as is feasible, although none are actually required to run the code. (You may specify "translate_only='true'" to do gene finding then translation, and then stop at that point.) Databases are listed with at least one way of acquiring them, but there may be additional sources, and it is possible to substitute subsets of blast databases (e.g., a subset of the NCBI gene database in place of Refseq Gene).
 
 NCBI virus genomes - ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/ or https://www.ncbi.nlm.nih.gov/genome/viruses/viral.1.1.1.genomic.fna.gz
 
@@ -98,7 +98,7 @@ Databases/
 
 	pVOGs/
 
-You must specify in the multiPhate.config file the locations of the data sets that you will be using. Although it is recommended that you place your databases in the above directory structure, they can reside anywhere on disk as long as you specify the full directory path/filename to a given resource in the multiPhate.config file.
+You must specify in your multiPhate.config file the locations of the data sets that you will be using. Although it is recommended that you place your databases in the above directory structure, they can reside anywhere locally on disk, but in any case you must specify the full directory path/filename to a given resource in your multiPhate.config file.
 
 
 SUPPORTING 3rd PARTY CODES
@@ -117,9 +117,11 @@ Glimmer - https://ccb.jhu.edu/software/glimmer/ (optional)
 
 Prodigal - https://github.com/hyattpd/Prodigal (optional)
 
-PHANOTATE - https://github.com/deprekate/PHANOTATE (optional but highly recommended)
+PHANOTATE - A Python 3-compatible version of PHANOTATE is included in the multiPhATE distribution, in the ExternalCodes/ folder. Unzip PHANOTATE.zip, and follow instructions in the README. Future updates to PHANOTATE will be available at https://github.com/deprekate/PHANOTATE. (optional)
 
-jackhmmer - https://www.ebi.ac.uk/Tools/hmmer/search/jackhmmer (optional)
+jackhmmer - https://www.eddylab.org/software.html or http://www.hmmer.org/download.html. Download HMMER; jackhmmer is included in this package (optional)
+
+tRNAscan-SE - https://www.eddylab.org/software.html - select tRNAscan-SE download link
 
 Third-party codes may be installed globally or locally. Global installation is recommended. If installed locally within the directory structure in which multiPhATE executes, it is suggested that you place a given code under the ExternalCodes/ subdirectory in the execution "phate" directory. (The ExternalCodes/ subdirectory should already exist in the multiPhATE distribution.)
 
