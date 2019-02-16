@@ -7,7 +7,7 @@ THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS
 
 ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
-MultiPhATE is a throughput version of PhATE, which is described below. The multiPhate.py code takes a single argument (hereafter referred to as, "multiPhate.config"; use sample.multiPhate.config as starting point) and uses it to generate a phate.config file (suitably named) for each genome being annotated. Then, multiPhate.py invokes the PhATE pipeline (via phate_runPipeline.py) for each genome.
+MultiPhATE is a throughput version of PhATE, which is described below. The multiPhate.py code is a command-line program that takes a single argument (hereafter referred to as, "multiPhate.config"; use sample.multiPhate.config as starting point) and uses it to generate a phate.config file (suitably named) for each genome being annotated. Then, multiPhate.py invokes the PhATE pipeline (via phate_runPipeline.py) for each genome.
 
 ABOUT THE PHATE PIPELINE
 
@@ -15,7 +15,15 @@ PhATE is a fully automated computational pipeline for identifying and annotating
 
 HOW TO SET UP MULTI-PHATE ON YOUR LOCAL MACHINE
 
-Place multiPhate.py and phate_runPipeline.py in your main execution "phate" directory. Create two subdirectories: PipelineInput/ and PipelineOutput/ (if not already existing in the downloaded distribution). Place your phage genome fasta files (genome1.fasta, genome2.fasta, etc.) into the PipelineInput/ subdirectory. Place your configuration file (multiPhate.config) in the main execution directory (same level as multiPhate.py). A word of caution here:  it is always best to name your files and fasta contigs as strings lacking any spaces or special characters, as third-party codes over which we have no control may balk when encountering odd characters or spaces. 
+First, create a working directory on your computer for running multiPhATE. Then, acquire the multiPhATE package from github. This can be done either by downloading a zip file directly from the multiPhATE repository, or by cloning the repository. The first method is recommended, but the second is certainly an option:
+
+*) Use a browser and navigate to https://github.com/carolzhou/multiPhATE. Press the green button "Clone or download", and download the zip file. Then, unzip the package in your working (main execution "multiPhate") directory.
+
+*) Acquire git from https://git-scm.com/downloads. Naviate to your working (main execution "multiPhATE") directory, and clone multiPhATE from the command line: $ git clone https://github.com/carolzhou/mulitPhATE
+
+(Complete instructions for using git and github can be found at http://help.github.com.)
+
+Now, be sure that multiPhate.py and phate_runPipeline.py and associated files and directories are your main execution "multiPhATE" directory. Check that the two subdirectories: PipelineInput/ and PipelineOutput/ are present (should already exist in the downloaded distribution). Place your phage genome fasta files (genome1.fasta, genome2.fasta, etc.) into the PipelineInput/ subdirectory. Place your configuration file (ie, your copy of sample.multiPhate.config) in the main execution directory (same level as multiPhate.py). A word of caution here:  it is always best to name your files and fasta contigs as strings lacking any spaces or special characters, as third-party codes over which we have no control may balk when encountering odd characters or spaces. 
 
 You will need to acquire one or more of the databases listed below under SUPPORING DATABASES (Phantome and pVOGs are included in the multiPhATE distribution, so it is possible to begin with just those), and the 3rd party codes listed under SUPPORTING 3rd PARTY CODES. You will need to acquire at least one of the supported gene finders, but it is recommended to run as many of the four gene finders as is feasible so that the results can be more meaningfully compared. You will need to specifiy the locations of the supporting data sets and codes in the multiPhATE config file (see multiPhate.config), and you will need to locate your genome file(s) to the PipelineInput/ subdirectory. Once you have acquired the third-party codes and databases, you will be ready to configure the multiPhate.config file.
 
@@ -55,6 +63,8 @@ Run the PhATE pipeline at the command line by passing your multiPhate.config fil
 SUPPORTING DATABASES
 
 It is recommended that the user acquire as many of the following sequence databases and associated codes as is feasible, although none are actually required to run the code. (You may specify "translate_only='true'" to do gene finding then translation, and then stop at that point.) Databases are listed with at least one way of acquiring them, but there may be additional sources, and it is possible to substitute subsets of blast databases (e.g., a subset of the NCBI gene database in place of Refseq Gene).
+
+In some cases, you will download a database through a web interface, and in other cases you may use blast+ to download a database at the command line, if the database of interest is provided by NCBI. The latter method may be more convenient for larger data sets (eg, NCBI Refseq Protein). Blast+ includes a script (/bin/update_blastdb.pl), which can be invoked at the command line to automatically download a specified database. In order for blast+ to search a database, the database must first be converted to a blast-able object using the blast+ program, makeblastdb. Once you have installed blast+, you can query for help in using the program. For example, type at the command line: $ makeblastdb -help.
 
 NCBI virus genomes - ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/ or https://www.ncbi.nlm.nih.gov/genome/viruses/viral.1.1.1.genomic.fna.gz
 
@@ -113,7 +123,7 @@ Blast+ https://ncbi.nlm.nih.gov/blast (optional)
 
 GeneMarkS - http://exon.gatech.edu/Genemark/index.html (optional; available by license)
 
-Glimmer - https://ccb.jhu.edu/software/glimmer/ (optional)
+Glimmer - https://ccb.jhu.edu/software/glimmer/ Use Glimmer version 3. (optional)
 
 Prodigal - https://github.com/hyattpd/Prodigal (optional)
 
@@ -130,9 +140,13 @@ PHATE PIPELINE OUTPUT FILES
 
 In the user-specified output directory (<genomeDir>), under PipelineOutput/, the following files will be written:
 
+gene-call outputs from each of the gene callers that was run, including a gff-formatted output file
+
 gene.fnt and protein.faa fasta files generated using the designated preferred gene finder
 
 CGC_results.txt - side-by-side comparison of all gene finder results (if at least two were run)
+
+cgc.gff - a superset of gene calls, each tagged with the gene caller(s) that made the call
 
 phate_sequenceAnnotation_main.out - tabbed integrated annotation results (also written in gff format)
 
@@ -151,7 +165,7 @@ The auto-generated myGenome_phate.config file, to record exactly how you configu
 
 RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
-Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenome_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution.
+Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenome_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization should be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes. 
 
 
 FURTHER RECOMMENDATIONS
