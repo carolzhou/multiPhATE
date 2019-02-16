@@ -23,14 +23,14 @@ First, create a working directory on your computer for running multiPhATE. Then,
 
 (Complete instructions for using git and github can be found at http://help.github.com.)
 
-Now, be sure that multiPhate.py and phate_runPipeline.py and associated files and directories are your main execution "multiPhATE" directory. Check that the two subdirectories: PipelineInput/ and PipelineOutput/ are present (should already exist in the downloaded distribution). Place your phage genome fasta files (genome1.fasta, genome2.fasta, etc.) into the PipelineInput/ subdirectory. Place your configuration file (ie, your copy of sample.multiPhate.config) in the main execution directory (same level as multiPhate.py). A word of caution here:  it is always best to name your files and fasta contigs as strings lacking any spaces or special characters, as third-party codes over which we have no control may balk when encountering odd characters or spaces. 
+Now, be sure that multiPhate.py and phate_runPipeline.py and associated files and directories are in your main execution "multiPhATE" directory. Check that the two subdirectories: PipelineInput/ and PipelineOutput/ are present (should already exist in the downloaded distribution). Place your phage genome fasta files (genome1.fasta, genome2.fasta, etc.) into the PipelineInput/ subdirectory. Place your configuration file (ie, your copy of sample.multiPhate.config) in the main execution directory (same level as multiPhate.py). A word of caution here:  it is always best to name your files and fasta contigs as strings lacking any spaces or special characters, as third-party codes over which we have no control may balk when encountering odd characters or spaces. 
 
 You will need to acquire one or more of the databases listed below under SUPPORING DATABASES (Phantome and pVOGs are included in the multiPhATE distribution, so it is possible to begin with just those), and the 3rd party codes listed under SUPPORTING 3rd PARTY CODES. You will need to acquire at least one of the supported gene finders, but it is recommended to run as many of the four gene finders as is feasible so that the results can be more meaningfully compared. You will need to specifiy the locations of the supporting data sets and codes in the multiPhATE config file (see multiPhate.config), and you will need to locate your genome file(s) to the PipelineInput/ subdirectory. Once you have acquired the third-party codes and databases, you will be ready to configure the multiPhate.config file.
 
 HOW TO WRITE A CONFIGURATION FILE
 
 Summary:
-Availability and locations of supporting databases and codes are to be specified in a configuration file. A sample configuration file is provided, called "sample.multiPhate.config". Make a copy of this file and rename it accordingly (eg., myGenomeSet_multiPhate.config). Hereafter we refer to this file as, multiPhate.config. The multiPhate.config file is configured according to established default parameters (just about everything turned off initially). Any of the parameters may be modified (switches turned on or off) by assigning 'true' or 'false'. It is suggested that you turn swithes off, then install each supporting gene finder and database in turn and test the code.
+Availability and locations of supporting databases and codes are to be specified in a configuration file. A sample configuration file is provided, called "sample.multiPhate.config". Make a copy of this file and rename it accordingly (eg., myGenomeSet_multiPhate.config). Hereafter we refer to this file as, multiPhate.config. The multiPhate.config file is configured according to established default parameters (just about everything turned off initially). Any of the parameters may be modified (switches turned on or off) by assigning 'true' or 'false'. It is suggested that you turn swithes off, then install each supporting gene finder and database in turn and test the pipeline.
 
 Procedure:
 
@@ -86,7 +86,7 @@ Phantome protein fasta sequences - http://www.phantome.org/Downloads/phage_prote
 
 pVOGs prepared database (pVOGs.faa) - included in PhATE distribution. This data set was derived by C. Zhou from the pVOGs fasta database. For use in PhATE, the sequence fasta headers have been modified to include the pVOG identifiers (all groups to which each sequence belongs). This re-formatting facilitates pVOG group identification and construction of the alignment-ready fasta files. Codes for reconstructing this modified data set are included in the PhATE distribution. Note that the pVOGs are not mutually exclusive, meaning that a sequence may have membership in more than one VOG group. The codes included in the phate distribution will combine identifiers that belong to a given sequence and list all the VOG identifiers in the fasta header. In this way, the pVOG fasta database used in PhATE is also non-redundant. See documentation in DatabasePrep/dbPrep_createPvogFastaFile.py for instructions how to update your local pVOGs data set for use in PhATE, but you can start with the pVOGs.faa file included in the PhATE distribution.
 
-For simplicity in configuring the locations of dependent databases in the phate_runPipeline.py driver script, it is suggested that the above databases be placed in a directory structure as follows: 
+For simplicity in configuring the locations of dependent databases in the multiPhate.config file, it is suggested that the above databases be placed in a directory structure as follows: 
 
 Databases/
  
@@ -144,7 +144,7 @@ gene-call outputs from each of the gene callers that was run, including a gff-fo
 
 gene.fnt and protein.faa fasta files generated using the designated preferred gene finder
 
-CGC_results.txt - side-by-side comparison of all gene finder results (if at least two were run)
+CGC_results.txt - side-by-side comparison of all gene finder results (if at least two were run) plus comparison statistics
 
 cgc.gff - a superset of gene calls, each tagged with the gene caller(s) that made the call
 
@@ -160,12 +160,12 @@ pVOG grouping comprising alignment-ready fasta files (under HMM/Protein/) based 
 
 log files capturing details of the processing and time stamps
 
-The auto-generated myGenome_phate.config file, to record exactly how you configured the pipeline for the current run (genome).
+The auto-generated myGenomeName_phate.config file, to record exactly how you configured the pipeline for the current run (genome).
 
 
 RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
-Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenome_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization should be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes. 
+Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenomeName_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization should be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes. 
 
 
 FURTHER RECOMMENDATIONS
