@@ -189,6 +189,6 @@ Feel free to report bugs or problems, or to suggest future improvements, by post
 
 PUBLICATION
 
-If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza. BioRxiv Feb 15, 2019, doi: http://dx.doi.org/z0.1101/551010. 
+If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza. BioRxiv Feb 15, 2019, doi: http://dx.doi.org/10.1101/551010. 
 
 multiPhATE v.0.5
