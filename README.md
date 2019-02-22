@@ -148,6 +148,8 @@ If you prefer to run multiPhATE in a Conda environment, here are some tips for h
 
 3) Add the bioconda channel:  $ conda --add channels bioconda 
 
+    Note: bioconda is supported on Linux and Mac operating systems, but so far not on PC.
+
 4) Create an environment for using multiPhATE; let's call it "multiphate":  $ conda create --name multiphate
 
 5) Activate that environment:  $ source activate multiphate
