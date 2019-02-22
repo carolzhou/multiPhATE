@@ -141,7 +141,8 @@ If you prefer to run multiPhATE in a Conda environment, here are some tips for h
 
 1) First, download and install miniconda3 for Python 3.7 (https://conda.io/en/latest/miniconda.html). 
 
-2) Check that conda is working:  $ conda --version 
+2) Check that conda is working:  $ conda --version
+ 
     If conda is not recognized, then you may need to  switch to bash shell: $ bash  
     (and then try again)
 
@@ -151,8 +152,11 @@ If you prefer to run multiPhATE in a Conda environment, here are some tips for h
 
 5) Activate that environment:  $ source activate multiphate
 
-6) Install conda packages within that environment:  $ conda install biopython
-    Repeat for each of emboss, blast, glimmer, prodigal, hmmer, trnascan-se.  
+6) Install conda packages within that environment:  $ conda install python=3
+
+    Repeat for each of biopython, emboss, blast, glimmer, prodigal, hmmer, trnascan-se.  
+
+7) When running multiPhATE within your multiphate Conda environment, the pipeline will use the version of python and the third party codes installed within the multiphate environment, so there should be no clashes with other versions of these packages that may be installed elsewhere on your system. When you are finished running multiPhATE, you may exit from the multiphate Conda environment:  $ source deactivate
 
 Note that genemarks and phanotate are not available as conda packages, so these programs, as well as the dependent databases, all need to be acquired/installed manually in any case.
 
