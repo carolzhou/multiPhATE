@@ -113,28 +113,48 @@ You must specify in your multiPhate.config file the locations of the data sets t
 
 SUPPORTING 3rd PARTY CODES
 
-Note that some third-party codes are required for multiPhATE, but others are optional, as indicated below. Install these codes globally, following the instructions provided with each package.
+Note that some third-party codes are required for multiPhATE, but others are optional, as indicated below. Some of these codes can be installed in a Conda environment. Codes that can be installed via Conda are so indicated below. If using Conda, follow the instructions that occur at the bottom of this section. Otherwise, install these codes globally, following the instructions provided with each package from the source.
 
-BioPython - https://biopython.org/wiki/Download (required)
+BioPython - https://biopython.org/wiki/Download (required) (conda)
 
-EMBOSS package - https://sourceforge.net/directory/os:mac/?q=EMBOSS (required)
+EMBOSS package - https://sourceforge.net/directory/os:mac/?q=EMBOSS (required) (conda)
 
-Blast+ https://ncbi.nlm.nih.gov/blast (optional)
+Blast+ https://ncbi.nlm.nih.gov/blast (optional) (conda)
 
 GeneMarkS - http://exon.gatech.edu/Genemark/index.html (optional; available by license)
 
-Glimmer - https://ccb.jhu.edu/software/glimmer/ Use Glimmer version 3. (optional)
+Glimmer - https://ccb.jhu.edu/software/glimmer/ Use Glimmer version 3. (optional) (conda)
 
-Prodigal - https://github.com/hyattpd/Prodigal (optional)
+Prodigal - https://github.com/hyattpd/Prodigal (optional) (conda)
 
 PHANOTATE - A Python 3-compatible version of PHANOTATE is included in the multiPhATE distribution, in the ExternalCodes/ folder. Unzip PHANOTATE.zip, and follow instructions in the README. Future updates to PHANOTATE will be available at https://github.com/deprekate/PHANOTATE. (optional)
 
-jackhmmer - https://www.eddylab.org/software.html or http://www.hmmer.org/download.html. Download HMMER; jackhmmer is included in this package (optional)
+jackhmmer - https://www.eddylab.org/software.html or http://www.hmmer.org/download.html. Download HMMER; jackhmmer is included in this package (optional) (conda - hmmer) 
 
-tRNAscan-SE - https://www.eddylab.org/software.html - select tRNAscan-SE download link
+tRNAscan-SE - https://www.eddylab.org/software.html - select tRNAscan-SE download link (conda)
 
-Third-party codes may be installed globally or locally. Global installation is recommended. If installed locally within the directory structure in which multiPhATE executes, it is suggested that you place a given code under the ExternalCodes/ subdirectory in the execution "phate" directory. (The ExternalCodes/ subdirectory should already exist in the multiPhATE distribution.)
+Third-party codes should be installed globally whenever possible. However, it is recommended that PHANOTATE be installed under the ExternalCodes/ subdirectory in the execution/working directory. (The ExternalCodes/ subdirectory should already exist in the multiPhATE distribution, with PHANOTATE for Python 3.x in that location.)
 
+CONDA INSTALLATION
+
+If you prefer to run multiPhATE in a Conda environment, here are some tips for how to set it up. 
+
+1) First, download and install miniconda3 for Python 3.7 (https://conda.io/en/latest/miniconda.html). 
+
+2) Check that conda is working:  $ conda --version 
+    If conda is not recognized, then you may need to  switch to bash shell: $ bash  
+    (and then try again)
+
+3) Add the bioconda channel:  $ conda --add channels bioconda 
+
+4) Create an environment for using multiPhATE; let's call it "multiphate":  $ conda create --name multiphate
+
+5) Activate that environment:  $ source activate multiphate
+
+6) Install conda packages within that environment:  $ conda install biopython
+    Repeat for each of emboss, blast, glimmer, prodigal, hmmer, trnascan-se.  
+
+Note that genemarks and phanotate are not available as conda packages, so these programs, as well as the dependent databases, all need to be acquired/installed manually in any case.
 
 PHATE PIPELINE OUTPUT FILES 
 
