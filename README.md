@@ -139,7 +139,7 @@ CONDA INSTALLATION
 
 If you prefer to run multiPhATE in a Conda environment, here are some tips for how to set it up. 
 
-1) First, download and install miniconda3 for Python 3.7 (https://conda.io/en/latest/miniconda.html). 
+1) First, download and install miniconda3 for Python 3.7 (https://conda.io/en/latest/miniconda.html). For more information about Conda, see https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html.  
 
 2) Check that conda is working:  $ conda --version
  
