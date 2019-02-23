@@ -19,7 +19,11 @@ First, create a working directory on your computer for running multiPhATE. Then,
 
 *) Use a browser and navigate to https://github.com/carolzhou/multiPhATE. Press the green button "Clone or download", and download the zip file. Then, unzip the package in your working (main execution "multiPhate") directory.
 
-*) Acquire git from https://git-scm.com/downloads. Naviate to your working (main execution "multiPhATE") directory, and clone multiPhATE from the command line: $ git clone https://github.com/carolzhou/mulitPhATE
+*) Acquire git from https://git-scm.com/downloads. Naviate to your working (main execution "multiPhATE") directory, and clone multiPhATE from the command line: 
+
+$ git init
+
+$ git clone https://github.com/carolzhou/mulitPhATE
 
 (Complete instructions for using git and github can be found at http://help.github.com.)
 
