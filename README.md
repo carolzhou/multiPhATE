@@ -17,9 +17,13 @@ HOW TO SET UP MULTI-PHATE ON YOUR LOCAL MACHINE
 
 First, create a working directory on your computer for running multiPhATE. Then, acquire the multiPhATE package from github. This can be done either by downloading a zip file directly from the multiPhATE repository, or by cloning the repository. The first method is recommended, but the second is certainly an option:
 
-*) Use a browser and navigate to https://github.com/carolzhou/multiPhATE. Press the green button "Clone or download", and download the zip file. Then, unzip the package in your working (main execution "multiPhate") directory.
+*) To download the zip file:  Use a browser and navigate to https://github.com/carolzhou/multiPhATE. Press the green button "Clone or download", and download the zip file. Then, unzip the package in your working (main execution "multiPhate") directory.
 
-*) Acquire git from https://git-scm.com/downloads. Naviate to your working (main execution "multiPhATE") directory, and clone multiPhATE from the command line: 
+$ cd myMultiphateDir
+
+$ unzip multiPhate-master.zip
+
+*) To clone from github:  Acquire git from https://git-scm.com/downloads. Naviate to your working (main execution "multiPhATE") directory, and clone multiPhATE from the command line: 
 
 $ git init
 
