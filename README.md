@@ -157,9 +157,9 @@ If you prefer to run multiPhATE in a Conda environment, here are some tips for h
 3) Add the following channel:  
 
     ```bash
-    $ conda --add channels defaults 
-    $ conda --add channels conda-forge 
-    $ conda --add channels bioconda 
+    $ conda config --add channels defaults 
+    $ conda config --add channels conda-forge 
+    $ conda config --add channels bioconda 
     ```
 
     Note: bioconda is supported on Linux and Mac operating systems, but so far not on Windows.
