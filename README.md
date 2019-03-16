@@ -5,6 +5,8 @@ This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence L
 
 THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS.
 
+NOTE to reviewers: We have detected an issue with PHANOTATE/fastpath. There appears to be a system-dependent problem in compiling fastpath, which disables PHANOTATE. This error occurs on some systems but not others. If running multiPhate.py yields an error message "IndexError: list index out of range" in phate_geneCallPhage.py, line 216, please disable phanotate in your multiPhate.config file (phanotate_calls='false', and gene_caller='<your choice other than phanotate>'), and continue evaluating multiPhATE without PHANOTATE for the time being. When this issue has been resolved we will upload a patched code and will delete this message from the README. Thank you.
+
 ###ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
 MultiPhATE is a throughput version of PhATE, which is described below. The multiPhate.py code is a command-line program that takes a single argument (hereafter referred to as, "multiPhate.config"; use sample.multiPhate.config as starting point) and uses it to generate a phate.config file (suitably named) for each genome being annotated. Then, multiPhate.py invokes the PhATE pipeline (via phate_runPipeline.py) for each genome.
@@ -61,6 +63,8 @@ For each database that you have in-house, specify the full path/filename. Note t
 
 7) Verbosity:
 You may up- or down-regulate verbosity in the multiPhate.config file, under "# VERBOSITY". This includes an option to clean the (voluminous) raw blast and hmm search data from the output directories. It is suggested that clean_raw_data, phate_progress, and cgc_progress be set to 'true'. The warnings and messages, when set to 'true', will generate voluminous output; set these to 'true' when trouble-shooting the pipeline.
+
+8) See CHECKLIST below.
 
 
 ###PIPELINE EXECUTION
@@ -201,6 +205,22 @@ pVOG grouping comprising alignment-ready fasta files (under HMM/Protein/) based 
 log files capturing details of the processing and time stamps
 
 The auto-generated myGenomeName_phate.config file, to record exactly how you configured the pipeline for the current run (genome).
+
+###INSTALLATION AND SET-UP CHECKLIST
+
+* Have you installed multiPhATE either by downloading the zip file from https://github.com/carolzhou/multiPhATE.git or cloning the repository?
+* Have you installed the databases you would like to use with multiPhATE? Recall that Phantome and pVOGs are included under Databases/.
+* Have you run makeblastdb on each of your local databases?
+* Have you acquired the dependent codes, either by installing from the provided web addresses or by installing within a Conda environment?
+* Have you created a copy of sample.multiPhate.config and configured it?
+	- added meta-data for each genome to be processed
+	- configured "translate_only" to do genecalling only ('true') or to do genecalling followed by blast/hmm analyses ('false')
+	- selected gene callers to be run, and specified the gene caller to use for annotation (preferred caller)?
+	- specified the blast/hmm analyses to be performed
+	- specified the locations/names of the databases you have locally on your system
+	- modified the verbosity (optional)
+* We recommend stepwise testing to be sure all components have been correctly installed and specified.
+* Feel free to post issues and suggested regarding multiPhATE on our github project page: https://github.com/carolzhou/multiPhATE.git. Select the 'Issues' tab.
 
 ###RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
