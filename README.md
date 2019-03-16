@@ -64,7 +64,7 @@ For each database that you have in-house, specify the full path/filename. Note t
 7) Verbosity:
 You may up- or down-regulate verbosity in the multiPhate.config file, under "# VERBOSITY". This includes an option to clean the (voluminous) raw blast and hmm search data from the output directories. It is suggested that clean_raw_data, phate_progress, and cgc_progress be set to 'true'. The warnings and messages, when set to 'true', will generate voluminous output; set these to 'true' when trouble-shooting the pipeline.
 
-8) See CHECKLIST below.
+8) See INSTALLATION AND SET-UP CHECKLIST below.
 
 
 ###PIPELINE EXECUTION
