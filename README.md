@@ -5,7 +5,8 @@ This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence L
 
 THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS.
 
-NOTE to reviewers: We have detected an issue with PHANOTATE/fastpath. There appears to be a system-dependent problem in compiling fastpath, which disables PHANOTATE. This error occurs on some systems but not others. If running multiPhate.py yields an error message "IndexError: list index out of range" in phate_geneCallPhage.py, line 216, please disable phanotate in your multiPhate.config file (phanotate_calls='false', and gene_caller='\<your choice other than phanotate\>'), and continue evaluating multiPhATE without PHANOTATE for the time being. When this issue has been resolved we will upload a patched code and will delete this message from the README. Thank you.
+####NOTE TO REVIEWERS: 
+We have detected an issue with PHANOTATE/fastpath. There appears to be a system-dependent problem in compiling fastpath, which disables PHANOTATE. This error occurs on some systems but not others. If running multiPhate.py yields an error message "IndexError: list index out of range" in phate_geneCallPhage.py, line 216, please disable phanotate in your multiPhate.config file (phanotate_calls='false', and gene_caller='\<your choice other than phanotate\>'), and continue evaluating multiPhATE without PHANOTATE for the time being. When this issue has been resolved we will upload a patched code and will delete this message from the README. Thank you.
 
 ###ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
@@ -220,7 +221,7 @@ The auto-generated myGenomeName_phate.config file, to record exactly how you con
 	- specified the locations/names of the databases you have locally on your system
 	- modified the verbosity (optional)
 * We recommend stepwise testing to be sure all components have been correctly installed and specified.
-* Feel free to post issues and suggested regarding multiPhATE on our github project page: https://github.com/carolzhou/multiPhATE.git. Select the 'Issues' tab.
+* Feel free to post issues and suggestions regarding multiPhATE on our github project page: https://github.com/carolzhou/multiPhATE.git. Select the 'Issues' tab.
 
 ###RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
