@@ -81,7 +81,7 @@ In some cases, you will download a database through a web interface, and in othe
 
 NCBI virus genomes - ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/ or https://www.ncbi.nlm.nih.gov/genome/viruses/viral.1.1.1.genomic.fna.gz
 
-NCBI-associated file:  accession2taxid file - ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz. If using a web browser, go to ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accessions2taxid/. Then, select "Allow" to "Do you want to allow this page to open 'Finder'?". Connect as "Guest". Select the volumes to mount: "OK". This should download the zip file.
+NCBI-associated file:  accession2taxid file - ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz. If using a web browser, go to ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/. Then, select "Allow" to "Do you want to allow this page to open 'Finder'?". Connect as "Guest". Select the volumes to mount: "OK". This should download the zip file.
 
 NCBI Refseq Protein - download using blast+: /bin/update_blastdb.pl refseq_protein
 
