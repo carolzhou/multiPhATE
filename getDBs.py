@@ -102,16 +102,16 @@ else:
 print ("Please indicate which databases you would like to download...")
 print ("For each, type 'y' or 'n'")
 
-#####
-print ("NCBI Virus Genome database: ('y'/'n')")
-ncbi_virus_genome = input()
-if re.search('Y|y|yes|Yes|YES',ncbi_virus_genome):
-    print ("Great, let's download NCBI Virus Genome")
-    NCBI_VIRUS_GENOME = True
-elif re.search('N|n|no|No|NO',ncbi_virus_genome):
-    print ("Ok, we'll skip that one")
-else:
-    print ("That was not a correct response; please try again: type 'y' or 'n'")
+##### THIS DB NOT AVAILABLE FOR DOWNLOAD VIA BLAST+ --> manual for now
+#print ("NCBI Virus Genome database: ('y'/'n')")
+#ncbi_virus_genome = input()
+#if re.search('Y|y|yes|Yes|YES',ncbi_virus_genome):
+#    print ("Great, let's download NCBI Virus Genome")
+#    NCBI_VIRUS_GENOME = True
+#elif re.search('N|n|no|No|NO',ncbi_virus_genome):
+#    print ("Ok, we'll skip that one")
+#else:
+#    print ("That was not a correct response; please try again: type 'y' or 'n'")
 
 #####
 print ("NCBI Refseq Protein database: ('y'/'n')")
