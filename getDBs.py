@@ -203,13 +203,17 @@ else:
 
 if NCBI_VIRUS_GENOME:
     os.chdir(ncbiGenomeDir)
-    # VIRUS GENOME DB NOT FOUND 
+    # VIRUS GENOME DB NOT FOUND - THIS ONE IS MANUAL 
     try:
         print ("Downloading NCBI Virus Genome database.")
         print ("This may take a while...")
         command = blastPath + "update_blastdb.pl" + ' ' + "virus_genome"
         #success = os.system(command)
         print ("NCBI Virus Genome database download complete.")
+        print ("Formatting database for blast.")
+        command = "makeblastdb -dbtype nucl -in viral.genomic"
+        #success = os.system(command)
+        print ("Database is formatted.")
     except BlastError:  
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -225,6 +229,10 @@ if NCBI_REFSEQ_PROTEIN:
         command = blastPath + "update_blastdb.pl" + ' ' + "refseq_protein"
         success = os.system(command)
         print ("NCBI Refseq Protein database download complete.")
+        print ("Formatting database for blast.")
+        command = "makeblastdb -dbtype prot -in refseq_protein"
+        success = os.system(command)
+        print ("Database is formatted.")
     except BlastError:  
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -240,6 +248,10 @@ if NCBI_REFSEQ_GENE:
         command = blastPath + "update_blastdb.pl" + ' ' + "refseqgene"
         success = os.system(command)
         print ("NCBI Refseq Gene database download complete.")
+        print ("Formatting database for blast.")
+        command = "makeblastdb -dbtype nucl -in refseqgene"
+        success = os.system(command)
+        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -255,6 +267,10 @@ if NCBI_SWISSPROT:
         command = blastPath + "update_blastdb.pl" + ' ' + "swissprot"
         success = os.system(command)
         print ("NCBI Swissprot database download complete.")
+        print ("Formatting database for blast.")
+        command = "makeblastdb -dbtype prot -in swissprot"
+        success = os.system(command)
+        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -270,6 +286,10 @@ if NR:
         command = blastPath + "update_blastdb.pl" + ' ' + "nr"
         success = os.system(command)
         print ("NCBI NR database download complete.")
+        print ("Formatting database for blast.")
+        command = "makeblastdb -dbtype nucl -in nr"
+        success = os.system(command)
+        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
