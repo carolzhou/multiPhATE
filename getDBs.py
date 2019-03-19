@@ -13,6 +13,7 @@
 ##############################################################################
 
 import os, sys, re, time, datetime
+import requests
 
 ##############################################################################
 # CONSTANTS, BOOLEANS
@@ -23,6 +24,8 @@ NCBI_REFSEQ_PROTEIN = False
 NCBI_REFSEQ_GENE    = False
 NCBI_SWISSPROT      = False
 NR                  = False
+PHANTOME            = True
+PVOGS               = True
 
 # VARIABLES
 blast               = ''
@@ -46,6 +49,8 @@ refseqDir        = dbDir     + "Refseq/"
 refseqProteinDir = refseqDir + "Protein/"
 refseqGeneDir    = refseqDir + "Gene/"
 swissprotDir     = dbDir     + "Swissprot/"
+phantomeDir      = dbDir     + "Phantome/"
+pVOGsDir         = dbDir     + "pVOGs/"
 
 if not os.path.exists(dbDir):
     os.mkdir(dbDir)
@@ -201,9 +206,15 @@ else:
 ##############################################################################
 # Install NCBI_VIRUS_GENOME
 
+ftpAddr1_1 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz"
+ftpAddr1_2 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.1.genomic.fna.gz"
+ftpAddr1_3 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.1.genomic.fna.gz"
+ftpAddr2 = "ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/accesion2taxid.gz"
+
 if NCBI_VIRUS_GENOME:
     os.chdir(ncbiGenomeDir)
     # VIRUS GENOME DB NOT FOUND - THIS ONE IS MANUAL 
+    # Download database
     try:
         print ("Downloading NCBI Virus Genome database.")
         print ("This may take a while...")
@@ -211,11 +222,17 @@ if NCBI_VIRUS_GENOME:
         #success = os.system(command)
         print ("NCBI Virus Genome database download complete.")
         print ("Formatting database for blast.")
-        command = "makeblastdb -dbtype nucl -in viral.genomic"
+        command = blastPath + "makeblastdb -dbtype nucl -in viral.genomic"
         #success = os.system(command)
         print ("Database is formatted.")
     except BlastError:  
         print ("Command " + command + " failed; please check the location of your blast executables")
+    # Download accessory file
+    try:
+        print ("Downloading NCBI Virus Genome accessory file, nucl_gb.accessioin2taxid.tar.gz")
+        r = requests.get(ftpAddr2)
+    except DownloadError:
+        print ("Cannot download NCBI Virus Genome accessory file, nucl_gb.accession2taxid.tar.gz")
     os.chdir(cwd)
 
 ##############################################################################
@@ -230,7 +247,7 @@ if NCBI_REFSEQ_PROTEIN:
         success = os.system(command)
         print ("NCBI Refseq Protein database download complete.")
         print ("Formatting database for blast.")
-        command = "makeblastdb -dbtype prot -in refseq_protein"
+        command = blastPath + "makeblastdb -dbtype prot -in refseq_protein"
         success = os.system(command)
         print ("Database is formatted.")
     except BlastError:  
@@ -249,7 +266,7 @@ if NCBI_REFSEQ_GENE:
         success = os.system(command)
         print ("NCBI Refseq Gene database download complete.")
         print ("Formatting database for blast.")
-        command = "makeblastdb -dbtype nucl -in refseqgene"
+        command = blastPath + "makeblastdb -dbtype nucl -in refseqgene"
         success = os.system(command)
         print ("Database is formatted.")
     except BlastError:
@@ -268,7 +285,7 @@ if NCBI_SWISSPROT:
         success = os.system(command)
         print ("NCBI Swissprot database download complete.")
         print ("Formatting database for blast.")
-        command = "makeblastdb -dbtype prot -in swissprot"
+        command = blastPath + "makeblastdb -dbtype prot -in swissprot"
         success = os.system(command)
         print ("Database is formatted.")
     except BlastError:
@@ -287,7 +304,7 @@ if NR:
         success = os.system(command)
         print ("NCBI NR database download complete.")
         print ("Formatting database for blast.")
-        command = "makeblastdb -dbtype nucl -in nr"
+        command = blastPath + "makeblastdb -dbtype nucl -in nr"
         success = os.system(command)
         print ("Database is formatted.")
     except BlastError:
@@ -295,6 +312,31 @@ if NR:
     os.chdir(cwd)
 
 ##############################################################################
+# Run makeblastdb on the Phantome and pVOGs databases
+
+if PHANTOME:
+    os.chdir(phantomeDir)
+    try:
+        print ("Formatting Phantome database for blast.")
+        command = blastPath + "makeblastdb -dbtype prot -in Phantome_Phage_genes.faa"
+        success = os.system(command)
+        print ("done")
+    except BlastError:
+        print ("Command " + command + " failed; please check the location of your blast executables")
+    os.chdir(cwd)
+
+if PVOGS:
+    os.chdir(pVOGsDir)
+    try:
+        print ("Formatting pVOGs database for blast.")
+        command = blastPath + "makeblastdb -dbtype prot -in pVOGs.faa"
+        success = os.system(command)
+        print ("done")
+    except BlastError:
+        print ("Command " + command + " failed; please check the location of your blast executables")
+    os.chdir(cwd)
+
+#############################################################################
 
 print ("Done!")
 
