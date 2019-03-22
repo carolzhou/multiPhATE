@@ -8,11 +8,12 @@
 #
 # Summary:  This script facilitates the downloading of databases to be used with multiPhATE.
 #
-# Most recent update:  18 March 2019
+# Most recent update:  22 March 2019
 #
 ##############################################################################
 
 import os, sys, re, time, datetime
+from ftplib import FTP
 #import requests
 
 ##############################################################################
@@ -37,6 +38,7 @@ nr                  = ''
 decision            = ''
 blastPath           = '' # path to user's blast installation
 cwd                 = '' # current working direcgtory
+emailAddr           = '' # user's email address for ftp login
 
 # Set up database directories
 cwd              = os.getcwd()
@@ -79,18 +81,16 @@ print ("First, you need blast+ in order to install several of the databases")
 print ("Please confirm that you have downloaded and installed blast+: type 'y' (yes) or 'n' (no)")
 blast = input()
 if re.search('Y|y|Yes|yes|YES', blast):
-    BLAST = False 
+    BLAST = True 
     print ("That's great! Now tell me where your blast executables are located.") 
     print ("If you installed them within your Conda environment, then you should find")
     print ("them in a path something like, \"/Users/myName/miniconda3/envs/multiPhate/bin/\"")
     print ("That directory should contain executables: blastn, blastp, blastx, and makeblastdb")
     print ("Please input the fully qualified path to blast+ : ")
     blastPath = input()
-    if not re.search('/$',blastPath):
-        blastPath = blastPath + '/'
     # CHECK THAT THIS IS CORRECT !!!"
 elif re.search('N|n|No|no|NO', blast):
-    BLAST = True 
+    BLAST = False 
     print ("Please consult the README file for how to acquire and install BLAST+.") 
     print ("Note: The easiest way to install BLAST+ is within a Conda environment.")
     print ("Without blast+, we can still download some of the databases.")
@@ -111,16 +111,18 @@ else:
 print ("Please indicate which databases you would like to download...")
 print ("For each, type 'y' or 'n'")
 
-##### THIS DB NOT AVAILABLE FOR DOWNLOAD VIA BLAST+ --> manual for now
-#print ("NCBI Virus Genome database: ('y'/'n')")
-#ncbi_virus_genome = input()
-#if re.search('Y|y|yes|Yes|YES',ncbi_virus_genome):
-#    print ("Great, let's download NCBI Virus Genome")
-#    NCBI_VIRUS_GENOME = True
-#elif re.search('N|n|no|No|NO',ncbi_virus_genome):
-#    print ("Ok, we'll skip that one")
-#else:
-#    print ("That was not a correct response; please try again: type 'y' or 'n'")
+##### NCBI Virus Genome database is downloaded via ftp 
+print ("NCBI Virus Genome database: ('y'/'n')")
+ncbi_virus_genome = input()
+if re.search('Y|y|yes|Yes|YES',ncbi_virus_genome):
+    print ("Great, let's download NCBI Virus Genome")
+    print ("Please enter your email address for ftp anonymous login: ")
+    emailAddr = input()
+    NCBI_VIRUS_GENOME = True
+elif re.search('N|n|no|No|NO',ncbi_virus_genome):
+    print ("Ok, we'll skip that one")
+else:
+    print ("That was not a correct response; please try again: type 'y' or 'n'")
 
 #####
 print ("NCBI Refseq Protein database: ('y'/'n')")
@@ -187,7 +189,6 @@ if (BLAST or NCBI_VIRUS_GENOME or NCBI_REFSEQ_PROTEIN or NCBI_REFSEQ_GENE or NCB
     print ("Print 'go' to proceed, or 'stop' to reconsider. ")
     print ("(You can always run this script again.) ")
     decision = input()
-    print (decision)
     if (re.search('go|Go|GO',decision)):
         print ("Ok, let's get started with downloading.")
         print ("Databases will be installed into the Databases/ folder within multiPhATE")
@@ -211,41 +212,119 @@ else:
 ##############################################################################
 # Install NCBI_VIRUS_GENOME
 
-ftpAddr1_1 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz"
-ftpAddr1_2 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.1.genomic.fna.gz"
-ftpAddr1_3 = "ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.1.genomic.fna.gz"
-ftpAddr2 = "ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/accesion2taxid.gz"
+ftpAddr  = "ftp.ncbi.nlm.nih.gov"
+file1_1u = "viral.1.1.genomic.fna"
+file1_2u = "viral.2.1.genomic.fna"
+file1_3u = "viral.3.1.genomic.fna"
+file1_1  = file1_1u + ".gz"
+file1_2  = file1_2u + ".gz"
+file1_3  = file1_3u + ".gz"
+file2    = "nucl_gb.accession2taxid.gz"
 
-# NOT YET IN SERVICE
+
 if NCBI_VIRUS_GENOME:
     os.chdir(ncbiGenomeDir)
-    # VIRUS GENOME DB NOT FOUND - THIS ONE IS MANUAL 
-    # Download database
+
+    ### Download accessory file
+    print ("Downloading NCBI accession2taxid accessory file for Virus Genome database.")
+    print ("This may take a while...")
+
     try:
-        print ("Downloading NCBI Virus Genome database.")
-        print ("This may take a while...")
-        command = blastPath + "update_blastdb.pl" + ' ' + "virus_genome"
-        #success = os.system(command)
-        print ("NCBI Virus Genome database download complete.")
-        print ("Formatting database for blast.")
-        command = blastPath + "makeblastdb -dbtype nucl -in viral.genomic"
-        #success = os.system(command)
-        print ("Database is formatted.")
-    except BlastError:  
-        print ("Command " + command + " failed; please check the location of your blast executables")
-    # Download accessory file
+        ftp = FTP(ftpAddr)
+        ftp.login(user='anonymous', passwd=emailAddr)
+        ftp.cwd('pub/')
+        ftp.cwd('taxonomy/')
+        ftp.cwd('accession2taxid/')
+        localfile = open(file2, 'wb')
+        ftp.retrbinary('RETR ' + file2, localfile.write, 1024)
+        localfile.close()
+        print ("done")
+        ftp.quit()
+    except Exception:
+        print ("FTP download for accessory file failed")
+
+    ### Download two volumes of NCBI Virus Genome database
+    print ("Downloading two NCBI Virus Genome database volumes.")
+    print ("This may take a while...")
+
     try:
-        print ("Downloading NCBI Virus Genome accessory file, nucl_gb.accessioin2taxid.tar.gz")
-        r = requests.get(ftpAddr2)
-    except DownloadError:
-        print ("Cannot download NCBI Virus Genome accessory file, nucl_gb.accession2taxid.tar.gz")
+        ftp = FTP(ftpAddr)
+        ftp.login(user='anonymous', passwd=emailAddr)
+        ftp.cwd('refseq/')
+        ftp.cwd('release/')
+        ftp.cwd('viral/')
+    except Exception:
+        print ("Connection to NCBI FTP server failed.")
+
+    try:
+        print ("Volume 1...")
+        localfile = open(file1_1, 'wb')
+        ftp.retrbinary('RETR ' + file1_1, localfile.write, 1024)
+        localfile.close()
+        print ("done")
+    except Exception:
+        print ("FTP download for Volume 1 file failed")
+   
+    try: 
+        print ("Volume 2...")
+        localfile = open(file1_2, 'wb')
+        ftp.retrbinary('RETR ' + file1_2, localfile.write, 1024)
+        localfile.close()
+        print ("done")
+    except Exception:
+        print ("FTP download for Volume 2 file failed")
+
+    try:
+        ftp.quit()
+    except Exception:
+        print("Failure to quit FTP.")
+
+    ### Unpack files
+
+    print ("Unpacking files...")
+    try:
+        command = "gunzip " + file2
+        success = os.system(command)
+    except Exception:
+        print ("Unpacking of accessory file failed")
+
+    try:
+        command = "gunzip " + file1_1
+        success = os.system(command)
+    except Exception:
+        print ("Unpacking of Volume 1 failed")
+
+    try:
+        command = "gunzip " + file1_2
+        success = os.system(command)
+    except Exception:
+        print ("Unpacking of Volume 2 failed")
+
+    print ("done")
+
+    ### Format files for blasting
+
+    print ("Performing blast formatting...")
+
+    try:
+        command = blastPath + "makeblastdb -dbtype nucl -in " + file1_1u
+        success = os.system(command)
+    except Exception:
+        print ("Formatting of Volume 1 failed")
+
+    try:
+        command = blastPath + "makeblastdb -dbtype nucl -in " + file1_2u
+        success = os.system(command)
+    except Exception:
+        print ("Formatting of Volume 2 failed")
+
+    print ("done")
     os.chdir(cwd)
 
 ##############################################################################
 # Install NCBI_REFSEQ_PROTEIN
 
-if NCBI_REFSEQ_PROTEIN:  # update_blastdb.pl script downloads tarballs for blast-formatted data
-    print ("Processing NCBI_REFSEQ_PROTEIN")
+if NCBI_REFSEQ_PROTEIN:
     os.chdir(ncbiProteinDir)
     try:
         print ("Downloading NCBI Refseq Protein database.")
@@ -253,16 +332,6 @@ if NCBI_REFSEQ_PROTEIN:  # update_blastdb.pl script downloads tarballs for blast
         command = blastPath + "update_blastdb.pl" + ' ' + "refseq_protein"
         success = os.system(command)
         print ("NCBI Refseq Protein database download complete.")
-        print ("Unpacking files...")
-        for root, dirs, files in os.walk("."):
-            for filename in files:
-                if re.search("tar\.gz",filename):
-                    command = "tar -xvf " + filename
-                    os.system(command)
-        print ("Formatting database for blast.")
-        command = blastPath + "makeblastdb -dbtype prot -in refseq_protein"
-        #success = os.system(command)
-        print ("Database is formatted.")
     except BlastError:  
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -278,16 +347,6 @@ if NCBI_REFSEQ_GENE:
         command = blastPath + "update_blastdb.pl" + ' ' + "refseqgene"
         success = os.system(command)
         print ("NCBI Refseq Gene database download complete.")
-        print ("Unpacking files...")
-        for root, dirs, files in os.walk("."):
-            for filename in files:
-                if re.search("tar\.gz",filename):
-                    command = "tar -xvf " + filename
-                    os.system(command)
-        print ("Formatting database for blast.")
-        command = blastPath + "makeblastdb -dbtype nucl -in refseqgene"
-        #success = os.system(command)
-        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -303,16 +362,6 @@ if NCBI_SWISSPROT:
         command = blastPath + "update_blastdb.pl" + ' ' + "swissprot"
         success = os.system(command)
         print ("NCBI Swissprot database download complete.")
-        print ("Unpacking files...")
-        for root, dirs, files in os.walk("."):
-            for filename in files:
-                if bool(re.search("tar\.gz",filename)):
-                    command = "tar -xvf " + filename
-                    os.system(command)
-        print ("Formatting database for blast.")
-        command = blastPath + "makeblastdb -dbtype prot -in swissprot"
-        #success = os.system(command)
-        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -328,16 +377,6 @@ if NR:
         command = blastPath + "update_blastdb.pl" + ' ' + "nr"
         success = os.system(command)
         print ("NCBI NR database download complete.")
-        print ("Unpacking files...")
-        for root, dirs, files in os.walk("."):
-            for filename in files:
-                if re.search("tar\.gz",filename):
-                    command = "tar -xvf " + filename
-                    os.system(command)
-        print ("Formatting database for blast.")
-        command = blastPath + "makeblastdb -dbtype nucl -in nr"
-        #success = os.system(command)
-        print ("Database is formatted.")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
     os.chdir(cwd)
@@ -350,7 +389,7 @@ if PHANTOME:
     try:
         print ("Formatting Phantome database for blast.")
         command = blastPath + "makeblastdb -dbtype prot -in Phantome_Phage_genes.faa"
-        success = os.system(command)
+        #success = os.system(command)
         print ("done")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
@@ -361,7 +400,7 @@ if PVOGS:
     try:
         print ("Formatting pVOGs database for blast.")
         command = blastPath + "makeblastdb -dbtype prot -in pVOGs.faa"
-        success = os.system(command)
+        #success = os.system(command)
         print ("done")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
@@ -373,4 +412,3 @@ print ("Done!")
 
 ##############################################################################
 ##############################################################################
-
