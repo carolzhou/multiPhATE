@@ -389,7 +389,7 @@ if PHANTOME:
     try:
         print ("Formatting Phantome database for blast.")
         command = blastPath + "makeblastdb -dbtype prot -in Phantome_Phage_genes.faa"
-        #success = os.system(command)
+        success = os.system(command)
         print ("done")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
@@ -400,7 +400,7 @@ if PVOGS:
     try:
         print ("Formatting pVOGs database for blast.")
         command = blastPath + "makeblastdb -dbtype prot -in pVOGs.faa"
-        #success = os.system(command)
+        success = os.system(command)
         print ("done")
     except BlastError:
         print ("Command " + command + " failed; please check the location of your blast executables")
