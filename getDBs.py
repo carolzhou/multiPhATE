@@ -344,8 +344,8 @@ if NCBI_REFSEQ_PROTEIN:
         files = ls_h.read().splitlines()
         for filename in files:
             if not re.search('md5', filename):
-            command = "gunzip " + filename
-            success = os.system(command)
+                command = "gunzip " + filename
+                success = os.system(command)
         ls_h.close()
     except Exception:
         print ("Error encountered in unpacking files")
@@ -374,8 +374,8 @@ if NCBI_REFSEQ_GENE:
         files = ls_h.read().splitlines()
         for filename in files:
             if not re.search('md5', filename):
-            command = "gunzip " + filename
-            success = os.system(command)
+                command = "gunzip " + filename
+                success = os.system(command)
         ls_h.close()
     except Exception:
         print ("Error encountered in unpacking files")
@@ -403,8 +403,8 @@ if NCBI_SWISSPROT:
         files = ls_h.read().splitlines()
         for filename in files:
             if not re.search('md5', filename):
-            command = "gunzip " + filename
-            success = os.system(command)
+                command = "gunzip " + filename
+                success = os.system(command)
         ls_h.close()
     except Exception:
         print ("Error encountered in unpacking files")
@@ -433,8 +433,8 @@ if NR:
         files = ls_h.read().splitlines()
         for filename in files:
             if not re.search('md5', filename):
-            command = "gunzip " + filename
-            success = os.system(command)
+                command = "gunzip " + filename
+                success = os.system(command)
         ls_h.close()
     except Exception:
         print ("Error encountered in unpacking files")
