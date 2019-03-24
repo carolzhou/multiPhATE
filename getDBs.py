@@ -174,7 +174,7 @@ else:
 #####
 if (BLAST or NCBI_VIRUS_GENOME or NCBI_REFSEQ_PROTEIN or NCBI_REFSEQ_GENE or NCBI_SWISSPROT or NR):
     print ("Ok, this is what we are going to download. ")
-    if BLAST:
+    if not BLAST:
         print ("BLAST plus")
     if NCBI_VIRUS_GENOME:
         print ("NCBI Virus Genome database")
@@ -186,7 +186,7 @@ if (BLAST or NCBI_VIRUS_GENOME or NCBI_REFSEQ_PROTEIN or NCBI_REFSEQ_GENE or NCB
         print ("NCBI Swissprot database")
     if NR:
         print ("NR database")
-    print ("Print 'go' to proceed, or 'stop' to reconsider. ")
+    print ("Type 'go' to proceed, or 'stop' to reconsider. ")
     print ("(You can always run this script again.) ")
     decision = input()
     if (re.search('go|Go|GO',decision)):
@@ -247,37 +247,37 @@ if NCBI_VIRUS_GENOME:
     print ("Downloading two NCBI Virus Genome database volumes.")
     print ("This may take a while...")
 
+    # Volume 1
     try:
+        print ("Volume 1...")
         ftp = FTP(ftpAddr)
         ftp.login(user='anonymous', passwd=emailAddr)
         ftp.cwd('refseq/')
         ftp.cwd('release/')
         ftp.cwd('viral/')
-    except Exception:
-        print ("Connection to NCBI FTP server failed.")
-
-    try:
-        print ("Volume 1...")
         localfile = open(file1_1, 'wb')
         ftp.retrbinary('RETR ' + file1_1, localfile.write, 1024)
         localfile.close()
+        ftp.quit()
         print ("done")
     except Exception:
         print ("FTP download for Volume 1 file failed")
    
+    # Volume 2
     try: 
         print ("Volume 2...")
+        ftp = FTP(ftpAddr)
+        ftp.login(user='anonymous', passwd=emailAddr)
+        ftp.cwd('refseq/')
+        ftp.cwd('release/')
+        ftp.cwd('viral/')
         localfile = open(file1_2, 'wb')
         ftp.retrbinary('RETR ' + file1_2, localfile.write, 1024)
         localfile.close()
+        ftp.quit()
         print ("done")
     except Exception:
         print ("FTP download for Volume 2 file failed")
-
-    try:
-        ftp.quit()
-    except Exception:
-        print("Failure to quit FTP.")
 
     ### Unpack files
 
