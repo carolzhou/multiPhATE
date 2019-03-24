@@ -8,7 +8,7 @@
 #
 # Summary:  This script facilitates the downloading of databases to be used with multiPhATE.
 #
-# Most recent update:  22 March 2019
+# Most recent update:  24 March 2019
 #
 ##############################################################################
 
