@@ -8,19 +8,19 @@
 #
 # Summary:  This script facilitates the downloading of databases to be used with multiPhATE.
 #
-# Most recent update:  24 March 2019
+# Most recent update:  25 March 2019
 #
 ##############################################################################
 
 import os, sys, re, time, datetime
 from ftplib import FTP
-#import requests
 
 ##############################################################################
 # CONSTANTS, BOOLEANS
 
 BLAST               = False
 NCBI_VIRUS_GENOME   = False
+NCBI_VIRUS_PROTEIN  = False
 NCBI_REFSEQ_PROTEIN = False
 NCBI_REFSEQ_GENE    = False
 NCBI_SWISSPROT      = False
@@ -31,6 +31,7 @@ PVOGS               = True
 # VARIABLES
 blast               = ''
 ncbi_virus_genome   = ''
+ncbi_virus_protein  = ''
 ncbi_refseq_protein = ''
 ncbi_refseq_gene    = ''
 ncbi_swissprot      = ''
@@ -116,13 +117,27 @@ print ("NCBI Virus Genome database: ('y'/'n')")
 ncbi_virus_genome = input()
 if re.search('Y|y|yes|Yes|YES',ncbi_virus_genome):
     print ("Great, let's download NCBI Virus Genome")
-    print ("Please enter your email address for ftp anonymous login: ")
-    emailAddr = input()
     NCBI_VIRUS_GENOME = True
 elif re.search('N|n|no|No|NO',ncbi_virus_genome):
     print ("Ok, we'll skip that one")
 else:
     print ("That was not a correct response; please try again: type 'y' or 'n'")
+
+##### NCBI Virus Protein database is downloaded via ftp 
+print ("NCBI Virus Protein database: ('y'/'n')")
+ncbi_virus_protein = input()
+if re.search('Y|y|yes|Yes|YES',ncbi_virus_protein):
+    print ("Great, let's download NCBI Virus Protein")
+    NCBI_VIRUS_PROTEIN = True
+elif re.search('N|n|no|No|NO',ncbi_virus_genome):
+    print ("Ok, we'll skip that one")
+else:
+    print ("That was not a correct response; please try again: type 'y' or 'n'")
+
+#### If downloading via FTP, get user's email address for login
+if NCBI_VIRUS_GENOME or NCBI_VIRUS_PROTEIN:
+    print ("Please enter your email address for ftp anonymous login: ")
+    emailAddr = input()
 
 #####
 print ("NCBI Refseq Protein database: ('y'/'n')")
@@ -215,12 +230,9 @@ else:
 ftpAddr  = "ftp.ncbi.nlm.nih.gov"
 file1_1u = "viral.1.1.genomic.fna"
 file1_2u = "viral.2.1.genomic.fna"
-file1_3u = "viral.3.1.genomic.fna"
 file1_1  = file1_1u + ".gz"
 file1_2  = file1_2u + ".gz"
-file1_3  = file1_3u + ".gz"
 file2    = "nucl_gb.accession2taxid.gz"
-
 
 if NCBI_VIRUS_GENOME:
     os.chdir(ncbiGenomeDir)
@@ -322,11 +334,93 @@ if NCBI_VIRUS_GENOME:
     os.chdir(cwd)
 
 ##############################################################################
+
+if NCBI_VIRUS_PROTEIN:
+
+    ftpAddr  = "ftp.ncbi.nlm.nih.gov"
+    file3_1u = "viral.1.protein.faa"
+    file3_2u = "viral.2.protein.faa"
+    file3_1  = file3_1u + ".gz"
+    file3_2  = file3_2u + ".gz"
+
+    os.chdir(ncbiProteinDir)
+
+    ### Download two volumes of NCBI Virus Protein database
+    print ("Downloading two NCBI Virus Protein database volumes.")
+    print ("This may take a while...")
+
+    # Volume 1
+    try:
+        print ("Volume 1...")
+        ftp = FTP(ftpAddr)
+        ftp.login(user='anonymous', passwd=emailAddr)
+        ftp.cwd('refseq/')
+        ftp.cwd('release/')
+        ftp.cwd('viral/')
+        localfile = open(file3_1, 'wb')
+        ftp.retrbinary('RETR ' + file3_1, localfile.write, 1024)
+        localfile.close()
+        ftp.quit()
+        print ("done")
+    except Exception:
+        print ("FTP download for Volume 1 file failed")
+
+    # Volume 2
+    try:
+        print ("Volume 2...")
+        ftp = FTP(ftpAddr)
+        ftp.login(user='anonymous', passwd=emailAddr)
+        ftp.cwd('refseq/')
+        ftp.cwd('release/')
+        ftp.cwd('viral/')
+        localfile = open(file3_2, 'wb')
+        ftp.retrbinary('RETR ' + file3_2, localfile.write, 1024)
+        localfile.close()
+        ftp.quit()
+        print ("done")
+    except Exception:
+        print ("FTP download for Volume 2 file failed")
+
+    ### Unpack files
+
+    print ("Unpacking files...")
+
+    try:
+        command = "gunzip " + file3_1
+        success = os.system(command)
+    except Exception:
+        print ("Unpacking of Volume 1 failed")
+
+    try:
+        command = "gunzip " + file3_2
+        success = os.system(command)
+    except Exception:
+        print ("Unpacking of Volume 2 failed")
+
+    print ("done")
+
+    ### Format files for blasting
+
+    print ("Performing blast formatting...")
+
+    try:
+        command = blastPath + "makeblastdb -dbtype prot -in " + file3_1u
+        success = os.system(command)
+    except Exception:
+        print ("Formatting of Volume 1 failed")
+
+    try:
+        command = blastPath + "makeblastdb -dbtype nucl -in " + file3_2u
+        success = os.system(command)
+    except Exception:
+        print ("Formatting of Volume 2 failed")
+
+##############################################################################
 # Install NCBI_REFSEQ_PROTEIN
 
 if NCBI_REFSEQ_PROTEIN:
     filename_root = "refseq_protein"
-    os.chdir(ncbiProteinDir)
+    os.chdir(refseqProteinDir)
     try:
         print ("Downloading NCBI Refseq Protein database.")
         print ("This may take a while...")
@@ -472,4 +566,3 @@ print ("Done!")
 
 ##############################################################################
 ##############################################################################
-
