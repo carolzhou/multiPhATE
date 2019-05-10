@@ -222,7 +222,7 @@ The auto-generated myGenomeName_phate.config file, to record exactly how you con
 
 #### RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
-Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenomeName_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization should be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes. 
+Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenomeName_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization should be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes. Alternatively, multiPhATE could be run with a single genome per node on a high-performance computing system, whereby each instance of multiPhATE is distributed to a different compute node. 
 
 #### FURTHER RECOMMENDATIONS
 
@@ -250,6 +250,6 @@ Feel free to report bugs or problems, or to suggest future improvements, by post
 
 #### PUBLICATION
 
-If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza. BioRxiv Feb 15, 2019, doi: http://dx.doi.org/10.1101/551010. 
+If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza; BioRxiv Feb 15, 2019, doi: http://dx.doi.org/10.1101/551010. Note that this paper is now in press at Bioinformatics, manuscript btz258, soon to appear in print (doi:10.1093/Bioinformatics/btz258). If you run PHANOTATE "under the hood", please also reference, "PHANOTATE: a novel approach to gene identification in phage genomes", by Katelyn McNair, Carol Zhou, Elizabeth A Dinsdale, Brian Souza, and Robert A Edwards, Bioinformatics, btz265, https://doi.org/10.1093/bioinformatics/btz265. 
 
 multiPhATE v.0.5
