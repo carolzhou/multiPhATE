@@ -5,9 +5,6 @@ This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence L
 
 THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS.
 
-#### NOTE TO REVIEWERS: 
-We have detected an issue with PHANOTATE/fastpath. There appears to be a system-dependent problem in compiling fastpath, which disables PHANOTATE. This error occurs on some systems but not others. If running multiPhate.py yields an error message "IndexError: list index out of range" in phate_geneCallPhage.py, line 216, please disable phanotate in your multiPhate.config file (phanotate_calls='false', and gene_caller='\<your choice other than phanotate\>'), and continue evaluating multiPhATE without PHANOTATE for the time being. When this issue has been resolved we will upload a patched code and will delete this message from the README. Thank you.
-
 #### ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
 MultiPhATE is a throughput version of PhATE, which is described below. The multiPhate.py code is a command-line program that takes a single argument (hereafter referred to as, "multiPhate.config"; use sample.multiPhate.config as starting point) and uses it to generate a phate.config file (suitably named) for each genome being annotated. Then, multiPhate.py invokes the PhATE pipeline (via phate_runPipeline.py) for each genome.
