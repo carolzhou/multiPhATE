@@ -245,6 +245,8 @@ Because the behavior of 3rd party codes can sometimes be unpredictable, it is re
 Plans include adding additional functionality to the pipeline:
 1) Adding HMMER and additional hmm databases
 2) Implementing an optional "custom" database for blasting or doing hmm analysis. (Actually, you can do custom blast now by substituting your custom nucleotide blast database for the refseq_gene_blast process, or substituting your custom protein blast database for one of the protein processes (swissprot, nr, refseq_protein, or ncbi_virus_protein), by specifying the location of your custom database in the multiPhate.config file and turning the corresponding annotation process to 'true'.)
+3) Implementing an optional "custom" gene caller, whereby gene-call output in GFF format may be added to the PipelineInput/ directory and specified in the multiPhate.config file.
+4) Incorporating CGP (Compare Gene Profiles) for automated gene matching among the genomes processed through multiPhATE.
 
 Feel free to report bugs or problems, or to suggest future improvements, by posting an issue on the project github page (click on the Issues tab), or by emailing the developers at:  zhou4@llnl.gov. Thank you for using multiPhATE.
 
