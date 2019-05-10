@@ -1,4 +1,4 @@
-# multiPhATE v.0.5
+# multiPhATE v.1.0
 /MultiPhate/ - multiPhATE (beta version)
 
 This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence Livermore National Laboratory.
@@ -252,4 +252,4 @@ Feel free to report bugs or problems, or to suggest future improvements, by post
 
 If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza; BioRxiv Feb 15, 2019, doi: http://dx.doi.org/10.1101/551010. Note that this paper is now in press at Bioinformatics, manuscript btz258, soon to appear in print (doi:10.1093/Bioinformatics/btz258). If you run PHANOTATE "under the hood", please also reference, "PHANOTATE: a novel approach to gene identification in phage genomes", by Katelyn McNair, Carol Zhou, Elizabeth A Dinsdale, Brian Souza, and Robert A Edwards, Bioinformatics, btz265, https://doi.org/10.1093/bioinformatics/btz265. 
 
-multiPhATE v.0.5
+multiPhATE v.1.0
