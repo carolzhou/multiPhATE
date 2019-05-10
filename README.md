@@ -180,7 +180,7 @@ Note that genemarks and phanotate are not available as conda packages, so these 
 
 #### PHATE PIPELINE OUTPUT FILES 
 
-In the user-specified output directory (<genomeDir>), under PipelineOutput/, the following files will be written:
+In the user-specified output directory (eg, myGenomeDir/), under PipelineOutput/, the following files will be written:
 
 gene-call outputs from each of the gene callers that was run, including a gff-formatted output file
 
@@ -207,8 +207,8 @@ The auto-generated myGenomeName_phate.config file, to record exactly how you con
 #### INSTALLATION AND SET-UP CHECKLIST
 
 * Have you installed multiPhATE either by downloading the zip file from https://github.com/carolzhou/multiPhATE.git or cloning the repository?
-* Have you installed the databases you would like to use with multiPhATE? Recall that Phantome and pVOGs are included under Databases/.
-* Have you run makeblastdb on each of your local databases?
+* Have you installed the databases you would like to use with multiPhATE? Recall that Phantome and pVOGs are included under Databases/, and that script getDBs.py can assist you in downloading and preparing the databases.
+* Have you run makeblastdb on each of your local databases (if this has not already been done by getDBs.py)?
 * Have you acquired the dependent codes, either by installing from the provided web addresses or by installing within a Conda environment?
 * Have you created a copy of sample.multiPhate.config and configured it?
 	- added meta-data for each genome to be processed
@@ -222,7 +222,7 @@ The auto-generated myGenomeName_phate.config file, to record exactly how you con
 
 #### RUNNING PHATE AS AN "EMBARASSINGLY PARALLEL" CODE
 
-Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenomeName_phate.config files, one for each genome). In this way, multiPhATE may be set up to run in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization may be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes; at this point in the code, the execution of run_phate.py can be distributed among threads or processors. Alternatively, multiPhATE could be run as multiple processes, each with a single genome per node (ie, one genome listed per multiPhate.config file) on a high-performance computing system, whereby each instance of multiPhATE is distributed to a different compute node. In this case you will need to disable the multiPhate.log file to avoid I/O contention among the parallel processes; within multiPhate.py, set HPC = True. 
+Pipeline outputs are written to user-specified output subdirectories (specified in your multiPhate.config file, and in the auto-generated myGenomeName_phate.config files, one for each genome specified in multiPhate.config). In this way, multiPhATE may be set up to run multiple instances of PhATE in parallel on any number of nodes of a compute cluster without fear of clashes in writing results. Implementing a code in parallel is system dependent; a parallel version of multiPhATE is not provided in the distribution. In the case that you have programming expertise at hand, parallelization may be implemented within the multiPhate.py script, upon execution of phate_runPipeline.py over the list of genomes; at this point in the code, the execution of phate_runPipeline.py can be distributed among threads or processors. Alternatively, multiple instances of multiPhATE could each be distributed to a different compute node (ie, one genome listed per multiPhate.config file) on a high-performance computing system. In this case you will need to disable the multiPhate.log file to avoid I/O contention among the parallel multiPhATE processes; within multiPhate.py, set HPC = True. 
 
 #### FURTHER RECOMMENDATIONS
 
