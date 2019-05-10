@@ -4,10 +4,10 @@
 #
 # Program Title:  multiPhate.py (/MultiPhate/)
 #
-# Last Update:  14 February 2019
+# Last Update:  15 April 2019
 #
 # Description: Script multiPhate.py runs the phate annotation pipeline over a set of input phage genomes.  This code runs under 
-#    Python 2.7, and requires dependent packages and databases as listed in the README file.
+#    Python 3.7, and requires dependent packages and databases as listed in the README file.
 #    multiPhate.py inputs a configuration file (see sample_ multiPhate.config), and uses it to construct a set of
 #    configuration files, one for each genome. Then, multiPhate.py executes phate_runPipeline.py over all of the genomes in the set.
 #
@@ -25,12 +25,16 @@ import sys, os, re, string, copy, time, datetime
 import subprocess
 
 # CONFIGURABLE
-# 1) If you are running under a linux system, set PHATE_OUT and PHATE_ERR to 'True'. This will capture standard errors to files. Cannot
+# 1) If you are running multiPhATE on a high-performance computing (HPC) system (e.g., using SLURM), you will need to quiet the multiPhate log.
+# Set HPC = True to prevent multiPhATE from writing the multiPhate.log file, as each process attempting to write to this one file will cause
+# contention for I/O. 
+HPC = False
+# 2) If you are running under a linux system, set PHATE_OUT and PHATE_ERR to 'True'. This will capture standard errors to files. Cannot
 # guarantee this will work under other operating systems.
 PHATE_OUT = 'False'
 PHATE_ERR = 'True'
 #
-# Default Verbosity
+# Default Verbosity; These are normally set in the config file, but defaults take effect if not specified in config.
 CLEAN_RAW_DATA_DEFAULT = 'True'   # if 'False', the raw Blast and Hmm outputs will be saved in the PipelineOutput folder
 PHATE_WARNINGS_DEFAULT = 'False'
 PHATE_MESSAGES_DEFAULT = 'False'
@@ -96,7 +100,7 @@ UNIPARC_BLAST_DEFAULT            = False     # Keep turned 'off' for now; not ye
 REFSEQ_GENE_BLAST_DEFAULT        = False
 SWISSPROT_BLAST_DEFAULT          = False
 UNIPROT_BLAST_DEFAULT            = False     # not yet in service
-PFAM_BLAST_DEAFULT               = False     # not yet in service
+PFAM_BLAST_DEFAULT               = False     # not yet in service
 
 #hmm programs
 HMM_PROGRAM_DEFAULT              = 'jackhmmer'  # This is the only hmm program currently supported
@@ -215,7 +219,7 @@ SAMPLE_CONFIG_FILE = "sample_" + CONFIG_FILE # Sample config file; user should c
 
 # HELP STRINGS
 
-HELP_STRING = """This code, """ + CODE + """, runs the phage annotation pipeline (phate_runPipeline.py) over multipe genomes. The configuration file input to this code specifies a list of genomes to be processed and the parameters for pipeline execution. The pipeline performs 1) gene calling by 4 gene callers (PHANOTATE, GeneMarkS, Glimmer3, and Prodigal), followed by identification of closest phage genome by means of blast against an NCBI-phage database, and sequence-based functional annotation by means of blastp against several peptide databases (NR, NCBI virus protein, KEGG-virus, Phantome, pVOGs, Swissprot, Refseq protein), and HMM search against the pVOG database. \nType: python """ + CODE + """ usage - for more information about constructing the command line.\nType: python """ + CODE + """ detail - for more information about how this code can be run.\n"""
+HELP_STRING = """This code, """ + CODE + """, runs the phage annotation pipeline (phate_runPipeline.py) over multiple genomes. The configuration file input to this code specifies a list of genomes to be processed and the parameters for pipeline execution. The pipeline performs 1) gene calling by 4 gene callers (PHANOTATE, GeneMarkS, Glimmer3, and Prodigal), followed by identification of closest phage genome by means of blast against an NCBI-phage database, and sequence-based functional annotation by means of blastp against several peptide databases (NR, NCBI virus protein, KEGG-virus, Phantome, pVOGs, Swissprot, Refseq protein), and HMM search against the pVOG database. \nType: python """ + CODE + """ usage - for more information about constructing the command line.\nType: python """ + CODE + """ detail - for more information about how this code can be run.\n"""
 
 INPUT_STRING = """The input files and other parameters for running this code are specified in a configuration file, which is provided as the only input parameter. See sample configuration file (""" + SAMPLE_CONFIG_FILE + """) for details on how to customize your configuration file.\n"""
 
@@ -328,19 +332,23 @@ p_psatFile                    = re.compile("psat_file='(.*)'")
 
 # Open log file
 logfile = BASE_DIR_DEFAULT + CODE_BASE + ".log"
-LOG = open(logfile,'w')
-LOG.write("%s%s\n" % ("Begin log file ",datetime.datetime.now()))
+if not HPC:
+    LOG = open(logfile,'w')
+    LOG.write("%s%s\n" % ("Begin log file ",datetime.datetime.now()))
 
 if len(sys.argv) != 2:
     print(HELP_STRING)
     dateTime = os.popen('date')
-    LOG.write("%s%s%s%s\n" % ("Incorrect number of input parameters: ", len(sys.argv), ". End log ",dateTime))
-    LOG.close(); exit(0)
+    if not HPC:
+        LOG.write("%s%s%s%s\n" % ("Incorrect number of input parameters: ", len(sys.argv), ". End log ",dateTime))
+        LOG.close()
+    exit(0)
 else:
     match_config = re.search(p_config,sys.argv[1])
     if match_config:
         configFile = sys.argv[1]
-        LOG.write("%s%s\n" % ("Config file is ",configFile))
+        if not HPC:
+            LOG.write("%s%s\n" % ("Config file is ",configFile))
     else: 
         match_input  = re.search(p_input,  sys.argv[1].lower())
         match_usage  = re.search(p_usage,  sys.argv[1].lower())
@@ -353,8 +361,10 @@ else:
             print(DETAIL_STRING)
         else:
             print(HELP_STRING)
-        LOG.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
-        LOG.close(); exit(0)
+        if not HPC:
+            LOG.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
+            LOG.close()
+        exit(0)
 
 # Open and check input file
 
@@ -368,8 +378,10 @@ except IOError as e:
 if fileError:
     print("Check your config file.")
     print(HELP_STRING)
-    LOG.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
-    LOG.close(); exit(0)
+    if not HPC:
+        LOG.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
+        LOG.close()
+    exit(0)
 
 ##### Read input parameters from configuration file
 
@@ -530,13 +542,16 @@ for cLine in cLines:
     elif match_genomeNumber:  # The next genome's data 
         # First, record previous genome data, if this is not the first genome 
         if not FIRST_GENOME:
-            #LOG.write("%s\n" % ("Appending a genome data set"))
+            #if not HPC:
+            #    LOG.write("%s\n" % ("Appending a genome data set"))
             if genomeDataItems != DATA_ITEMS_NUM:  # If record appears incomplete, flag a problem
-                LOG.write("%s%s\n" % ("WARNING: check config file for possible incorrect data items: ", genomeDataItems))
+                if not HPC:
+                    LOG.write("%s%s\n" % ("WARNING: check config file for possible incorrect data items: ", genomeDataItems))
             genomeList.append(nextGenomeData)
 
         # Next, begin collecting next genome's data
-        #LOG.write("%s%s\n" % ("Creating a new genome data set for ", match_genomeNumber.group(0)))
+        if not HPC:
+            LOG.write("%s%s\n" % ("Creating a new genome data set for ", match_genomeNumber.group(0)))
         genomeDataItems = 0
         nextGenomeData = copy.deepcopy(genomeDataDict)  # make new genome data object
         genomeNumber = match_genomeNumber.group(1)
@@ -553,7 +568,8 @@ for cLine in cLines:
             if PHATE_WARNINGS:
                 print("multiPhate says, WARNING:  GENOME_FILE is", GENOME_FILE)
         nextGenomeData["genomeFile"] = GENOME_FILE
-        #LOG.write("%s%s\n" % ("GENOME_FILE is ",GENOME_FILE))
+        #if not HPC:
+        #    LOG.write("%s%s\n" % ("GENOME_FILE is ",GENOME_FILE))
         genomeDataItems += 1
 
     elif match_genomeType:
@@ -566,19 +582,22 @@ for cLine in cLines:
             nextGenomeData["genomeType"] = 'bacterium' 
         else:
             nextGenomeData["genomeType"] = 'other'
-        #LOG.write("%s%s\n" % ("genome type is ",nextGenomeData["genomeType"]))
+        #if not HPC:
+        #    LOG.write("%s%s\n" % ("genome type is ",nextGenomeData["genomeType"]))
         genomeDataItems += 1
 
     elif match_species:
         species = match_species.group(1)
-        nextGenomeData["genomeSpecies"] = species 
-        #LOG.write("%s%s\n" % ("Species is ",species))
+        nextGenomeData["genomeSpecies"] = species
+        #if not HPC: 
+        #    LOG.write("%s%s\n" % ("Species is ",species))
         genomeDataItems += 1
 
     elif match_name:
         name = match_name.group(1)
         nextGenomeData["genomeName"] = name 
-        #LOG.write("%s%s\n" % ("genome name is ",name))
+        #if not HPC:
+        #    LOG.write("%s%s\n" % ("genome name is ",name))
         genomeDataItems += 1
 
     elif match_phateDir:
@@ -607,9 +626,11 @@ for cLine in cLines:
 
     elif match_end:  # List of genomes complete; record last genome's data
         if genomeDataItems != DATA_ITEMS_NUM:
-            LOG.write("%s%s%s%s%s%s\n" % ("multiPhate says, WARNING: check config file for possible incorrect data items: ", genomeDataItems, " for genome ",nextGenomeData["genomeName"],' ',nextGenomeData["genomeNumber"]))
+            if not HPC:
+                LOG.write("%s%s%s%s%s%s\n" % ("multiPhate says, WARNING: check config file for possible incorrect data items: ", genomeDataItems, " for genome ",nextGenomeData["genomeName"],' ',nextGenomeData["genomeNumber"]))
         genomeList.append(nextGenomeData)
-        LOG.write("%s%s\n" % ("END: Length of genomeList is ",len(genomeList)))
+        if not HPC:
+            LOG.write("%s%s\n" % ("END: Length of genomeList is ",len(genomeList)))
 
     ##### Other processing #####
 
@@ -627,7 +648,8 @@ for cLine in cLines:
         else:
             if PHATE_WARNINGS == 'True':
                 print("WARNING:  Invalid string following translate_only parameter in config file:", value)
-            LOGFILE.write("%s%s\n" % ("Invalid string following translate_only parameter in config file: ", value))
+            if not HPC:
+                LOGFILE.write("%s%s\n" % ("Invalid string following translate_only parameter in config file: ", value))
 
     elif match_contig:
         value = match_contig.group(1)
@@ -884,7 +906,8 @@ for cLine in cLines:
             PSAT_FILE = ""
             if PHATE_WARNINGS:
                 print("multiPhate says, WARNING:  PSAT_FILE is ",PSAT_FILE)
-        #LOG.write("%s%s\n" % ("PSAT_FILE is ",PSAT_FILE))
+        #if not HPC:
+        #    LOG.write("%s%s\n" % ("PSAT_FILE is ",PSAT_FILE))
 
     ##### DEPENDENT CODE LOCATIONS #####
 
@@ -1009,86 +1032,88 @@ for cLine in cLines:
             os.environ["CLEAN_RAW_DATA"] = 'False' 
 
     else:
-        LOG.write("%s%s\n" % ("ERROR: Unrecognized line in config file: ", cLine))
+        if not HPC:
+            LOG.write("%s%s\n" % ("ERROR: Unrecognized line in config file: ", cLine))
         print("ERROR: unrecognized line in config file:", cLine)
 
+if not HPC:
+    LOG.write("%s\n" % ("Input parameters and configurables:"))
+    LOG.write("%s%s\n" % ("   BASE_DIR is ",os.environ["BASE_DIR"]))
+    LOG.write("%s%s\n" % ("   PHATE_BASE_DIR is ",os.environ["PHATE_BASE_DIR"]))
+    LOG.write("%s%s\n" % ("   DATABASE_DIR is ",os.environ["DATABASE_DIR"]))
+    LOG.write("%s%s\n" % ("   SOFTWARE_DIR is ",os.environ["SOFTWARE_DIR"]))
+    LOG.write("%s%s\n" % ("   GENE_FILE: ", GENE_FILE))
+    LOG.write("%s%s\n" % ("   PROTEIN_FILE: ", PROTEIN_FILE))
 
-LOG.write("%s\n" % ("Input parameters and configurables:"))
-LOG.write("%s%s\n" % ("   BASE_DIR is ",os.environ["BASE_DIR"]))
-LOG.write("%s%s\n" % ("   PHATE_BASE_DIR is ",os.environ["PHATE_BASE_DIR"]))
-LOG.write("%s%s\n" % ("   DATABASE_DIR is ",os.environ["DATABASE_DIR"]))
-LOG.write("%s%s\n" % ("   SOFTWARE_DIR is ",os.environ["SOFTWARE_DIR"]))
-LOG.write("%s%s\n" % ("   GENE_FILE: ", GENE_FILE))
-LOG.write("%s%s\n" % ("   PROTEIN_FILE: ", PROTEIN_FILE))
+    LOG.write("%s%s\n" % ("   geneticCode: ", geneticCode))
+    LOG.write("%s%s\n" % ("   Status of boolean TRANSLATE_ONLY is ",TRANSLATE_ONLY))
+    LOG.write("%s%s\n" % ("   geneCaller is ",geneCaller))
+    LOG.write("%s%s\n" % ("   genemarksCalls is ",genemarksCalls))
+    LOG.write("%s%s\n" % ("   prodigalCalls is ",prodigalCalls))
+    LOG.write("%s%s\n" % ("   glimmerCalls is ",glimmerCalls))
+    LOG.write("%s%s\n" % ("   phanotateCalls is ",phanotateCalls))
+    LOG.write("%s%s\n" % ("   CONSENSUS_CALLS_FILE is ",CONSENSUS_CALLS_FILE))
 
-LOG.write("%s%s\n" % ("   geneticCode: ", geneticCode))
-LOG.write("%s%s\n" % ("   Status of boolean TRANSLATE_ONLY is ",TRANSLATE_ONLY))
-LOG.write("%s%s\n" % ("   geneCaller is ",geneCaller))
-LOG.write("%s%s\n" % ("   genemarksCalls is ",genemarksCalls))
-LOG.write("%s%s\n" % ("   prodigalCalls is ",prodigalCalls))
-LOG.write("%s%s\n" % ("   glimmerCalls is ",glimmerCalls))
-LOG.write("%s%s\n" % ("   phanotateCalls is ",phanotateCalls))
-LOG.write("%s%s\n" % ("   CONSENSUS_CALLS_FILE is ",CONSENSUS_CALLS_FILE))
+    LOG.write("%s%s\n" % ("   blastpIdentity is ",blastpIdentity))
+    LOG.write("%s%s\n" % ("   blastpHitCount is ",blastpHitCount))
+    LOG.write("%s%s\n" % ("   blastnHitCount is ",blastnHitCount))
+    LOG.write("%s%s\n" % ("   ncbiVirusBlast is ",ncbiVirusBlast))
+    LOG.write("%s%s\n" % ("   ncbiVirusProteinBlast is ",ncbiVirusProteinBlast))
+    LOG.write("%s%s\n" % ("   keggVirusBlast is ",keggVirusBlast))
+    LOG.write("%s%s\n" % ("   nrBlast is ",nrBlast))
+    LOG.write("%s%s\n" % ("   refseqProteinBlast is ",refseqProteinBlast))
+    LOG.write("%s%s\n" % ("   refseqGeneBlast is ",refseqGeneBlast))
+    LOG.write("%s%s\n" % ("   phantomeBlast is ",phantomeBlast))
+    LOG.write("%s%s\n" % ("   pvogsBlast is ",pvogsBlast))
+    LOG.write("%s%s\n" % ("   uniparcBlast is ",uniparcBlast))
+    LOG.write("%s%s\n" % ("   swissprotBlast is ",swissprotBlast))
 
-LOG.write("%s%s\n" % ("   blastpIdentity is ",blastpIdentity))
-LOG.write("%s%s\n" % ("   blastpHitCount is ",blastpHitCount))
-LOG.write("%s%s\n" % ("   blastnHitCount is ",blastnHitCount))
-LOG.write("%s%s\n" % ("   ncbiVirusBlast is ",ncbiVirusBlast))
-LOG.write("%s%s\n" % ("   ncbiVirusProteinBlast is ",ncbiVirusProteinBlast))
-LOG.write("%s%s\n" % ("   keggVirusBlast is ",keggVirusBlast))
-LOG.write("%s%s\n" % ("   nrBlast is ",nrBlast))
-LOG.write("%s%s\n" % ("   refseqProteinBlast is ",refseqProteinBlast))
-LOG.write("%s%s\n" % ("   refseqGeneBlast is ",refseqGeneBlast))
-LOG.write("%s%s\n" % ("   phantomeBlast is ",phantomeBlast))
-LOG.write("%s%s\n" % ("   pvogsBlast is ",pvogsBlast))
-LOG.write("%s%s\n" % ("   uniparcBlast is ",uniparcBlast))
-LOG.write("%s%s\n" % ("   swissprotBlast is ",swissprotBlast))
+    LOG.write("%s%s\n" % ("   hmmProgram is ",hmmProgram))
+    LOG.write("%s%s\n" % ("   ncbiVirusHmm is ",ncbiVirusHmm))
+    LOG.write("%s%s\n" % ("   ncbiVirusProteinHmm is ",ncbiVirusProteinHmm))
+    LOG.write("%s%s\n" % ("   keggVirusHmm is ",keggVirusHmm))
+    LOG.write("%s%s\n" % ("   nrHmm is ",nrHmm))
+    LOG.write("%s%s\n" % ("   refseqProteinHmm is ",refseqProteinHmm))
+    LOG.write("%s%s\n" % ("   refseqGeneHmm is ",refseqGeneHmm))
+    LOG.write("%s%s\n" % ("   phantomeHmm is ",phantomeHmm))
+    LOG.write("%s%s\n" % ("   pvogsHmm is ",pvogsHmm))
+    LOG.write("%s%s\n" % ("   uniparcHmm is ",uniparcHmm))
+    LOG.write("%s%s\n" % ("   swissprotHmm is ",swissprotHmm))
 
-LOG.write("%s%s\n" % ("   hmmProgram is ",hmmProgram))
-LOG.write("%s%s\n" % ("   ncbiVirusHmm is ",ncbiVirusHmm))
-LOG.write("%s%s\n" % ("   ncbiVirusProteinHmm is ",ncbiVirusProteinHmm))
-LOG.write("%s%s\n" % ("   keggVirusHmm is ",keggVirusHmm))
-LOG.write("%s%s\n" % ("   nrHmm is ",nrHmm))
-LOG.write("%s%s\n" % ("   refseqProteinHmm is ",refseqProteinHmm))
-LOG.write("%s%s\n" % ("   refseqGeneHmm is ",refseqGeneHmm))
-LOG.write("%s%s\n" % ("   phantomeHmm is ",phantomeHmm))
-LOG.write("%s%s\n" % ("   pvogsHmm is ",pvogsHmm))
-LOG.write("%s%s\n" % ("   uniparcHmm is ",uniparcHmm))
-LOG.write("%s%s\n" % ("   swissprotHmm is ",swissprotHmm))
+    LOG.write("%s%s\n" % ("   blast+ home is ",os.environ["BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   emboss home is ",os.environ["EMBOSS_PHATE_HOME"]))
+    LOG.write("%s%s\n" % ("   tRNAscanSE home is ",os.environ["tRNAscanSE_HOME"]))
+    LOG.write("%s%s\n" % ("   glimmer home is ",os.environ["GLIMMER_PATH"]))
+    LOG.write("%s%s\n" % ("   prodigal home is ",os.environ["PRODIGAL_PATH"]))
+    LOG.write("%s%s\n" % ("   phanotate home is ",os.environ["PHANOTATE_PATH"]))
+    LOG.write("%s%s\n" % ("   genemark home is ",os.environ["GENEMARKS_PATH"]))
 
-LOG.write("%s%s\n" % ("   blast+ home is ",os.environ["BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   emboss home is ",os.environ["EMBOSS_PHATE_HOME"]))
-LOG.write("%s%s\n" % ("   tRNAscanSE home is ",os.environ["tRNAscanSE_HOME"]))
-LOG.write("%s%s\n" % ("   glimmer home is ",os.environ["GLIMMER_PATH"]))
-LOG.write("%s%s\n" % ("   prodigal home is ",os.environ["PRODIGAL_PATH"]))
-LOG.write("%s%s\n" % ("   phanotate home is ",os.environ["PHANOTATE_PATH"]))
-LOG.write("%s%s\n" % ("   genemark home is ",os.environ["GENEMARKS_PATH"]))
+    LOG.write("%s%s\n" % ("   ncbi virus database is located in ",os.environ["NCBI_VIRUS_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   ncbi virus protein databases is located in ",os.environ["NCBI_VIRUS_PROTEIN_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   refseq gene database is located in ",os.environ["REFSEQ_GENE_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   kegg virus database is located in ",os.environ["KEGG_VIRUS_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   phantome database is located in ",os.environ["PHANTOME_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   pVOGs database is located in ",os.environ["PVOGS_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   swissprot database is located in ",os.environ["SWISSPROT_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   refseq protein database is located in ",os.environ["REFSEQ_PROTEIN_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   NR database is located in ",os.environ["NR_BLAST_HOME"]))
 
-LOG.write("%s%s\n" % ("   ncbi virus database is located in ",os.environ["NCBI_VIRUS_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   ncbi virus protein databases is located in ",os.environ["NCBI_VIRUS_PROTEIN_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   refseq gene database is located in ",os.environ["REFSEQ_GENE_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   kegg virus database is located in ",os.environ["KEGG_VIRUS_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   phantome database is located in ",os.environ["PHANTOME_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   pVOGs database is located in ",os.environ["PVOGS_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   swissprot database is located in ",os.environ["SWISSPROT_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   refseq protein database is located in ",os.environ["REFSEQ_PROTEIN_BLAST_HOME"]))
-LOG.write("%s%s\n" % ("   NR database is located in ",os.environ["NR_BLAST_HOME"]))
+    LOG.write("%s%s\n" % ("   phate warnings is set to ",os.environ["PHATE_WARNINGS"]))
+    LOG.write("%s%s\n" % ("   phate messages is set to ",os.environ["PHATE_MESSAGES"]))
+    LOG.write("%s%s\n" % ("   phate progress is set to ",os.environ["PHATE_PROGRESS"]))
+    LOG.write("%s%s\n" % ("   cgc warnings is set to ",os.environ["CGC_WARNINGS"]))
+    LOG.write("%s%s\n" % ("   cgc messages is set to ",os.environ["CGC_MESSAGES"]))
+    LOG.write("%s%s\n" % ("   cgc progress is set to ",os.environ["CGC_PROGRESS"]))
+    LOG.write("%s%s\n" % ("   clean raw data is set to ",os.environ["CLEAN_RAW_DATA"]))
 
-LOG.write("%s%s\n" % ("   phate warnings is set to ",os.environ["PHATE_WARNINGS"]))
-LOG.write("%s%s\n" % ("   phate messages is set to ",os.environ["PHATE_MESSAGES"]))
-LOG.write("%s%s\n" % ("   phate progress is set to ",os.environ["PHATE_PROGRESS"]))
-LOG.write("%s%s\n" % ("   cgc warnings is set to ",os.environ["CGC_WARNINGS"]))
-LOG.write("%s%s\n" % ("   cgc messages is set to ",os.environ["CGC_MESSAGES"]))
-LOG.write("%s%s\n" % ("   cgc progress is set to ",os.environ["CGC_PROGRESS"]))
-LOG.write("%s%s\n" % ("   clean raw data is set to ",os.environ["CLEAN_RAW_DATA"]))
+    LOG.write("%s%s\n" % ("   PSAT is ",PSAT))
+    LOG.write("%s%s\n" % ("   PSAT_FILE is ",PSAT_FILE))
 
-LOG.write("%s%s\n" % ("   PSAT is ",PSAT))
-LOG.write("%s%s\n" % ("   PSAT_FILE is ",PSAT_FILE))
-
-LOG.write("%s%s\n" % ("Number of genomes to be processed: ",len(genomeList)))
-LOG.write("%s\n" % ("List of genomes to be processed:"))
+    LOG.write("%s%s\n" % ("Number of genomes to be processed: ",len(genomeList)))
+    LOG.write("%s\n" % ("List of genomes to be processed:"))
 for genome in genomeList:
-    LOG.write("%s%c%s%c%s%c%s%c%s%c%s\n" % (genome["genomeNumber"],' ',genome["genomeName"],' ',genome["genomeType"],' ',genome["genomeSpecies"],' ',genome["genomeFile"],' ',genome["outputSubdir"]))
+    if not HPC:
+        LOG.write("%s%c%s%c%s%c%s%c%s%c%s\n" % (genome["genomeNumber"],' ',genome["genomeName"],' ',genome["genomeType"],' ',genome["genomeSpecies"],' ',genome["genomeFile"],' ',genome["outputSubdir"]))
 
 ##### BEGIN MAIN ########################################################################################
 
@@ -1107,7 +1132,8 @@ for genome in genomeList:
         if PHATE_WARNINGS:
             print("multiPhate says, WARNING: Fasta filename not recognized for genome", genome["genomeName"])
             print("   Expected fasta filename extension: .fasta")
-        LOG.write("%s%s%s\n" % ("WARNING: problem with fasta file: ",genome["genomeFile"]," This genome not processed!"))
+        if not HPC:
+            LOG.write("%s%s%s\n" % ("WARNING: problem with fasta file: ",genome["genomeFile"]," This genome not processed!"))
         continue
     NEXT_CONFIG = open(nextConfigFile,"w")
     NEXT_CONFIG.write("%s%s%s%s\n" % ("# Config file for genome ",genome["genomeNumber"]," AKA ",genome["genomeName"])) 
@@ -1154,16 +1180,21 @@ for genome in genomeList:
 
 # Run the pipeline (phate_runPipeline.py) over each genome; The code below runs in serial; Modify this section to implement in parallel on your cluster
 
-LOG.write("%s%s\n" % ("Processing genomes through PhATE. Begin processing at ",datetime.datetime.now()))
+if not HPC:
+    LOG.write("%s%s\n" % ("Processing genomes through PhATE. Begin processing at ",datetime.datetime.now()))
 for configFile in configList:
-    LOG.write("%s%s\n" % ("Running PhATE using genome config file ",configFile))
+    if not HPC:
+        LOG.write("%s%s\n" % ("Running PhATE using genome config file ",configFile))
     command = "python " + PHATE_BASE_DIR + PHATE_PIPELINE_CODE + " " + configFile 
-    LOG.write("%s%s\n" % ("Command is ",command))
-    LOG.write("%s%s\n" % ("Begin processing at ",datetime.datetime.now()))
+    if not HPC:
+        LOG.write("%s%s\n" % ("Command is ",command))
+        LOG.write("%s%s\n" % ("Begin processing at ",datetime.datetime.now()))
     result = os.system(command)
-    LOG.write("%s%s\n" % ("End processing at ",datetime.datetime.now()))
+    if not HPC:
+        LOG.write("%s%s\n" % ("End processing at ",datetime.datetime.now()))
 
 ##### CLEAN UP
 
-LOG.write("%s%s\n" % ("End log file ",datetime.datetime.now()))
-LOG.close()
+if not HPC:
+    LOG.write("%s%s\n" % ("End log file ",datetime.datetime.now()))
+    LOG.close()
