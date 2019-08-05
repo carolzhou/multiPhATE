@@ -88,7 +88,7 @@ if re.search('Y|y|Yes|yes|YES', blast):
     print ("them in a path something like, \"/Users/myName/miniconda3/envs/multiPhate/bin/\"")
     print ("That directory should contain executables: blastn, blastp, blastx, and makeblastdb")
     print ("Please input the fully qualified path to blast+ : ")
-    blastPath = input()
+    blastPath = input() + "/"
     # CHECK THAT THIS IS CORRECT !!!"
 elif re.search('N|n|No|no|NO', blast):
     BLAST = False 
