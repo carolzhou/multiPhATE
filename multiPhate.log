@@ -1,0 +1,81 @@
+Begin log file 2019-08-05 15:14:08.072985
+Config file is sample.multiPhate.config
+END: Length of genomeList is 2
+Input parameters and configurables:
+   BASE_DIR is /Users/kimbrel1/Science/repos/multiPhATE/
+   PHATE_BASE_DIR is /Users/kimbrel1/Science/repos/multiPhATE/
+   DATABASE_DIR is /Users/kimbrel1/Science/repos/multiPhATE/Databases/
+   SOFTWARE_DIR is /Users/kimbrel1/Science/repos/multiPhATE/ExternalCodes/
+   GENE_FILE: gene.fnt
+   PROTEIN_FILE: protein.faa
+   geneticCode: 11
+   Status of boolean TRANSLATE_ONLY is False
+   geneCaller is phanotate
+   genemarksCalls is False
+   prodigalCalls is True
+   glimmerCalls is True
+   phanotateCalls is True
+   CONSENSUS_CALLS_FILE is phanotate.cgc
+   blastpIdentity is 60
+   blastpHitCount is 3
+   blastnHitCount is 3
+   ncbiVirusBlast is True
+   ncbiVirusProteinBlast is True
+   keggVirusBlast is False
+   nrBlast is False
+   refseqProteinBlast is True
+   refseqGeneBlast is True
+   phantomeBlast is True
+   pvogsBlast is True
+   uniparcBlast is False
+   swissprotBlast is True
+   hmmProgram is jackhmmer
+   ncbiVirusHmm is False
+   ncbiVirusProteinHmm is False
+   keggVirusHmm is False
+   nrHmm is False
+   refseqProteinHmm is False
+   refseqGeneHmm is False
+   phantomeHmm is False
+   pvogsHmm is False
+   uniparcHmm is False
+   swissprotHmm is False
+   blast+ home is 
+   emboss home is /Users/kimbrel1/Science/repos/multiPhATE/ExternalCodes/
+   tRNAscanSE home is 
+   glimmer home is 
+   prodigal home is 
+   phanotate home is /Users/kimbrel1/Science/repos/multiPhATE/ExternalCodes/PHANOTATE/PHANOTATE-master/
+   genemark home is /Users/kimbrel1/Science/repos/multiPhATE/ExternalCodes/GeneMarkS/genemark_suite_linux_64/gmsuite/
+   ncbi virus database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/NCBI/Virus_Genome/viral.genomic.fna
+   ncbi virus protein databases is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/NCBI/Virus_Protein/viral.protein.faa
+   refseq gene database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/Refseq/Gene/refseqgene
+   kegg virus database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/KEGG/T40000.pep
+   phantome database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/Phantome/Phantome_Phage_genes.faa
+   pVOGs database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/pVOGs/pVOGs.faa
+   swissprot database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/Swissprot/swissprot
+   refseq protein database is located in /Users/kimbrel1/Science/repos/multiPhATE/Databases/Refseq/Protein/refseq_protein
+   NR database is located in /data/data1/sandbox/BLAST/nr
+   phate warnings is set to True
+   phate messages is set to True
+   phate progress is set to True
+   cgc warnings is set to True
+   cgc messages is set to False
+   cgc progress is set to True
+   clean raw data is set to True
+   PSAT is False
+   PSAT_FILE is 
+Number of genomes to be processed: 2
+List of genomes to be processed:
+1 P2 phage P2_phage P2.fasta P2/
+2 Lambda phage Lambda_phage Lambda.fasta Lambda/
+Processing genomes through PhATE. Begin processing at 2019-08-05 15:14:08.081918
+Running PhATE using genome config file P2.config
+Command is python /Users/kimbrel1/Science/repos/multiPhATE/phate_runPipeline.py P2.config
+Begin processing at 2019-08-05 15:14:08.081933
+End processing at 2019-08-05 15:14:23.946973
+Running PhATE using genome config file Lambda.config
+Command is python /Users/kimbrel1/Science/repos/multiPhATE/phate_runPipeline.py Lambda.config
+Begin processing at 2019-08-05 15:14:23.947027
+End processing at 2019-08-05 15:14:48.186965
+End log file 2019-08-05 15:14:48.186983

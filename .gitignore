@@ -1,0 +1,5 @@
+Databases/*
+.DS_Store
+ExternalCodes/*
+PipelineOutput/*
+*.pyc
