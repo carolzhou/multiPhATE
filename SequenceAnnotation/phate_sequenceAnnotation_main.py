@@ -552,6 +552,7 @@ geneCallInfo = {      # For passing info to genomeSequence module
     'geneCaller'           : geneCaller, 
     'geneCallFile'         : infile_geneCall, 
     'contig'               : contigName, #*** TEMPORARY: Should be included as 5th column of geneCall file, but PHANOTATE does not report this yet
+    'contigSequenceLength' : 0,
     #'peptideFile'          : infile_protein, # file into which translated peptides are to be written
     'name'                 : name,
 }
@@ -572,16 +573,25 @@ myGenome.setCodeBaseDir(CODE_BASE_DIR)
 myGenome.setOutputDir(outputDir)
 LOGFILE_H.write("%s\n" % ("Reading sequence into genome object"))
 gLines = GENOME_FILE.read().splitlines()
-myGenome.contigSet.addFastas(gLines,'nt')
+myGenome.contigSet.addFastas(gLines,'nt')  
 myGenome.contigSet.assignContig(contigName) #***  TEMPORARY handles only finished genome / single contig for now
 if PHATE_MESSAGES == 'True':
     print("Sequence annotation main says: contigName is", myGenome.contigSet.contig)
+# Create a hash to record contig names and their sequence lengths, for GFF output
+contigSeqLen_hash = {}
+for i in range(0,len(myGenome.contigSet.fastaList)):
+    contigName = myGenome.contigSet.fastaList[i].cleanHeader 
+    #seqLen     = myGenome.contigSet.fastaList[i].sequenceLength 
+    seqLen     = len(myGenome.contigSet.fastaList[i].sequence) 
+    contigSeqLen_hash[contigName] = seqLen
 
 # Extract gene calls
 if PHATE_PROGRESS == 'True':
     print("Sequence annotation main says: Processing gene calls...")
 LOGFILE_H.write("%s%s\n" % ("Processing gene calls at ",datetime.datetime.now()))
-myGenome.processGeneCalls(geneCallInfo,GENE_CALL_FILE)
+# Record the gene calls, and pass the hash so contig lengths can also be recorded...
+# ...for access when ultimately writing the GFF output file. (oh what we do for want of a pointer.)
+myGenome.processGeneCalls(geneCallInfo,GENE_CALL_FILE,contigSeqLen_hash)
 myGenome.cleanUpAfterEMBOSS()
 #myGenome.contigSet.assignContig2all(contigName) #*** TEMPORARY handles only finished genome /single contig for now
 GENE_CALL_FILE.close()

@@ -6,11 +6,29 @@
 #
 # Classes and methods: 
 #     annotationRecord
+#         addPVOGid2list
+#         getPVOGassociationList
 #         enterGFFdata(gff/dict)
+#         setPSATparameters
+#         removeRedundancy
+#         recordPSATannotations
+#         updatePSATcount
+#         getDBXREFs
+#         findInfo
+#         getFigDescription
+#         getPvogMembers
+#         getNCBItaxonomy
+#         link2databaseIdentifiers
 #         printAnnotationRecord
+#         printAnnotationRecord_tabHeader
+#         printAnnotationRecord_tab
+#         printAnnotationRecord2file_tabHeader
+#         printAnnotationRecord2file_tab
+#         returnGFFannotationRecord
 #         printAnnotationRecord2file
 #         printAll
 #         printAll2file(fileH)
+#         writePVOGgroups
 ##########################################################
 
 # This code was developed by Carol L. Ecale Zhou at Lawrence Livermore National Laboratory.
@@ -520,15 +538,15 @@ class annotationRecord(object):
     def returnGFFannotationRecord(self,FILE_HANDLE):
         self.annotationString = ''; annot = ''; annotationList = []
         if self.annotationType == 'gene':
-            annot = 'gene ' + self.start + '/' + self.end + '/' + self.strand + ' ' + self.method 
+            annot = '(gene) ' + self.start + '/' + self.end + '/' + self.strand + ' ' + self.method 
             annotationList.append(annot)
         if self.annotationType == 'functional':
-            annot = 'func ' + self.method + ' ' + self.description
+            annot = '(function) ' + self.method + ' ' + self.description
             annotationList.append(annot)
         if self.annotationType == 'homology':
             homologName = self.name
             newName = re.sub(';','',homologName)  # Remove embedded ';' because GFF uses this delimiter
-            annot = 'homolog ' + self.method + ' ' + newName
+            annot = "(homology) " + self.method + ' ' + newName
             annotationList.append(annot)
         if len(annotationList) > 0:
             for i in range(0, len(annotationList)):

@@ -82,9 +82,11 @@ STRAND_COL     = 6   # Defined as + (forward) or - (reverse)
 PHASE_COL      = 7   # One of '0', '1', or '2'. '0' indicates that the 1st base of the feature is the first base of a codon....
 ATTRIBUTES_COL = 8   # A semicolon-separated list of tag-value pairs, providing additional information about each feature.
                      # Some of these tags are predefined, eg, ID, Name, Alias, Parent (see GFF documentation).
+GFF_SEQ_NAME   = "unknown"  # default
 GFF_SOURCE     = "PhATE"
 GFF_SCORE      = EMPTY_COL  # blast hit stats will not be reported here
-GFF_PHASE      = EMPTY_COL  # phase will not be reported here
+GFF_PHASE      = '0'        # set to zero as per standard 
+GFF_VERSION    = "gff-version 3"
 
 # Patterns
 p_extra      = re.compile('(\s)|([0-9])|(\*)') # characters often included in sequence text 
@@ -125,9 +127,11 @@ class fasta(object):
         self.customHeader = ""            # a customized header; could be anything, but written for pVOGs
         self.name = "none"                # name will be geneCaller + number, if gene|protein from gene call
         self.sequence = ""                # store sequence as continuous lower-case string, sans numbers, white space
+        self.sequenceLength = 0           # length of sequence
         self.sequenceType = "unknown"     # "nt" or "aa"; not "gene" or "dna" or the like
         self.moleculeType = "unknown"     # eg, 'contig', 'peptide', 'protein', or 'gene'
-        self.parentSequence = ""          # eg, for gene, the contig that the gene is on
+        self.parentSequence = ""          # eg, for gene, the sequence of the contig that the gene is on; ###*** should not duplicate!!!
+        self.parentSequenceLength = 0     # need this for passing info to method for printing GFF output; ###*** can now delete?
         self.truncation = 15              # number of characters (N) in header to retain, by default
         self.annotationList = []          # list of annotationRecord objects 
         self.paralogList = []             # list of paralog objects (header + blast hit)
@@ -177,6 +181,11 @@ class fasta(object):
                 self.sequenceType = geneData["type"]
             if "parentSequence" in list(geneData.keys()):
                 self.parentSequence = geneData["parentSequence"]
+                if self.parentSequence != '':
+                    self.parentSequenceLength = len(self.parentSequence)
+                else:
+                    self.parentSequenceLength = -99  #***
+                    print("WARNING: in phate_fastaSequence, sequence not entered for parent")
             if "parentName" in list(geneData.keys()):
                 self.parentName = geneData["parentName"]
             if "parentStart" in list(geneData.keys()):
@@ -185,6 +194,7 @@ class fasta(object):
                 self.parentEnd = geneData["parentEnd"]
             if "order" in list(geneData.keys()):
                 self.order = geneData["order"]
+            self.moleculeType = 'gene'
             return True
         else:
             return False
@@ -203,7 +213,7 @@ class fasta(object):
         splitSpace = cleanHeader.split(' ') # Note: Blast truncates after the 1st space
         self.blastHeader = splitSpace[0] 
         cleanHeader = re.sub(' ', '_', cleanHeader)
-        cleanHeader = re.sub('[();:?\.]','',cleanHeader)
+        cleanHeader = re.sub('[-();:?\.\[\]]','',cleanHeader)
         self.cleanHeader = cleanHeader
         self.truncHeader = self.header[0:self.truncation]
         # Assign a benign, sequential header 
@@ -214,8 +224,8 @@ class fasta(object):
         else:
             self.shortHeader = self.truncHeader
         self.compoundHeader = self.header
-        if self.parentSequence:
-            self.compoundHeader = self.compoundHeader + '_' + self.parentSequence
+        if self.parentName:
+            self.compoundHeader = self.compoundHeader + '_' + self.parentName
 
     def assignCompoundHeader(self,hdr,parent):   
         # Creates a compound header; user should self.assignHeader first, then input self.cleanHeader as hdr
@@ -239,6 +249,7 @@ class fasta(object):
         else:
             seqType = type(seq)
             return False
+        self.sequenceLength = len(self.sequence)
 
     def removeEMBOSSpostfix(self):  # Remove the pesky "_1" that EMBOSS adds
         self.assignHeader(self.header.rstrip("_1 "))
@@ -406,6 +417,7 @@ class fasta(object):
         print("Type:                     ", self.sequenceType)
         print("ParentName:               ", self.parentName)
         print("ParentSequence:           ", self.parentSequence)
+        print("ParentSequenceLength:     ", self.parentSequenceLength)
         print("ParentStart:              ", self.parentStart)
         print("ParentEnd:                ", self.parentEnd)
         print("Order in multi-fasta list:", self.order)
@@ -458,32 +470,57 @@ class fasta(object):
         else:
             FILE_HANDLE.write("%s\n" % ("Sequence too long to print. See file."))
 
-    def printData2file_GFF(self,FILE_HANDLE,feature):
+    def printData2file_GFF(self,FILE_HANDLE,feature,contigName):
+        # Note: pragmas are printed by calling method (ex: phate_genomeSequence/printGenomeData2file_GFF
+
         GFF_annotationString = ''
-        FILE_HANDLE.write("%s\t" % (GFF_SOURCE)) 
-        FILE_HANDLE.write("%s\t" % (feature))    # feature type
-        if self.moleculeType == 'peptide' or self.moleculeType == 'protein' or self.sequenceType == 'aa':
-            # use parent's (ie, gene's) start/end
-            FILE_HANDLE.write("%s\t" % (self.parentStart))
-            FILE_HANDLE.write("%s\t" % (self.parentEnd))
-        else:  # use gene start/end
-            FILE_HANDLE.write("%s\t" % (self.start)) 
-            FILE_HANDLE.write("%s\t" % (self.end)) 
-        FILE_HANDLE.write("%s\t" % (GFF_SCORE)) 
-        FILE_HANDLE.write("%s\t" % (self.strand)) 
-        FILE_HANDLE.write("%s\t" % (GFF_PHASE)) 
+        GFF_type = "unknown"
         FIRST = True
+
+        # Construct data fields
+        GFF_parentName = self.parentName      # column 1 
+        GFF_source     = GFF_SOURCE           # column 2 
+
+        if self.moleculeType == 'peptide' or self.moleculeType == 'protein' or self.sequenceType == 'aa' or feature == 'CDS':
+            GFF_type   = "CDS"                  # column 3 
+            GFF_start  = str(self.parentStart)  # column 4 
+            GFF_end    = str(self.parentEnd)    # column 5 
+        elif self.moleculeType == 'gene' or self.sequenceType == 'nt' or feature == 'gene':
+            GFF_type   = "gene"                 # column 3 
+            GFF_start  = str(self.start)        # column 4 
+            GFF_end    = str(self.end)          # column 5 
+
+        GFF_score      = GFF_SCORE            # column 6
+        GFF_strand     = self.strand          # column 7 
+        GFF_phase      = GFF_PHASE            # column 8 
+
+        # Last one is complicated...
+        # Column 9 has many sub-fields, starting with sequence identifier and parent 
+        if self.moleculeType == 'peptide' or self.moleculeType == 'protein' or self.sequenceType == 'aa':
+            GFF_identifier = "ID=" + self.header + "_cds"
+        elif self.moleculeType == 'gene' or self.sequenceType == 'nt':
+            GFF_identifier = "ID=" + self.header
+
+        # Write 1st 8 columns of data to file
+        FILE_HANDLE.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t" % (contigName,GFF_source,GFF_type,GFF_start,GFF_end,GFF_score,GFF_strand,GFF_phase))
+
+        # Write identifier to column 9
+        FILE_HANDLE.write("%s%s" % (GFF_identifier, ';'))
+
+        # Column 9 has many sub-fields, continuing with the annotation homologies
+        count = 1
         if len(self.annotationList) > 0:
             for annotation in self.annotationList:
+                annotNo = "annot" + str(count) + '='
                 if FIRST:
+                    FILE_HANDLE.write("%s" % (annotNo))
                     annotation.returnGFFannotationRecord(FILE_HANDLE)
                     FIRST = False
                 else:
-                    FILE_HANDLE.write("%s" % ('; '))
+                    FILE_HANDLE.write("%s%s" % ('; ',annotNo))
                     annotation.returnGFFannotationRecord(FILE_HANDLE)
-        else:
-            FILE_HANDLE.write("%s" % ('.'))
-        FILE_HANDLE.write("\n")
+                count += 1
+        FILE_HANDLE.write("\n" % ())
 
     #*** Fill out this method as printAll() above
     def printAll2file(self,FILE_HANDLE):  # Dump everything: useful for testing  
@@ -621,6 +658,7 @@ class multiFasta(object):
         self.fastaList.append(newFa)
 
     def addFastas(self,lines,mtype): # Given multi-fasta file read into line set, create multi-fasta object
+        # This method is to be called in order to fill fasta lists (e.g., geneList)
         sequence = ""
         numberAdded = 0
         if lines:
@@ -630,11 +668,12 @@ class multiFasta(object):
                 match = re.search(p_header, line) # detect start of a new fasta
                 if match:
                     newFasta = fasta()            # create new object
-                    newFasta.moleculeType = self.moleculeType
+                    newFasta.moleculeType = self.moleculeType # elements of the list inherit moleculeType (eg, 'gene') from parent (the list)
                     numberAdded += 1              # no. of fasta objects added so far from lines
                     newFasta.order = numberAdded
                     newFasta.assignHeader(header) # 
                     newFasta.assignSequence(sequence)
+                    newFasta.sequenceLength = len(sequence)
                     newFasta.assignType(mtype)
                     self.addFasta(newFasta)
                     sequence = ""                 # reset

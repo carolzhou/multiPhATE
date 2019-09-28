@@ -222,7 +222,7 @@ def Convert_cgc2gff(cgcFile,gffFile):
     p_dataLine = re.compile('^\d')   # data lines begin with a digit
 
     # Initialize gff fields and caller
-    seqid = '.'; source = '.'; type = 'cds'
+    seqid = '.'; source = 'phate'; seqtype = 'CDS'
     start = '0'; end = '0'; strand = '.'
     phase = '.'; attributes = '.'; score = '.'
     caller = 'unknown'
@@ -239,8 +239,8 @@ def Convert_cgc2gff(cgcFile,gffFile):
         match_dataLine = re.search(p_dataLine,cLine) 
         if match_dataLine:
             (geneNo,strand,leftEnd,rightEnd,length,contig,protein) = cLine.split('\t')
-            seqid  = contig
             source = caller
+            score  = '.' # no score to report
             if strand == '+':           # GFF lists start/end, rather than left/right
                 start = str(leftEnd)
                 end   = str(rightEnd)
@@ -250,7 +250,8 @@ def Convert_cgc2gff(cgcFile,gffFile):
             else:
                 if PHATE_WARNINGS == 'True':
                     print("WARNING: phate_geneCall says, Unexpected strand:", strand)
-            GFF_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (seqid,source,type,start,end,strand,phase,attributes))
+            attributes = "ID=" + contig + "_geneCall_" + geneNo 
+            GFF_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (contig,source,seqtype,start,end,score,strand,phase,attributes))
         elif match_caller:
             caller = match_caller.group(1)
 
@@ -380,6 +381,8 @@ if PHANOTATE_CALLS:
 
     for line in open(outputFolder + 'phanotateOutput.txt', 'rt'):
         line = line.rstrip()
+        print("PHANOTATE: ",line)
+        logfile.write("%s%s\n" % ("PHANOTATE: ",line))
         processPhanotate(line)
     logfile.write("%s\n" % ("Processing PHANOTATE complete."))
 else:

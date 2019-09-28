@@ -157,7 +157,7 @@ class genome(object):
 
     # INPUT/PROCESS SEQUENCES 
 
-    def processGeneCalls(self,geneCallInfo,GENE_CALL_H):  # GeneCalls formatted by CGCparser.py
+    def processGeneCalls(self,geneCallInfo,GENE_CALL_H,contigSeqLen_hash):  # GeneCalls formatted by CGCparser.py
         # Gene calls: tabbed in 6 columns: No. \t strand(+/-) \t leftEnd \t rightEnd \t contig
         geneCaller = 'unknown'
         geneCallFile = '' 
@@ -173,9 +173,12 @@ class genome(object):
 
         # Gather information about these gene calls
         if isinstance(geneCallInfo,dict):
+            contigSequenceLength = 0
             p_digits = re.compile('\d+')
             if 'contig' in geneCallInfo:
                 contig = geneCallInfo['contig']
+            if 'contigSequenceLength' in geneCallInfo:
+                contigSequenceLength = geneCallInfo['contigSequenceLength']
             if 'geneCaller' in geneCallInfo:
                 gc = geneCallInfo['geneCaller'].lower()
                 match_phanotate = re.search('phanotate',gc)
@@ -235,6 +238,15 @@ class genome(object):
                 newGene.moleculeType = self.geneSet.moleculeType # Gene inherits from multi-fasta "parent"
                 newGene.assignHeader(geneName)  # Note:  using method assignHeader establishes all header variants
                 newGene.parentSequence = contig
+                cleanContig1 = re.sub(' ', '_', contig)
+                cleanContig2 = re.sub('[-();:?\.\[\]]','',cleanContig1)
+                if cleanContig2 in contigSeqLen_hash.keys():
+                    contigSequenceLength = contigSeqLen_hash[cleanContig2]  
+                    if contigSequenceLength == 0:
+                        print("ERROR: in phate_genomeSequence, contigSequenceLength is zero for ", contig, cleanContig2)
+                else:
+                    print("WARNING: in phate_genomeSequence, contig name not found in contig_seqLen_hash", contig, cleanContig2)
+                newGene.parentSequenceLength = contigSequenceLength
                 newGene.parentName     = contig
                 newGene.number         = int(geneNo)  # as numbered in gene-call file #*** OOPS! might be a string
                 newGene.order          = len(self.geneSet.fastaList) + 1 # order in which object is added
@@ -481,18 +493,23 @@ class genome(object):
                 FILE_HANDLE.write("%s%s%s" % ("  ",annot,"\n"))
 
     def printGenomeData2file_GFF(self,FILE_HANDLE):
-        FILE_HANDLE.write("%s\n" % (GFF_COMMENT))
+        FILE_HANDLE.write("%s\n" % (GFF_COMMENT))  # pragma identifying gff version
         print("There are", len(self.geneSet.fastaList), "genes, and", len(self.proteinSet.fastaList), "proteins")
         print("Writing data to GFF file")
-        #for gene in self.geneSet.fastaList:
-        #    gene.printData2file_GFF(FILE_HANDLE,'gene')
-        #for protein in self.proteinSet.fastaList:
-        #    protein.printData2file_GFF(FILE_HANDLE,'CDS')
         #*** NOTE: The following code assumes that the list of proteins corresponds precisely to
         #*** the list of genes.  Oh, for the want of a pointer!!!
+
+        lastContig = "notAname"; nextContig = ""
         for i in range(0, len(self.geneSet.fastaList)-1):
-            self.geneSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'gene')
-            self.proteinSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'CDS')
+            nextContig = self.geneSet.fastaList[i].parentName
+            if lastContig != nextContig:
+                contig = self.geneSet.fastaList[i].parentName
+                end    = self.geneSet.fastaList[i].parentSequenceLength
+                FILE_HANDLE.write("%s%s%s%s\n" % ("##sequence-region ",contig,' 0 ',str(end)))
+                lastContig = nextContig
+            # Print data lines
+            self.geneSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'gene',contig)
+            self.proteinSet.fastaList[i].printData2file_GFF(FILE_HANDLE,'CDS',contig)
 
     def printAll(self):
         print("Contigs =====================================================")
