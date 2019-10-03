@@ -5,6 +5,8 @@
 *.zip
 *.gff
 *.txt
+*.tar
+*.tar.gz
 __pycache__
 PipelineInput/
 PipelineOutput/
