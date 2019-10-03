@@ -1,0 +1,13 @@
+*.pyc
+*.log
+*.config
+*.out
+*.zip
+*.gff
+*.txt
+__pycache__
+PipelineInput/
+PipelineOutput/
+ExternalCodes/
+Databases/
+
