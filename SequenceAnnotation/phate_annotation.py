@@ -546,7 +546,10 @@ class annotationRecord(object):
         if self.annotationType == 'homology':
             homologName = self.name
             newName = re.sub(';','',homologName)  # Remove embedded ';' because GFF uses this delimiter
-            annot = "(homology) " + self.method + ' ' + newName
+            annot = '(homology) ' + self.method + ' ' + newName
+            annotationList.append(annot)
+        if self.annotationType == 'hmm search':
+            annot = '(hmm search) ' + self.method + ' ' + self.description
             annotationList.append(annot)
         if len(annotationList) > 0:
             for i in range(0, len(annotationList)):
