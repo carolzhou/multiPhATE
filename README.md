@@ -1,5 +1,5 @@
 # multiPhATE v.1.0
-/MultiPhate/ - multiPhATE (beta version)
+/MultiPhate/ - multiPhATE
 
 This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence Livermore National Laboratory.
 
