@@ -242,8 +242,8 @@ def ProcessGenemark(fLines,OUT):
                 return
             if contig == '':
                 contig = 'unknown'  # Contig name may be absent in input file
-            #TMPFILE.write("%s\t%s\t%s\t%s\t%s\t%s\t%si\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
-            OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%si\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
+            #TMPFILE.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
+            OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
             if USER_OUT_PROVIDED:
                 USER_OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
     return
@@ -302,7 +302,7 @@ def ProcessGlimmer(fLines,OUT):
             if contig == '':    # contig name may be left out of input file
                 contig = 'unknown'
             count += 1; geneNo = count  # re-assign gene number over that assigned by Glimmer
-            OUT.write("%s\t%s\t%s\t%s\t%s\t%si\t%s\n" % (geneNo,strand,str(leftEnd),str(rightEnd),str(length),contig,protein))
+            OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,str(leftEnd),str(rightEnd),str(length),contig,protein))
 
             if USER_OUT_PROVIDED:
                 USER_OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,str(leftEnd),str(rightEnd),str(length),contig,protein))
@@ -359,7 +359,7 @@ def ProcessGFF3(fLines,OUT):
                     strand    =     fields[6]
                     if fields[8] != '':
                         protein = fields[8]
-                    if feature == 'CDS':
+                    if feature.lower() == 'cds':
                         length = rightEnd - leftEnd + 1
                         OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,str(leftEnd),str(rightEnd),str(length),contig,protein))
                         if USER_OUT_PROVIDED:
