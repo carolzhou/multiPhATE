@@ -234,9 +234,9 @@ def ProcessGenemark(fLines,OUT):
             if strand != '+' and strand != '-':
                 if RUNLOGOPEN:
                     RUNLOGFILE.write("%s%s\n" % ("ERROR: unknown strand designator, ",strand))
-                OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
+                OUT.write("%s\n" % ("ERROR encountered: unknown strand designator\n"))
                 if USER_OUT_PROVIDED:
-                    USER_OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
+                    USER_OUT.write("%s\n" % ("ERROR encountered: unknown strand designator\n"))
                 if CGC_WARNINGS == 'True':
                     print("ERROR in CGC_parser module: unexpected strand designator,", strand)
                 return
@@ -291,9 +291,9 @@ def ProcessGlimmer(fLines,OUT):
             else:
                 if RUNLOGOPEN:
                     RUNLOGFILE.write("%s%s\n" % ("ERROR: unknown strand designator, ",strand))
-                OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
+                OUT.write("%s\n" % ("ERROR encountered: unknown strand designator\n"))
                 if USER_OUT_PROVIDED:
-                    USER_OUT.write("%s\n" ("ERROR encountered: unknown strand designator\n"))
+                    USER_OUT.write("%s\n" % ("ERROR encountered: unknown strand designator\n"))
                 if CGC_WARNINGS == 'True':
                     print("ERROR in CGC_parser module: unexpected strand designator,", strand)
                 return
@@ -399,7 +399,7 @@ def ProcessProdigal(fLines,OUT):
         p_dataLine = re.compile('(.*)\t.*\tCDS\t(\d+)\t(\d+)\t([\d\.]+)\t([+-])\t.\t(.*)') 
         for line in fLines:
             match_header   = re.search(p_header,  line)
-            match_comment = re.search(p_comment,line)
+            match_comment  = re.search(p_comment,line)
             match_dataLine = re.search(p_dataLine,line)
             if match_header:
                 contig = match_header.group(1)
