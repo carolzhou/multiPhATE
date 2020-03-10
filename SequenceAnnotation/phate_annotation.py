@@ -95,7 +95,7 @@ class annotationRecord(object):
             "fileName" : "",   # PSAT output file
             }
         self.psatOutDir = ""   # need to set
-        self.annotationSTring = ""      # used to construct a summary of annotation(s) for GFF output
+        self.annotationString = ""      # used to construct a summary of annotation(s) for GFF output
 
     def addPVOGid2list(self,pVOG):
         self.pVOGlist.append(pVOG)
