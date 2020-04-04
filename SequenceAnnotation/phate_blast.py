@@ -2,6 +2,8 @@
 #
 # Module:  phate_blast.py
 #
+# Last Update:  03 April 2020
+#
 # This class performs blast against various phage-related databases. 
 #
 # Programmer:  Carol Zhou
@@ -40,6 +42,10 @@ from xml.etree.ElementTree import ElementTree as ET
 import phate_fastaSequence
 import phate_genomeSequence
 import phate_annotation
+
+# Constants
+HIT_SORT_CRITERION = 3 # sort by percent identity
+HSP_SORT_CRITERION = 3 # sort by percent identity
 
 # Get environment variables (set in phate_runPipeline.py)
 
@@ -86,8 +92,8 @@ class multiBlast(object):
 
     def __init__(self):
         self.blastFlavor              = 'blastp'  # Select from 'blastp', 'blastn', 'blastx'; default = blastp
-        self.identityMin              = 50        # default: Invokes blast with this value (for phage maybe set much lower)
-        self.evalueMin                = 0.01      # default: Invokes blast with this value (for phage maybe set much lower)
+        self.identityMin              = 20        # default: Invokes blast with this value (for phage set low, ie 20)
+        self.evalueMin                = 10.0      # default: Invokes blast with this value (for phage maybe set much lower) (should be evalueMax)
         self.identitySelect           = 70        # default: Selects best hit if meets or exceeds this value (for phage maybe set much lower)
         self.evalueSelect             = 0.01      # default: Selects best hit if meets or exceeds this value (for phage maybe set to 10)
         self.topHitCount              = 3         # default: Number of best hits to record
@@ -273,6 +279,9 @@ class multiBlast(object):
                 " -best_hit_score_edge " + str(self.scoreEdge) + " -best_hit_overhang " + \
                 str(self.overhang) + " -outfmt " + str(self.outputFormat) + \
                 " -max_target_seqs " + str(self.topHitCount)
+                #" -max_target_seqs " + str(self.topHitCount) + \
+                #" -sorthits " + str(HIT_SORT_CRITERION) + \
+                #" -sorthsps " + str(HSP_SORT_CRITERION) 
         else:
             if PHATE_WARNINGS == 'True':
                 print("ERROR in blast module: blast flavor not currently supported: ", self.blastFlavor)
@@ -381,34 +390,37 @@ class multiBlast(object):
                             nextHspDataSet = copy.deepcopy(hspDataSet)
                             for hsp in hsps:
                                 if hsp.tag == "Hsp_hseq":
-                                     nextHspDataSet["hspSequence"]= hsp.text
+                                    nextHspDataSet["hspSequence"]= hsp.text
                                 if hsp.tag == "Hsp_num":
-                                     nextHspDataSet["hspNumber"] = hsp.text
+                                    nextHspDataSet["hspNumber"] = hsp.text
                                 if hsp.tag == "Hsp_bit_score":
-                                     nextHspDataSet["hspBitScore"]= hsp.text
+                                    nextHspDataSet["hspBitScore"]= hsp.text
                                 if hsp.tag == "Hsp_evalue":
-                                     nextHspDataSet["hspEvalue"]= hsp.text
-                                if hsp.tag == "Hsp_query-from":
-                                     nextHspDataSet["queryStart"]= hsp.text
-                                if hsp.tag == "Hsp_query-to":
-                                     nextHspDataSet["queryEnd"]= hsp.text
-                                if hsp.tag == "Hsp_hit-from":
-                                     nextHspDataSet["hitStart"]= hsp.text
-                                if hsp.tag == "Hsp_hit-to":
-                                     nextHspDataSet["hitEnd"]= hsp.text
+                                    nextHspDataSet["hspEvalue"]= hsp.text
                                 if hsp.tag == "Hsp_identity":
-                                     nextHspDataSet["hspIdentity"]= hsp.text
+                                    nextHspDataSet["hspIdentity"] = hsp.text 
+                                if hsp.tag == "Hsp_query-from":
+                                    nextHspDataSet["queryStart"]= hsp.text
+                                if hsp.tag == "Hsp_query-to":
+                                    nextHspDataSet["queryEnd"]= hsp.text
+                                if hsp.tag == "Hsp_hit-from":
+                                    nextHspDataSet["hitStart"]= hsp.text
+                                if hsp.tag == "Hsp_hit-to":
+                                    nextHspDataSet["hitEnd"]= hsp.text
+                                if hsp.tag == "Hsp_identity":
+                                    nextHspDataSet["hspIdentity"]= hsp.text
                                 if hsp.tag == "Hsp_positive":
-                                     nextHspDataSet["hspPositives"]= hsp.text
+                                    nextHspDataSet["hspPositives"]= hsp.text
                                 if hsp.tag == "Hsp_gaps":
-                                     nextHspDataSet["hspGaps"]= hsp.text
+                                    nextHspDataSet["hspGaps"]= hsp.text
                                 if hsp.tag == "Hsp_align-len":
-                                     nextHspDataSet["hspAlignLen"] = hsp.text
-                                     if int(nextHspDataSet["hspAlignLen"]) > 0:
-                                         nextHspDataSet["hspPercentIdentity"] = int(nextHspDataSet["hspIdentity"])*100/int(nextHspDataSet["hspAlignLen"])
-                                          
+                                    nextHspDataSet["hspAlignLen"] = hsp.text
+                                    if int(nextHspDataSet["hspAlignLen"]) > 0:
+                                        nextHspDataSet["hspPercentIdentity"] = int(nextHspDataSet["hspIdentity"])*100/int(nextHspDataSet["hspAlignLen"])
                             nextHitDataSet["hitHSPs"].append(nextHspDataSet)
-                hitList.append(nextHitDataSet)
+
+                if nextHitDataSet:
+                    hitList.append(nextHitDataSet)
 
                 if DEBUG:
                     print("Number of hits:", len(hitList))
@@ -427,6 +439,9 @@ class multiBlast(object):
                 resultString = 'alignlen=' + str(nextHitDataSet["hitHSPs"][0]["hspAlignLen"]) 
                 newAnnotation.annotationList.append(resultString)
                 resultString = 'evalue='   + str(nextHitDataSet["hitHSPs"][0]["hspEvalue"]) 
+                MEETS_IDENTITY_CUTOFF = False
+                if float(nextHitDataSet["hitHSPs"][0]["hspPercentIdentity"]) >= float(self.identityMin):
+                    MEETS_IDENTITY_CUTOFF = True
 
                 # If this is a pVOGs blast result, capture the pVOG identifiers in the annotation objecta
                 match_pVOG = re.search('pvog',newAnnotation.source.lower())
@@ -435,8 +450,7 @@ class multiBlast(object):
                     for pVOGid in pVOGidList:
                         if pVOGid not in newAnnotation.pVOGlist: #** cez: bug fix 05 sept 2017
                             newAnnotation.pVOGlist.append(pVOGid)
-                newAnnotation.annotationList.append(resultString)
- 
+
                 # Get DBXREFs, packed into annotation object's self.description field
                 if DEBUG:
                     print("TESTING: newAnnotation", newAnnotation.printAll())
@@ -444,7 +458,13 @@ class multiBlast(object):
                 newAnnotation.link2databaseIdentifiers(database,dbName) # Get DBXREFs, packed into self.description
  
                 # Add this completed annotation to growing list for this fasta
-                fasta.annotationList.append(newAnnotation)
+                if MEETS_IDENTITY_CUTOFF:
+                    fasta.annotationList.append(newAnnotation)
+                    if DEBUG:
+                        print("phate_blast says, Adding annotation: meets identity cutoff of",self.identityMin," annot: ",newAnnotation.annotationList)
+                else:
+                    if DEBUG:
+                        print("phate_blast says, Deleting annotation: fails to meet identity cutoff:", newAnnotation.annotationList)
 
             if DEBUG: 
                 print("Done parsing XML tree") 

@@ -84,9 +84,9 @@ PHANOTATE_PATH              = ''
 
 #blast parameters
 MAX_BLAST_HIT_COUNT         = 100     # maximum number of hits to capture (user should specify far fewer than max)
-MIN_BLASTP_IDENTITY         = 20      # default; sets a lower limit based on value at which a structure model can provide information
+MIN_BLASTP_IDENTITY         = 5       # default; sets a lower limit based on value at which a structure model can provide information
 MAX_BLASTP_HIT_COUNT        = 100     # default; sets an upper limit; user's value should typically be well below this
-MAX_BLASTN_HIT_COUNT        = 10      # default; sets an upper limit
+MAX_BLASTN_HIT_COUNT        = 100     # default; sets an upper limit
 
 #blast databases to be used for search
 NCBI_VIRUS_BLAST_DEFAULT         = False

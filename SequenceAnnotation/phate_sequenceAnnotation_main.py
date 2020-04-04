@@ -10,7 +10,7 @@
 #
 # Programmer: CEZhou
 #
-# Date: 02 October 2017
+# Date: 03 April 2020
 # Version 1.0
 #
 ################################################################
@@ -26,6 +26,12 @@ from subprocess import call
 # DEBUG control
 #DEBUG = True
 DEBUG = False 
+
+# Boolean control
+DO_GENOME_BLAST  = False
+DO_GENE_BLAST    = False
+DO_PROTEIN_BLAST = False
+DO_HMM_SEARCH    = False
 
 # Defaults/Parameters
 GENE_CALLER            = 'phanotate'   # Default; can be configured by user
@@ -643,8 +649,8 @@ else:
     if PHATE_MESSAGES == 'True':
         print("Sequence annotation module says: Running at the following settings:")
         blast.printParameters()
-    LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run ", blast.blastFlavor, " at the following settings:"))
-    blast.printParameters2file(LOGFILE_H)
+    #LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run ", blast.blastFlavor, " at the following settings:"))
+    #blast.printParameters2file(LOGFILE_H)
 
     # Create directory for blast output
     blastOutputDir = outputDir + '/BLAST/'
@@ -670,204 +676,233 @@ else:
 
     # GENOME BLAST
 
-    # Create blast output directory for genome blast
-    genomeBlastOutputDir = blastOutputDir + 'Genome/'
-    try:
-        os.stat(genomeBlastOutputDir)
-    except:
-        os.mkdir(genomeBlastOutputDir)
+    if NCBI_VIRUS_BLAST:
+        DO_GENOME_BLAST = True
 
-    # Prepare for genome blast
-    myParamSet = {
-        'identityMin'    : GENOME_IDENTITY_MIN,  #*** Should not be hard coded, but should be a low-stringency setting
-        'identitySelect' : GENOME_IDENTITY_SELECT,  #*** this one too 
-        'evalueMin'      : EVALUE_MIN,
-        'evalueSelect'   : EVALUE_SELECT,
-        'topHitCount'    : int(blastnHitCount),
-        'outputFormat'   : XML_OUT_FORMAT,  # blast output format (use 5=XML or 7=LIST only) 
-        'scoreEdge'      : SCORE_EDGE,
-        'overhang'       : OVERHANG,
-        'geneCallDir'    : outputDir, 
-        'blastOutDir'    : genomeBlastOutputDir,
-        'ncbiVirusBlast' : NCBI_VIRUS_BLAST,
-    }
-    blast.setBlastParameters(myParamSet)
-    blast.setBlastFlavor('blastn') 
+    if DO_GENOME_BLAST:
+        # Create blast output directory for genome blast
+        genomeBlastOutputDir = blastOutputDir + 'Genome/'
+        try:
+            os.stat(genomeBlastOutputDir)
+        except:
+            os.mkdir(genomeBlastOutputDir)
 
-    LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run ", blast.blastFlavor, " at the following settings:"))
-    blast.printParameters2file(LOGFILE_H)
+        # Prepare for genome blast
+        myParamSet = {
+            'identityMin'    : GENOME_IDENTITY_MIN,  #*** Should not be hard coded, but should be a low-stringency setting
+            'identitySelect' : GENOME_IDENTITY_SELECT,  #*** this one too 
+            'evalueMin'      : EVALUE_MIN,
+            'evalueSelect'   : EVALUE_SELECT,
+            'topHitCount'    : int(blastnHitCount),
+            'outputFormat'   : XML_OUT_FORMAT,  # blast output format (use 5=XML or 7=LIST only) 
+            'scoreEdge'      : SCORE_EDGE,
+            'overhang'       : OVERHANG,
+            'geneCallDir'    : outputDir, 
+            'blastOutDir'    : genomeBlastOutputDir,
+            'ncbiVirusBlast' : NCBI_VIRUS_BLAST,
+        }
+        blast.setBlastParameters(myParamSet)
+        blast.setBlastFlavor('blastn') 
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Preparing to run", blast.blastFlavor)
-    if PHATE_MESSAGES == 'True':
-        print("Sequence annotation main says: Running", blast.blastFlavor, "at the following settings:")
-        blast.printParameters()
+        LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run genome ", blast.blastFlavor, " at the following settings:"))
+        blast.printParameters2file(LOGFILE_H)
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Preparing to run", blast.blastFlavor)
+        if PHATE_MESSAGES == 'True':
+            print("Sequence annotation main says: Running", blast.blastFlavor, "at the following settings:")
+            blast.printParameters()
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Running Blast against phage genome database(s)...")
+        # Run Genome blast 
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Running Blast against phage genome database(s)...")
+        LOGFILE_H.write("%s\n" % ("Running Blast against phage genome database(s)..."))
+        blast.runBlast(myGenome.contigSet,'genome')
 
-    LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run ", blast.blastFlavor, " at the following settings:"))
-    blast.printParameters2file(LOGFILE_H)
-    LOGFILE_H.write("%s\n" % ("Running Blast against phage genome database(s)..."))
-
-    # Run Genome blast 
-    blast.runBlast(myGenome.contigSet,'genome')
-
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Genome blast complete")
-    LOGFILE_H.write("%s%s\n" % ("Genome blast complete at ", datetime.datetime.now()))
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Genome blast complete")
+        LOGFILE_H.write("%s%s\n" % ("Genome blast complete at ", datetime.datetime.now()))
+    else:
+        if PHATE_PROGRESS == True:
+            print("Skipping genome blast.")
+        LOGFILE_H.write("Skipping genome blast. DO_GENOME_BLAST is ",DO_GENOME_BLAST)
 
     # GENE BLAST
 
-    LOGFILE_H.write("%s\n" % ("Preparing to run gene blast"))
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Preparing to run gene blast...")
+    if REFSEQ_GENE_BLAST:
+        DO_GENE_BLAST = True
 
-    # Create blast output directory for gene blast
-    geneBlastOutputDir = blastOutputDir + 'Gene/'
-    try:
-        os.stat(geneBlastOutputDir)
-    except:
-        os.mkdir(geneBlastOutputDir)
+    if DO_GENE_BLAST:
+        LOGFILE_H.write("%s\n" % ("Preparing to run gene blast"))
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Preparing to run gene blast...")
 
-    # Prepare for gene blast
-    myParamSet = {
-        'identityMin'     : blastpIdentity,  #*** Setting as per blastp, for now 
-        'identitySelect'  : blastpIdentity,  #*** this one too 
-        'evalueMin'       : 10,
-        'evalueSelect'    : 10,
-        'topHitCount'     : int(blastpHitCount),  #*** maybe should parameterize this
-        'outputFormat'    : XML_OUT_FORMAT,  # XML=5; LIST=7
-        'scoreEdge'       : 0.1,
-        'overhang'        : 0.1,
-        'geneCallDir'     : outputDir, 
-        'blastOutDir'     : geneBlastOutputDir,
-        'refseqGeneBlast' : REFSEQ_GENE_BLAST,
-    }
-    blast.setBlastParameters(myParamSet)
-    blast.setBlastFlavor('blastn') 
+        # Create blast output directory for gene blast
+        geneBlastOutputDir = blastOutputDir + 'Gene/'
+        try:
+            os.stat(geneBlastOutputDir)
+        except:
+            os.mkdir(geneBlastOutputDir)
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Running Blast against gene database(s)...")
-    LOGFILE_H.write("%s\n" % ("Running Blast against gene databases..."))
+        # Prepare for gene blast
+        myParamSet = {
+            'identityMin'     : int(blastpIdentity),  #*** Setting as per blastp, for now 
+            'identitySelect'  : int(blastpIdentity),  #*** this one too 
+            'evalueMin'       : EVALUE_MIN,
+            'evalueSelect'    : EVALUE_SELECT,
+            'topHitCount'     : int(blastpHitCount),  #*** maybe should parameterize this
+            'outputFormat'    : XML_OUT_FORMAT,  # XML=5; LIST=7
+            'scoreEdge'       : SCORE_EDGE,
+            'overhang'        : OVERHANG,
+            'geneCallDir'     : outputDir, 
+            'blastOutDir'     : geneBlastOutputDir,
+            'refseqGeneBlast' : REFSEQ_GENE_BLAST,
+        }
+        blast.setBlastParameters(myParamSet)
+        blast.setBlastFlavor('blastn') 
 
-    # Run Gene blast
-    blast.runBlast(myGenome.geneSet,'gene')
+        LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run gene ", blast.blastFlavor, " at the following settings:"))
+        blast.printParameters2file(LOGFILE_H)
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Gene blast complete.")
-    LOGFILE_H.write("%s%s\n" % ("Gene blast complete at ",datetime.datetime.now()))
+        # Run Gene blast
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Running Blast against gene database(s)...")
+        LOGFILE_H.write("%s\n" % ("Running Blast against gene databases..."))
+        blast.runBlast(myGenome.geneSet,'gene')
+
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Gene blast complete.")
+        LOGFILE_H.write("%s%s\n" % ("Gene blast complete at ",datetime.datetime.now()))
+    else:
+        if PHATE_PROGRESS == True:
+            print("Skipping gene blast.")
+        LOGFILE_H.write("%s%s\n" % ("Skipping gene blast. DO_GENE_BLAST is ",DO_GENE_BLAST))
 
     # PROTEIN BLAST
+    if NR_BLAST or KEGG_VIRUS_BLAST or REFSEQ_PROTEIN_BLAST or PHANTOME_BLAST or PVOGS_BLAST or UNIPARC_BLAST or SWISSPROT_BLAST:
+        DO_PROTEIN_BLAST = True
 
-    # Create blast output directory for protein blast
-    proteinBlastOutputDir = blastOutputDir + 'Protein/'
-    try:
-        os.stat(proteinBlastOutputDir)
-    except:
-        os.mkdir(proteinBlastOutputDir)
+    if DO_PROTEIN_BLAST:
+        # Create blast output directory for protein blast
+        proteinBlastOutputDir = blastOutputDir + 'Protein/'
+        try:
+            os.stat(proteinBlastOutputDir)
+        except:
+            os.mkdir(proteinBlastOutputDir)
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Preparing for protein blast...")
-    LOGFILE_H.write("%s%s\n" % ("Preparing for protein blast at ",datetime.datetime.now()))
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Preparing for protein blast...")
+        LOGFILE_H.write("%s%s\n" % ("Preparing for protein blast at ",datetime.datetime.now()))
 
-    # Prepare for protein blast
-    myParamSet = {
-        'identityMin'           : int(blastpIdentity),  
-        'identitySelect'        : int(blastpIdentity),  
-        'evalueMin'             : EVALUE_MIN,
-        'evalueSelect'          : EVALUE_SELECT,
-        'topHitCount'           : int(blastpHitCount),  #*** maybe should parameterize this
-        'outputFormat'          : XML_OUT_FORMAT,  # XML=5, LIST=7  
-        'scoreEdge'             : SCORE_EDGE,
-        'overhang'              : OVERHANG,
-        'geneCallDir'           : outputDir, 
-        'blastOutDir'           : proteinBlastOutputDir,
-        'pvogsOutDir'           : proteinBlastOutputDir,
-        'nrBlast'               : NR_BLAST,
-        'ncbiVirusProteinBlast' : NCBI_VIRUS_PROTEIN_BLAST,
-        'keggVirusBlast'        : KEGG_VIRUS_BLAST,
-        'refseqProteinBlast'    : REFSEQ_PROTEIN_BLAST,
-        'phantomeBlast'         : PHANTOME_BLAST,
-        'pvogsBlast'            : PVOGS_BLAST,
-        'uniparcBlast'          : UNIPARC_BLAST,
-        'swissprotBlast'        : SWISSPROT_BLAST,
-    }
-    blast.setBlastParameters(myParamSet)
-    blast.setBlastFlavor('blastp')
+        # Prepare for protein blast
+        myParamSet = {
+            'identityMin'           : int(blastpIdentity),  
+            'identitySelect'        : int(blastpIdentity),  
+            'evalueMin'             : EVALUE_MIN,
+            'evalueSelect'          : EVALUE_SELECT,
+            'topHitCount'           : int(blastpHitCount),  #*** maybe should parameterize this
+            'outputFormat'          : XML_OUT_FORMAT,  # XML=5, LIST=7  
+            'scoreEdge'             : SCORE_EDGE,
+            'overhang'              : OVERHANG,
+            'geneCallDir'           : outputDir, 
+            'blastOutDir'           : proteinBlastOutputDir,
+            'pvogsOutDir'           : proteinBlastOutputDir,
+            'nrBlast'               : NR_BLAST,
+            'ncbiVirusProteinBlast' : NCBI_VIRUS_PROTEIN_BLAST,
+            'keggVirusBlast'        : KEGG_VIRUS_BLAST,
+            'refseqProteinBlast'    : REFSEQ_PROTEIN_BLAST,
+            'phantomeBlast'         : PHANTOME_BLAST,
+            'pvogsBlast'            : PVOGS_BLAST,
+            'uniparcBlast'          : UNIPARC_BLAST,
+            'swissprotBlast'        : SWISSPROT_BLAST,
+        }
+        blast.setBlastParameters(myParamSet)
+        blast.setBlastFlavor('blastp')
 
-    if PHATE_PROGRESS == 'True': 
-        print("Sequence annotation main says: Running Blast against protein database(s)...")
-    LOGFILE_H.write("%s\n" % ("Running Blast against protein database(s)..."))
+        LOGFILE_H.write("%s%s%s%s\n" % (datetime.datetime.now(), " Preparing to run protein ", blast.blastFlavor, " at the following settings:"))
+        blast.printParameters2file(LOGFILE_H)
 
-    # Run protein blast
-    blast.runBlast(myGenome.proteinSet,'protein')
+        # Run protein blast
+        if PHATE_PROGRESS == 'True': 
+            print("Sequence annotation main says: Running Blast against protein database(s)...")
+        LOGFILE_H.write("%s\n" % ("Running Blast against protein database(s)..."))
+        blast.runBlast(myGenome.proteinSet,'protein')
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Protein blast complete.")
-    LOGFILE_H.write("%s%s\n" % ("Protein blast complete at ", datetime.datetime.now()))
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Protein blast complete.")
+        LOGFILE_H.write("%s%s\n" % ("Protein blast complete at ", datetime.datetime.now()))
+    else:
+        if PHATE_PROGRESS == True:
+            print("Skipping protein blast.")
+        LOGFILE_H.write("Skipping protein blast. DO_PROTEIN_BLAST is ",DO_PROTEIN_BLAST)
 
     # Write out pVOGs sequences to enable alignments
 
     # HMM SEARCH
+    if NR_HMM or KEGG_VIRUS_HMM or REFSEQ_PROTEIN_HMM or PHANTOME_HMM or PVOGS_HMM or SWISSPROT_HMM or NCBI_VIRUS_HMM or NCBI_VIRUS_PROTEIN_HMM:
+        DO_HMM_SEARCH = True
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Preparing for hmm search...")
-    LOGFILE_H.write("%s\n" % ("Preparing for hmm search"))
+    if DO_HMM_SEARCH:
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Preparing for hmm search...")
+        LOGFILE_H.write("%s\n" % ("Preparing for hmm search"))
 
-    # Create hmm output directory for genome hmm search
-    genomeHmmOutputDir = hmmOutputDir + 'Genome/'
-    try:
-        os.stat(genomeHmmOutputDir)
-    except:
-        os.mkdir(genomeHmmOutputDir)
-    # Done for now; genome hmm search not yet in service
+        # Create hmm output directory for genome hmm search
+        genomeHmmOutputDir = hmmOutputDir + 'Genome/'
+        try:
+            os.stat(genomeHmmOutputDir)
+        except:
+            os.mkdir(genomeHmmOutputDir)
+        # Done for now; genome hmm search not yet in service
 
-    # Create hmm output directory for gene hmm search
-    geneHmmOutputDir = hmmOutputDir + 'Gene/'
-    try:
-        os.stat(geneHmmOutputDir)
-    except:
-        os.mkdir(geneHmmOutputDir)
-    # Done for now; gene hmm search not yet in service
+        # Create hmm output directory for gene hmm search
+        geneHmmOutputDir = hmmOutputDir + 'Gene/'
+        try:
+            os.stat(geneHmmOutputDir)
+        except:
+            os.mkdir(geneHmmOutputDir)
+        # Done for now; gene hmm search not yet in service
 
-    # Create hmm output directory for protein hmm search
-    proteinHmmOutputDir = hmmOutputDir + 'Protein/'
-    try:
-        os.stat(proteinHmmOutputDir)
-    except:
-        os.mkdir(proteinHmmOutputDir)
+        # Create hmm output directory for protein hmm search
+        proteinHmmOutputDir = hmmOutputDir + 'Protein/'
+        try:
+            os.stat(proteinHmmOutputDir)
+        except:
+            os.mkdir(proteinHmmOutputDir)
 
-    # Prepare for protein hmm search
-    myParamSet = {
-        'hmmProgram'            : hmmProgram,
-        'geneCallDir'           : outputDir,
-        'hmmOutDir'             : proteinHmmOutputDir,
-        'pvogsOutDir'           : proteinHmmOutputDir,
-        'nrHmm'                 : NR_HMM,
-        'keggVirusHmm'          : KEGG_VIRUS_HMM,
-        'refseqProteinHmm'      : REFSEQ_PROTEIN_HMM,
-        'phantomeHmm'           : PHANTOME_HMM,
-        'pvogsHmm'              : PVOGS_HMM,
-        'uniparcHmm'            : UNIPARC_HMM,
-        'swissprotHmm'          : SWISSPROT_HMM,
-        'ncbiVirusHmm'          : NCBI_VIRUS_HMM,
-        'ncbiVirusProteinHmm'   : NCBI_VIRUS_PROTEIN_HMM,
-    }
-    if DEBUG:
-        print("DEBUGGING Hmm parameters:", myParamSet)
+        # Prepare for protein hmm search
+        myParamSet = {
+            'hmmProgram'            : hmmProgram,
+            'geneCallDir'           : outputDir,
+            'hmmOutDir'             : proteinHmmOutputDir,
+            'pvogsOutDir'           : proteinHmmOutputDir,
+            'nrHmm'                 : NR_HMM,
+            'keggVirusHmm'          : KEGG_VIRUS_HMM,
+            'refseqProteinHmm'      : REFSEQ_PROTEIN_HMM,
+            'phantomeHmm'           : PHANTOME_HMM,
+            'pvogsHmm'              : PVOGS_HMM,
+            'uniparcHmm'            : UNIPARC_HMM,
+            'swissprotHmm'          : SWISSPROT_HMM,
+            'ncbiVirusHmm'          : NCBI_VIRUS_HMM,
+            'ncbiVirusProteinHmm'   : NCBI_VIRUS_PROTEIN_HMM,
+        }
+        if DEBUG:
+            print("DEBUGGING Hmm parameters:", myParamSet)
 
-    hmm.setHmmParameters(myParamSet)
-    #hmm.setHmmProgram(hmmProgram)  #*** redundant
+        hmm.setHmmParameters(myParamSet)
+        #hmm.setHmmProgram(hmmProgram)  #*** redundant
 
-    if PHATE_PROGRESS == 'True':
-        print("Sequence annotation main says: Running Hmm search against protein database(s)...")
-    LOGFILE_H.write("%s%s\n" % ("Running Hmm search against protein database(s) at ", datetime.datetime.now()))
+        if PHATE_PROGRESS == 'True':
+            print("Sequence annotation main says: Running Hmm search against protein database(s)...")
+        LOGFILE_H.write("%s%s\n" % ("Running Hmm search against protein database(s) at ", datetime.datetime.now()))
 
-    # Run protein hmm search
-    hmm.runHmm(myGenome.proteinSet,'protein')
+        # Run protein hmm search
+        hmm.runHmm(myGenome.proteinSet,'protein')
 
-    LOGFILE_H.write("%s%s\n" % ("HMM search complete at ",datetime.datetime.now()))
+        LOGFILE_H.write("%s%s\n" % ("HMM search complete at ",datetime.datetime.now()))
+    else:
+        if PHATE_PROGRESS == True:
+            print("Skipping hmm search.")
+        LOGFILE_H.write("%s%s\n" % ("Skipping hmm search. DO_HMM_SEARCH is ", DO_HMM_SEARCH))
 
     # ADD PSAT ANNOTATIONS  
 
