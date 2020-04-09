@@ -724,7 +724,7 @@ else:
     else:
         if PHATE_PROGRESS == True:
             print("Skipping genome blast.")
-        LOGFILE_H.write("Skipping genome blast. DO_GENOME_BLAST is ",DO_GENOME_BLAST)
+        LOGFILE_H.write("%s%s\n" % ("Skipping genome blast. DO_GENOME_BLAST is ",DO_GENOME_BLAST))
 
     # GENE BLAST
 
