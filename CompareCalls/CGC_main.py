@@ -18,6 +18,7 @@
 # This code was developed by Carol L. Ecale Zhou at Lawrence Livermore National Laboratory.
 # THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD.pdf FOR DETAILS.
 
+import sys
 import os
 
 PHATE_PIPELINE = True  # Running this code within the PhATE pipeline. Set this to False if running code independently
@@ -34,7 +35,7 @@ PHATE_PIPELINE = True  # Running this code within the PhATE pipeline. Set this t
 #CGC_PROGRESS = 'True'
 CGC_WARNINGS = 'False'
 CGC_MESSAGES = 'False'
-CGC_PROGRESS = 'False'
+CGC_PROGRESS = 'True'
 
 #if PHATE_PIPELINE:
 #    CGC_WARNINGS = os.environ["CGC_WARNINGS"]
@@ -90,7 +91,7 @@ INFO_STRING = "This code currently supports the following gene callers:  GeneMar
 fileSet = []
 argCount = len(sys.argv)
 if DEBUG:
-    print("sys.argv is", sys.argv)
+    print("CGC_main says, DEBUG:  sys.argv is", sys.argv)
 if argCount > 1:
 
     if PHATE_PIPELINE:  # First parameter is "log=<logFile>", second is "gff=<gffFile>", and remaining parameters are genecall files to compare
@@ -105,18 +106,18 @@ if argCount > 1:
                 LOG = open(LOG_FILE,"w")
                 LOG.write("%s%s\n" % ("Opening log at ",datetime.datetime.now()))
                 if DEBUG:
-                    print("DEBUG CGC_main: LOG has been opened")
+                    print("CGC_main says, DEBUG: LOG has been opened")
             else:
-                print("ERROR: CGC_main.py expects name of log file as first input parameter. Parameter was:", sys.argv[1])
+                print("CGC_main says, ERROR: expects name of log file as first input parameter. Parameter was:", sys.argv[1])
             if match_gff:
                 GFF_FILE = match_gff.group(1)  # override as named above
                 GFF = open(GFF_FILE,"w")
             #fileSet = sys.argv[2:]  # collect remaining command-line arguments
             fileSet = sys.argv[3:]  # collect remaining command-line arguments
             if DEBUG:
-                print("DEBUG CGC_main: fileSet is", fileSet)
+                print("CGC_main says, DEBUG: fileSet is", fileSet)
         else:
-            print("ERROR: CGC_main says, insufficient arguments provided")
+            print("CGC_main says, ERROR: insufficient arguments provided")
 
     else:  # "Help" input parameters should only be encountered if running code independently at command line
         match = re.search("help", sys.argv[1].lower())  
@@ -162,7 +163,7 @@ callSet_obj = CGC_geneCall.GeneCallSet()
 # For each user-provided gene call file, create a call set and add to list of call sets
 
 if CGC_PROGRESS == 'True':
-    print("CGCmain says: Iterating through fileSet...")
+    print("CGC_main says: Iterating through fileSet...")
 if PHATE_PIPELINE:
     LOG.write("%s%s\n" % ("CGC Main: Iterating through fileSet at ",datetime.datetime.now()))
     LOG.write("%s%s\n" % ("CGC Main: fileSet is ",fileSet))
@@ -173,12 +174,12 @@ for geneFile in fileSet:
 
     LOG.write("%s%s\n" % ("CGC Main: Opening geneFile ",geneFile))
     if CGC_MESSAGES == 'True':
-        print("CGC Main: Opening geneFile ",geneFile)
+        print("CGC_main says, Opening geneFile ",geneFile)
     geneFile_handle = open(geneFile,"r")
 
     LOG.write("%s%s\n" % ("CGC Main: Adding calls from geneFile ",geneFile))
     if CGC_MESSAGES == 'True':
-        print("CGCmain says: Adding calls from file", geneFile)
+        print("CGC_main says: Adding calls from file", geneFile)
     callSet.AddGeneCalls(geneFile_handle) 
     geneFile_handle.close()
 
@@ -186,7 +187,7 @@ for geneFile in fileSet:
     callerList.append(callSet) 
 
     if CGC_MESSAGES == 'True':
-        print("CGCmain says: Number of gene calls in current gene call set:", len(callSet.geneCallList))
+        print("CGC_main says: Number of gene calls in current gene call set:", len(callSet.geneCallList))
 
 # Communicate
 LOG.write("%s%s\n" % ("CGC Main: All call sets have been added to caller list. Number of call sets in callerList: ", len(callerList)))
@@ -200,7 +201,7 @@ for callSet in callerList:
     totalCalls += len(callSet.geneCallList)
 LOG.write("%s%s\n" % ("CGC Main: Total number of gene calls across callerList call sets is: ", totalCalls))
 if CGC_MESSAGES == 'True':
-    print("CGCmain says: callerList is:", end=' ') 
+    print("CGC_main says: callerList is:", end=' ') 
     for callSet in callerList:
         callSet.PrintAll_brief() 
 if DEBUG:  # Print out gene calls (verbose)
@@ -217,9 +218,9 @@ if DEBUG:  # Print out gene calls (verbose)
 
 LOG.write("%s\n" % ("CGC Main: Sorting gene calls for each caller"))
 if CGC_PROGRESS == 'True':
-    print("CGCmain: Sorting gene calls for each caller...")
+    print("CGC_main says, Sorting gene calls for each caller...")
 if DEBUG:
-    print("CGCmain / DEBUG: CGC_main says, Calling SortGeneCalls()")
+    print("CGC_main says, DEBUG: Calling SortGeneCalls()")
 
 # Sort calls for each caller
 for callSet in callerList:
@@ -230,10 +231,10 @@ for callSet in callerList:
 LOG.write("%s\n" % ("CGC Main: callSet processing complete"))
 
 if DEBUG:
-    print("CGCmain / DEBUG: Returning from SortGeneCalls()")
+    print("CGC_main says, DEBUG: Returning from SortGeneCalls()")
     LOG.write("%s\n" % ("CGC Main / DEBUG: Returning from call to caller.SortGeneCalls()"))
     LOG.write("%s\n" % ("CGC Main / DEBUG: Current content of callerList, in detail:"))
-    print("CGCmain / DEBUG \n******************Sorted Lists:")
+    print("CGC_main says, DEBUG: \n******************Sorted Lists:")
     for callSet in callerList:
         callSet.PrintAll2file(LOG)
         callSet.PrintAll()
@@ -244,9 +245,9 @@ if DEBUG:
 
 LOG.write("%s\n" % ("CGC Main: Comparing across the call sets..."))
 if CGC_PROGRESS == 'True':
-    print("CGCmain says: Comparing accross the call sets....")
+    print("CGC_main says: Comparing accross the call sets....")
 if DEBUG:
-    print("CGCmain says: Performing comparison....")
+    print("CGC_main says: Performing comparison....")
 # Create comparison object
 compareGCs = CGC_compare.Comparison()
 
@@ -255,9 +256,9 @@ compareGCs = CGC_compare.Comparison()
 
 LOG.write("%s\n" % ("CGC Main: Merging the geneCall sets...."))
 if CGC_PROGRESS == 'True':
-    print("CGC Main: Merging the gene call sets....")
+    print("CGC_ain: Merging the gene call sets....")
 if DEBUG:
-    print("CGCmain says: Merging the gene call sets....")
+    print("CGC_main says, DEBUG: Merging the gene call sets....")
 for callSet in callerList:
     compareGCs.Merge(callSet.geneCallList)  # Merge() merges one at a time, adding each gene call list the the existing merge
 
@@ -282,7 +283,7 @@ if DEBUG:
 # Next, score the gene calls
 LOG.write("%s\n" % ("CGC Main: Scoring gene calls...."))
 if CGC_PROGRESS == 'True':
-    print("CGCmain says: Scoring gene calls....")
+    print("CGC_main says: Scoring gene calls....")
 compareGCs.Score()
 if DEBUG:
     LOG.write("%s\n" % ("CGC Main: This is the scored gene-call list:"))
@@ -291,7 +292,7 @@ if DEBUG:
 # Then, identify gene calls in common
 LOG.write("%s\n" % ("CGC Main: Identifying common core..."))
 if CGC_PROGRESS == 'True':
-    print("CGCmain says: Identifying gene calls in common...")
+    print("CGC_main says: Identifying gene calls in common...")
 compareGCs.IdentifyCommonCore()
 LOG.write("%s\n" % ("CGC Main: This is the Common Core List:"))
 compareGCs.PrintCommonCore2file(LOG)
@@ -302,15 +303,15 @@ compareGCs.PrintCommonCore2file(LOG)
 # Print GFF
 LOG.write("%s\n" % ("CGC Main: Printing gene-call superset in GFF format"))
 if CGC_PROGRESS == 'True':
-    print("CGC Main: printing GFF formatted gene-call file....")
+    print("CGC_main says, printing GFF formatted gene-call file....")
 compareGCs.PrintGenecalls2file_gff(GFF,"superset")
 compareGCs.PrintGenecalls2file_gff(LOG,"superset")
 
 LOG.write("%s\n" % ("CGC Main: Printing report...."))
 if CGC_PROGRESS == 'True':
-    print("CGC Main: printing report....")
+    print("CGC_main says, printing report....")
 if DEBUG:
-    print("CGC Main: printing report....")
+    print("CGC_main says, DEBUG: printing report....")
     compareGCs.PrintAll()
 compareGCs.PrintReport2file(LOG)
 compareGCs.PrintReport()
@@ -323,5 +324,6 @@ if CGC_PROGRESS == 'True':
 if DEBUG:
     print("CGC: complete.")
 GFF.close()
-LOG.write("%s%s\n" % ("CGC: complete at ",datetime.datetime.now()))
+LOG.write("%s%s\n" % ("CGC_main: complete at ",datetime.datetime.now()))
 LOG.close()
+sys.stdout.flush() # Flush stdout buffer to avoid confusion in reporting progress to user

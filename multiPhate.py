@@ -4,7 +4,7 @@
 #
 # Program Title:  multiPhate.py (/MultiPhate/)
 #
-# Last Update:  15 April 2019
+# Last Update:  09 April 2020
 #
 # Description: Script multiPhate.py runs the phate annotation pipeline over a set of input phage genomes.  This code runs under 
 #    Python 3.7, and requires dependent packages and databases as listed in the README file.
@@ -376,7 +376,7 @@ except IOError as e:
     print(e)
 
 if fileError:
-    print("Check your config file.")
+    print("multiPhate says, ERROR: Check your config file.")
     print(HELP_STRING)
     if not HPC:
         LOG.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
@@ -647,7 +647,7 @@ for cLine in cLines:
             TRANSLATE_ONLY = False
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING:  Invalid string following translate_only parameter in config file:", value)
+                print("multiPhate says, WARNING:  Invalid string following translate_only parameter in config file:", value)
             if not HPC:
                 LOGFILE.write("%s%s\n" % ("Invalid string following translate_only parameter in config file: ", value))
 
@@ -812,7 +812,7 @@ for cLine in cLines:
             hmmProgram = 'jackhmmer'
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
+                print("multiPhate says, WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
             hmmProgram = HMM_PROGRAM_DEFAULT 
 
     elif match_ncbiVirusHmm:
@@ -1111,6 +1111,9 @@ if not HPC:
 
     LOG.write("%s%s\n" % ("Number of genomes to be processed: ",len(genomeList)))
     LOG.write("%s\n" % ("List of genomes to be processed:"))
+
+PHATE_PROGRESS = os.environ["PHATE_PROGRESS"]
+
 for genome in genomeList:
     if not HPC:
         LOG.write("%s%c%s%c%s%c%s%c%s%c%s\n" % (genome["genomeNumber"],' ',genome["genomeName"],' ',genome["genomeType"],' ',genome["genomeSpecies"],' ',genome["genomeFile"],' ',genome["outputSubdir"]))
@@ -1118,6 +1121,9 @@ for genome in genomeList:
 ##### BEGIN MAIN ########################################################################################
 
 # For each genome, create a phate.config file for running phate_runPipeline.py
+
+if PHATE_PROGRESS == 'True':
+    print("multiPhate says, Reading configuration file...",flush=True)
 
 nextConfigFile = ""
 configList = []  # List of config filenames
@@ -1131,7 +1137,7 @@ for genome in genomeList:
     else:
         if PHATE_WARNINGS:
             print("multiPhate says, WARNING: Fasta filename not recognized for genome", genome["genomeName"])
-            print("   Expected fasta filename extension: .fasta")
+            print("   ...Expected fasta filename extension: .fasta")
         if not HPC:
             LOG.write("%s%s%s\n" % ("WARNING: problem with fasta file: ",genome["genomeFile"]," This genome not processed!"))
         continue
@@ -1185,7 +1191,11 @@ if not HPC:
 for configFile in configList:
     if not HPC:
         LOG.write("%s%s\n" % ("Running PhATE using genome config file ",configFile))
+        if PHATE_PROGRESS == 'True':
+            print("multiPhate says, Running PhATE using genome config file ",configFile)
     command = "python " + PHATE_BASE_DIR + PHATE_PIPELINE_CODE + " " + configFile 
+    if PHATE_PROGRESS == 'True':
+        print("multiPhate says, command is ",command)
     if not HPC:
         LOG.write("%s%s\n" % ("Command is ",command))
         LOG.write("%s%s\n" % ("Begin processing at ",datetime.datetime.now()))
@@ -1198,3 +1208,5 @@ for configFile in configList:
 if not HPC:
     LOG.write("%s%s\n" % ("End log file ",datetime.datetime.now()))
     LOG.close()
+    if PHATE_PROGRESS == 'True':
+        print("multiPhate says, Done!")

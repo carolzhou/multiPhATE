@@ -327,7 +327,7 @@ except IOError as e:
     print(e)
 
 if fileError:
-    print("Check your config file.")
+    print("phate_runPipeline says, ERROR: Check your config file.")
     print(HELP_STRING)
     LOGFILE.write("%s%s\n" % ("A help string was provided to user; End log ",datetime.datetime.now()))
     LOGFILE.close(); exit(0)
@@ -466,7 +466,7 @@ for cLine in cLines:
             TRANSLATE_ONLY = False
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING:  Invalid string following translate_only parameter in config file:", value)
+                print("phate_runPipeline says, WARNING:  Invalid string following translate_only parameter in config file:", value)
             LOGFILE.write("%s%s\n" % ("Invalid string following translate_only parameter in config file: ", value))
 
     elif match_geneCaller:
@@ -648,7 +648,7 @@ for cLine in cLines:
             hmmProgram = 'jackhmmer'
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
+                print("phate_runPipeline says, WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
             hmmProgram = HMM_PROGRAM_DEFAULT 
 
     elif match_ncbiVirusHmm:
@@ -734,8 +734,8 @@ for cLine in cLines:
             psatAnnotation = False
 
     else:
-        LOGFILE.write("%s%s\n" % ("ERROR: Unrecognized line in config file: ", cLine))
-        print("ERROR: unrecognized line in config file:", cLine)
+        LOGFILE.write("%s%s\n" % ("WARNING: Unrecognized line in config file: ", cLine))
+        print("phate_runPipeline says, WARNING: unrecognized line in config file:", cLine)
 
 # Create user's output subdirectory, if doesn't already exist
 try:
@@ -809,56 +809,57 @@ if PSAT and TRANSLATE_ONLY:
     PSAT = False
 
 if PHATE_MESSAGES == 'True':
-    print("PIPELINE_INPUT_DIR is", PIPELINE_INPUT_DIR)
-    print("PIPELINE_OUTPUT_DIR is", PIPELINE_OUTPUT_DIR)
-    print("PIPELINE_OUTPUT_SUBDIR is", PIPELINE_OUTPUT_SUBDIR)
-    print("GENOME_FILE is", GENOME_FILE)
-    print("GENE_FILE is", GENE_FILE)
-    print("PROTEIN_FILE is", PROTEIN_FILE)
-    print("genomeType is", genomeType) 
-    print("name is", name) 
-    print("contigName is", contigName)
-    print("species is", species) 
+    print("phate_runPipeline says, Here are the parameters:")
+    print("  PIPELINE_INPUT_DIR is", PIPELINE_INPUT_DIR)
+    print("  PIPELINE_OUTPUT_DIR is", PIPELINE_OUTPUT_DIR)
+    print("  PIPELINE_OUTPUT_SUBDIR is", PIPELINE_OUTPUT_SUBDIR)
+    print("  GENOME_FILE is", GENOME_FILE)
+    print("  GENE_FILE is", GENE_FILE)
+    print("  PROTEIN_FILE is", PROTEIN_FILE)
+    print("  genomeType is", genomeType) 
+    print("  name is", name) 
+    print("  contigName is", contigName)
+    print("  species is", species) 
 
-    print("geneticCode is", geneticCode) 
-    print("Status of boolean TRANSLATE_ONLY is", TRANSLATE_ONLY)
-    print("geneCaller is", geneCaller) 
-    print("genemarksCalls is", genemarksCalls)
-    print("prodigalCalls is", prodigalCalls)
-    print("glimmerCalls is", glimmerCalls)
-    print("phanotateCalls is", phanotateCalls)
-    print("CONSENSUS_CALLS_FILE is", CONSENSUS_CALLS_FILE)
+    print("  geneticCode is", geneticCode) 
+    print("  Status of boolean TRANSLATE_ONLY is", TRANSLATE_ONLY)
+    print("  geneCaller is", geneCaller) 
+    print("  genemarksCalls is", genemarksCalls)
+    print("  prodigalCalls is", prodigalCalls)
+    print("  glimmerCalls is", glimmerCalls)
+    print("  phanotateCalls is", phanotateCalls)
+    print("  CONSENSUS_CALLS_FILE is", CONSENSUS_CALLS_FILE)
 
-    print("blastpIdentity is", blastpIdentity) 
-    print("blastpHitCount is", blastpHitCount) 
-    print("blastnHitCount is", blastnHitCount)
-    print("ncbiVirusBlast is", ncbiVirusBlast)
-    print("ncbiVirusProteinBlast is", ncbiVirusProteinBlast)
-    print("keggVirusBlast is", keggVirusBlast)
-    print("nrBlast is", nrBlast)
-    print("refseqProteinBlast is", refseqProteinBlast)
-    print("refseqGeneBlast is", refseqGeneBlast)
-    print("phantomeBlast is", phantomeBlast)
-    print("pvogsBlast is", pvogsBlast)
-    print("swissprotBlast is", swissprotBlast)
-    print("uniparcBlast is", uniparcBlast)
-    print("uniprotBlast is", uniprotBlast)
+    print("  blastpIdentity is", blastpIdentity) 
+    print("  blastpHitCount is", blastpHitCount) 
+    print("  blastnHitCount is", blastnHitCount)
+    print("  ncbiVirusBlast is", ncbiVirusBlast)
+    print("  ncbiVirusProteinBlast is", ncbiVirusProteinBlast)
+    print("  keggVirusBlast is", keggVirusBlast)
+    print("  nrBlast is", nrBlast)
+    print("  refseqProteinBlast is", refseqProteinBlast)
+    print("  refseqGeneBlast is", refseqGeneBlast)
+    print("  phantomeBlast is", phantomeBlast)
+    print("  pvogsBlast is", pvogsBlast)
+    print("  swissprotBlast is", swissprotBlast)
+    print("  uniparcBlast is", uniparcBlast)
+    print("  uniprotBlast is", uniprotBlast)
 
-    print("ncbiVirusHmm is", ncbiVirusHmm)
-    print("ncbiVirusProteinHmm is", ncbiVirusProteinHmm)
-    print("keggVirusHmm is", keggVirusHmm)
-    print("phantomeHmm is", phantomeHmm)
-    print("pvogsHmm is", pvogsHmm)
-    print("swissprotHmm is", swissprotHmm)
-    print("refseqProteinHmm is", refseqProteinHmm)
-    print("refseqGeneHmm is", refseqGeneHmm)
-    print("nrHmm is", nrHmm)
+    print("  ncbiVirusHmm is", ncbiVirusHmm)
+    print("  ncbiVirusProteinHmm is", ncbiVirusProteinHmm)
+    print("  keggVirusHmm is", keggVirusHmm)
+    print("  phantomeHmm is", phantomeHmm)
+    print("  pvogsHmm is", pvogsHmm)
+    print("  swissprotHmm is", swissprotHmm)
+    print("  refseqProteinHmm is", refseqProteinHmm)
+    print("  refseqGeneHmm is", refseqGeneHmm)
+    print("  nrHmm is", nrHmm)
 
-    print("psatAnnotation is", psatAnnotation)
+    print("  psatAnnotation is", psatAnnotation)
     if PSAT:
-        print("PSAT_FILE is", PSAT_FILE)
+        print("  PSAT_FILE is", PSAT_FILE)
     else:
-        print("PSAT_FILE was not provided.") 
+        print("  PSAT_FILE was not provided.") 
 
 RUNLOG.write("%s\n" % ("Input parameters:"))
 RUNLOG.write("%s%s\n" % ("   PIPELINE_INPUT_DIR: ", PIPELINE_INPUT_DIR))
@@ -934,7 +935,7 @@ RUNLOG.write("%s%s\n" % ("psatFile is ",    psatFile))
 # Check PSAT file
 
 if PHATE_PROGRESS == 'True':
-    print("Checking files...")
+    print("phate_runPipeline says, Checking files...")
 RUNLOG.write("%s\n" % ("Checking files..."))
 fileError = False
 if PSAT:
@@ -945,7 +946,7 @@ if PSAT:
         print(e)
 
     if fileError:
-        print("Check your PSAT file,", psatFile)
+        print("phate_runPipeline says, ERROR: Check your PSAT file,", psatFile)
         print(USAGE_STRING)
         LOGFILE.write("%s%s%s%s\n" % ("ERROR:  PSAT file could not be opened: ", psatFile, "; End log ", datetime.datetime.now()))
         LOGFILE.close(); exit(0)
@@ -962,7 +963,7 @@ except IOError as e:
 
 if fileError:
     print(USAGE_STRING)
-    print("Check your genome file,", genomeFile)
+    print("phate_runPipeline says, ERROR: Check your genome file,", genomeFile)
     LOGFILE.write("%s%s%s%s\n" % ("ERROR:  Genome file could not be opened: ", genomeFile, "; End log ", datetime.datetime.now()))
     LOGFILE.close(); exit(0)
 GENOME_H.close()
@@ -973,14 +974,14 @@ command = "cp " + configFile + ' ' + configSave
 os.system(command)
 
 if PHATE_PROGRESS == 'True':
-    print("Configuration complete.")
+    print("phate_runPipeline says, Configuration complete.")
 
 ##### BEGIN MAIN ########################################################################################
 
 ##### Run Gene-calling Module
 
 if PHATE_PROGRESS == 'True':
-    print("Preparing to run genecall module...")
+    print("phate_runPipeline says, Preparing to run genecall module...")
 RUNLOG.write("%s\n" % ("Preparing to run genecall module..."))
 
 param2 = outputDir[:-1]  # remove terminal '/' because subordinate code adds it explicitly
@@ -1000,9 +1001,9 @@ if genecallParameters["phanotateCalls"]:
 command = "python " + GENECALL_CODE + ' ' + genomeFile + ' ' + param2 + ' ' + param3
 
 if PHATE_PROGRESS == 'True':
-    print("Calling the gene-call module.")
+    print("phate_runPipeline says, Calling the gene-call module.")
 if PHATE_MESSAGES == 'True':
-    print("Command is,", command)
+    print("phate_runPipeline says, Command is,", command)
 RUNLOG.write("%s%s\n" % ("Calling the gene-call module. Command is ", command))
 
 # OS system matters; choose alternate system call if you get error message on this line
@@ -1010,19 +1011,19 @@ result = os.system(command)
 #result = subprocess.check_output(command,shell=True)
 
 if PHATE_PROGRESS == 'True':
-    print("Done!")
+    print("phate_runPipeline says, gene-call processing completed.")
 RUNLOG.write("%s%s\n" % ("Gene-call processing complete at ", datetime.datetime.now()))
 
 ##### Run Sequence Annotation Module
 
 RUNLOG.write("%s\n" % ("Preparing to call sequence annotation module..."))
 if DEBUG:
-    print("Before constructing command line to invoke sequence annotation code, contigName is", contigName)
+    print("phate_runPipeline says, DEBUG: Before constructing command line to invoke sequence annotation code, contigName is", contigName)
 
 # Construct command line parameter string
 
 if PHATE_PROGRESS == 'True':
-    print("Preparing command strings for homology searches...")
+    print("phate_runPipeline says, Preparing command strings for homology searches...")
 
 # First, construct string listing the names of databases to be blasted
 
@@ -1091,23 +1092,25 @@ else:
 
 # Communicate and execute
 if PHATE_PROGRESS == 'True':
-    print("Calling the sequence annotation module.")
+    print("phate_runPipeline says, Calling the sequence annotation module.")
 if PHATE_MESSAGES == 'True':
-    print("Command is,", command)
+    print("phate_runPipeline says, Command is,", command)
 RUNLOG.write("%s%s\n" % ("Calling the sequence annotation module. Command is ", command))
 result = os.system(command)
 if PHATE_PROGRESS == 'True':
-    print("Done!")
+    print("phate_runPipeline says, sequence annotation processing complete.")
 RUNLOG.write("%s%s\n" % ("Sequence annotation processing complete at ", datetime.datetime.now()))
 
 ##### CLEAN UP
 
 if PHATE_PROGRESS == 'True':
-    print("Code completed at", datetime.datetime.now())
+    print("phate_runPipeline says, code completed at", datetime.datetime.now())
 OUTFILE.write("%s%s\n" %("Pipeline output is in output file created by code ",SEQANNOTATION_CODE))
 OUTFILE.close()
 LOGFILE.write("%s%s\n" % ("Code completed at ", datetime.datetime.now()))
 LOGFILE.close()
 RUNLOG.write("%s%s\n" % ("Execution complete at ",datetime.datetime.now()))
 RUNLOG.close()
+# Flush standard output to avoid confusion with printing progress statements to stdout
+sys.stdout.flush()
 #logging.info('PhATE execution complete')

@@ -295,7 +295,7 @@ def ProcessGlimmer(fLines,OUT):
                 if USER_OUT_PROVIDED:
                     USER_OUT.write("%s\n" % ("ERROR encountered: unknown strand designator\n"))
                 if CGC_WARNINGS == 'True':
-                    print("ERROR in CGC_parser module: unexpected strand designator,", strand)
+                    print("CGC_parser says, ERROR: unexpected strand designator,", strand)
                 return
 
             length = rightEnd - leftEnd + 1
@@ -389,7 +389,7 @@ def ProcessProdigal(fLines,OUT):
                 strand   =     match_dataLine.group(4)
                 length   = int(rightEnd) - int(leftEnd) + 1 
                 count += 1; geneNo = count  # Re-number gene number assigned by Prodigal
-                print("Writing next prodigal gene", geneNo, strand, leftEnd, rightEnd, length, contig, protein)
+                #print("Writing next prodigal gene", geneNo, strand, leftEnd, rightEnd, length, contig, protein)
                 OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
                 if USER_OUT_PROVIDED:
                     USER_OUT.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (geneNo,strand,leftEnd,rightEnd,length,contig,protein))
@@ -455,7 +455,7 @@ def ProcessPHANOTATE(fLines,OUT):      # SDSU code
 ##### BEGIN MAIN 
 
 if CGC_PROGRESS == 'True':
-    print("CGC_parser: Parsing gene call outputs.")
+    print("CGC_parser says, Parsing gene call outputs.")
 
 # First, determine which gene caller was used
 
@@ -516,3 +516,4 @@ if RUNLOGOPEN:
     RUNLOGFILE.close()
 LOGFILE.write("%s%s\n" % ("Processing complete at ", datetime.datetime.now()))
 LOGFILE.close()
+sys.stdout.flush() # Flush stdout buffer to avoid confusion in reporting progress to user

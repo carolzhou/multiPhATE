@@ -161,7 +161,7 @@ class fasta(object):
         if gi != "" and int(gi) > 0: 
             giString = "gi\|" + gi + "\|"
         else:
-            print("problem with gi")
+            print("phate_fastaSequence says, WARNING:  problem with gi")
             return(0)
         for record in SeqIO.parse(nrLocation,"fasta"):
             match = re.findall(giString,record.id)
@@ -185,7 +185,7 @@ class fasta(object):
                     self.parentSequenceLength = len(self.parentSequence)
                 else:
                     self.parentSequenceLength = -99  #***
-                    print("WARNING: in phate_fastaSequence, sequence not entered for parent")
+                    print("phate_fastaSequence says, WARNING:  sequence not entered for parent")
             if "parentName" in list(geneData.keys()):
                 self.parentName = geneData["parentName"]
             if "parentStart" in list(geneData.keys()):
@@ -301,7 +301,7 @@ class fasta(object):
             return ('>' + self.customHeader)
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in fastaSequence module: Invalid header type:", hdrType, "--Choose full, clean, trunc, short, compound, blast")
+                print("phate_fastaSequence says, WARNING: Invalid header type:", hdrType, "--Choose full, clean, trunc, short, compound, blast")
 
     def getStartCodon(self):
         if self.sequence != "":
@@ -611,7 +611,7 @@ class multiFasta(object):
                     print("Found the header:", fasta.header, "for string:", searchString)
                 return(fasta)
         if PHATE_WARNINGS == 'True':
-            print("WARNING in fastaSequence module: Fasta not found for", searchString)
+            print("phate_fastaSequence says, WARNING: Fasta not found for", searchString)
         return(0)
 
     def reportStats(self):
@@ -694,7 +694,7 @@ class multiFasta(object):
     def addFastasFromFile(self,mtype):
         if self.filename == "unknown" or self.filename == '':
             if PHATE_WARNINGS == 'True':
-                print("ERROR in fastaSequence module: First you must set the filename in addFastasFromFile()")
+                print("phate_fastaSequence says, ERROR: First you must set the filename in addFastasFromFile()")
         else:
             fastaFile = open(self.filename,"r")
             fLines = fastaFile.read().splitlines()

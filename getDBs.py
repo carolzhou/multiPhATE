@@ -144,7 +144,7 @@ if NCBI_VIRUS_GENOME or NCBI_VIRUS_PROTEIN:
 print ("NCBI Refseq Protein database: ('y'/'n')")
 ncbi_refseq_protein = input()
 if re.search('Y|y|yes|Yes|YES',ncbi_refseq_protein):
-    print ("Great, let's download NCBI Virus Genome")
+    print ("Great, let's download Refseq Protein database")
     NCBI_REFSEQ_PROTEIN = True
 elif re.search('N|n|no|No|NO',ncbi_refseq_protein):
     print ("Ok, we'll skip that one")
@@ -155,7 +155,7 @@ else:
 print ("NCBI Refseq Gene database: ('y'/'n')")
 ncbi_refseq_gene = input()
 if re.search('Y|y|yes|Yes|YES',ncbi_refseq_gene):
-    print ("Great, let's download NCBI Virus Genome")
+    print ("Great, let's download Refseq Gene database")
     NCBI_REFSEQ_GENE = True
 elif re.search('N|n|no|No|NO',ncbi_refseq_gene):
     print ("Ok, we'll skip that one")
@@ -166,7 +166,7 @@ else:
 print ("NCBI Swissprot database: ('y'/'n')")
 ncbi_swissprot = input()
 if re.search('Y|y|yes|Yes|YES',ncbi_swissprot):
-    print ("Great, let's download NCBI Virus Genome")
+    print ("Great, let's download Swissprot")
     NCBI_SWISSPROT = True
 elif re.search('N|n|no|No|NO',ncbi_swissprot):
     print ("Ok, we'll skip that one")
@@ -180,7 +180,7 @@ print ("Downloading NR will take a long time. ")
 print ("NR database: ('y'/'n')")
 nr = input()
 if re.search('Y|y|yes|Yes|YES',nr):
-    print ("Great, let's download NCBI Virus Genome")
+    print ("Great, let's download NR")
     NR = True
 elif re.search('N|n|no|No|NO',nr):
     print ("Ok, we'll skip that one")

@@ -26,6 +26,7 @@
 # This code was developed by Carol L. Ecale Zhou at Lawrence Livermore National Laboratory.
 # THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD.pdf FOR DETAILS.
 
+import sys
 import re
 import copy
 import os
@@ -168,7 +169,7 @@ class GeneCallSet(object):
                     self.GetGeneCalls(fLines,caller)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print("ERROR in CGC_geneCall: gene caller not recognized in geneCall.GeneCallSet,", caller, line)
+                        print("CGC_geneCall says, ERROR: gene caller not recognized in geneCall.GeneCallSet,", caller, line)
         return
 
     # Determine which of 2 gene calls occurs first along the sequence (left to right, regardless of orientation) 

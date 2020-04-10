@@ -123,11 +123,11 @@ class genome(object):
         for fa in self.contigSet.fastaList:
             if fa.header == contig:
                 if DEBUG:
-                    print("Getting subsequence from A to B:", int(start)-1, int(end))
+                    print("phate_genomeSequence says, DEBUG: Getting subsequence from A to B:", int(start)-1, int(end))
                 subSeq = fa.getSubsequence(int(start)-1,int(end)) #*** ???
             else:
                 if PHATE_WARNINGS == 'True':
-                    print("WARNING in genomeSequence module: fa.header", fa.header, "did not match contig", contig)
+                    print("phate_genomeSequence says, WARNING: fa.header", fa.header, "did not match contig", contig)
         return subSeq           
 
     def getSubsequence(self,start,end,contig):  # Note: tailored to RAST
@@ -207,7 +207,7 @@ class genome(object):
                 geneCallFile = geneCallInfo['geneCallFile']
             else:
                 if PHATE_WARNINGS == 'True':
-                    print("WARNING in genomeSequence module: processGeneCalls(), no geneCall file provided")
+                    print("phate_genomeSequence says, WARNING: processGeneCalls(), no geneCall file provided")
                 return (0)
 
         # Read gene-call lines from gene caller output file and create a new gene object
@@ -216,7 +216,7 @@ class genome(object):
             match_geneCall = re.search('^\d+',fLine)
             if match_geneCall:
                 if DEBUG:
-                    print("Translating:", fLine)
+                    print("phate_genomeSequence says, DEBUG: Translating:", fLine)
                 # Format output by CGCparser.py is 6 columns, tabbed; final column is protein, but ignore
                 columns  = fLine.split('\t')
                 geneNo   = columns[0]
@@ -243,9 +243,9 @@ class genome(object):
                 if cleanContig2 in contigSeqLen_hash.keys():
                     contigSequenceLength = contigSeqLen_hash[cleanContig2]  
                     if contigSequenceLength == 0:
-                        print("ERROR: in phate_genomeSequence, contigSequenceLength is zero for ", contig, cleanContig2)
+                        print("phate_genomeSequence says, ERROR: contigSequenceLength is zero for ", contig, cleanContig2)
                 else:
-                    print("WARNING: in phate_genomeSequence, contig name not found in contig_seqLen_hash", contig, cleanContig2)
+                    print("phate_genomeSequence says, WARNING: contig name not found in contig_seqLen_hash", contig, cleanContig2)
                 newGene.parentSequenceLength = contigSequenceLength
                 newGene.parentName     = contig
                 newGene.number         = int(geneNo)  # as numbered in gene-call file #*** OOPS! might be a string
@@ -266,7 +266,7 @@ class genome(object):
                 else:
                     newGene.strand = 'x'
                     if PHATE_WARNINGS == 'True':
-                        print("ERROR in genomeSequence module: anomalous strand setting in processGeneCalls, phate_genomeSequence module:", newGene.strand)
+                        print("phate_genomeSequence says, ERROR: anomalous strand setting in processGeneCalls, phate_genomeSequence module:", newGene.strand)
 
                 #*** BANDAID - to compensate for PHANOTATE sometimes starting gene at 0
                 if newGene.start == 0:
@@ -274,11 +274,11 @@ class genome(object):
 
                 # Extract gene from genome sequence
                 if DEBUG:
-                    print("Invoking translation...start,end,strand,contig:",newGene.start,newGene.end,newGene.strand,contig)
+                    print("phate_genomeSequence says, DEBUG: Invoking translation...start,end,strand,contig:",newGene.start,newGene.end,newGene.strand,contig)
                 sequence = self.getCGCsubsequence(newGene.start,newGene.end,newGene.strand,contig)
                 newGene.sequence = sequence
                 if DEBUG:
-                    print("newGene.sequence is", newGene.sequence)
+                    print("phate_genomeSequence says, DEBUG: newGene.sequence is", newGene.sequence)
 
                 # Reverse complement the string if on reverse strand
                 if newGene.strand == '-':
@@ -349,7 +349,7 @@ class genome(object):
                 protein.addAnnotation(newPSAT)
                 PSAT_H.close()
         else:
-            print("First you need to set the PSAT filename in phate_genomeSequence object") 
+            print("phate_genomeSequence says, First you need to set the PSAT filename in phate_genomeSequence object") 
         return 0
 
     def countAllAnnotations(self):
@@ -494,14 +494,14 @@ class genome(object):
 
     def printGenomeData2file_GFF(self,FILE_HANDLE):
         FILE_HANDLE.write("%s\n" % (GFF_COMMENT))  # pragma identifying gff version
-        print("There are", len(self.geneSet.fastaList), "genes, and", len(self.proteinSet.fastaList), "proteins")
-        print("Writing data to GFF file")
+        print("phate_genomeSequence says, There are", len(self.geneSet.fastaList), "genes, and", len(self.proteinSet.fastaList), "proteins")
+        print("phate_genomeSequence says, Writing data to GFF file")
         #*** NOTE: The following code assumes that the list of proteins corresponds precisely to
         #*** the list of genes.  Oh, for the want of a pointer!!!
 
         lastContig = "notAname"; nextContig = ""
         for i in range(0, len(self.geneSet.fastaList)):
-            print("phate_genomeSequence says, Processing fastaList, i=",i)
+            #print("phate_genomeSequence says, Processing fastaList, i=",i)
             nextContig = self.geneSet.fastaList[i].parentName
             if lastContig != nextContig:
                 contig = self.geneSet.fastaList[i].parentName

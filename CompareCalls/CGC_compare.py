@@ -82,11 +82,11 @@ class Comparison(object):
                     self.callerList.append(gene.geneCaller)
             self.callerList.sort()
             if DEBUG:
-                print("DEBUG: CGC_compare/IdentifyCallers(): self.callerList is", self.callerList)
+                print("CGC_compare says, DEBUG: CGC_compare/IdentifyCallers(): self.callerList is", self.callerList)
             return len(self.callerList)
         else:
             if CGC_WARNINGS == 'True':
-                print("WARNING in CGC_compare module: IdentifyCallers(): No callers to extract: call method Merge() to establish mergeList before calling this method") 
+                print("CGC_compare says, WARNING in CGC_compare module: IdentifyCallers(): No callers to extract: call method Merge() to establish mergeList before calling this method") 
             return 0
 
 
@@ -113,13 +113,13 @@ class Comparison(object):
                             count += 1
                 else:
                     if CGC_WARNINGS == 'True':
-                        print("WARNING in CGC_compare: IdentifyCommonCore(): callerCount is zero! cannot process")
+                        print("CGC_compare says, WARNING: IdentifyCommonCore(): callerCount is zero! cannot process")
             else:
                 if CGC_WARNINGS == 'True':
-                    print("WARNING in CGC_compare module: IdentifyCommonCore(): MergeList is empty:  need to run self.Merge()")
+                    print("CGC_compare says, WARNING: IdentifyCommonCore(): MergeList is empty:  need to run self.Merge()")
         else:
             if CGC_WARNINGS == 'True':
-                print("WARNING in CGC_compare module: IdentifyCommonCore(): No data available to identify common core")
+                print("CGC_compare says, WARNING: IdentifyCommonCore(): No data available to identify common core")
         return 
 
  
@@ -257,7 +257,7 @@ class Comparison(object):
                         stop  = geneCall.leftEnd
                     else:
                         if CGC_WARNINGS == 'True':
-                            print("WARNING: CGC_compare says, Unrecognized strand:", geneCall.strand) 
+                            print("CGC_compare says, WARNING: Unrecognized strand:", geneCall.strand) 
                     contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
                     contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
 
@@ -271,8 +271,8 @@ class Comparison(object):
                     else:
                         callTally[contig_strand_stop] = 1  
             if DEBUG:
-                print("gene caller count:", geneCallerCount)
-                print("callTally:", callTally)
+                print("CGC_compare says, DEBUG: gene caller count:", geneCallerCount)
+                print("CGC_compare says, DEBUG: callTally:", callTally)
 
             # Next, compute score for each gene call; this is done is two steps: identity, then similarity
             for identityList in self.uniqueList:
@@ -291,7 +291,7 @@ class Comparison(object):
                         stop  = geneCall.leftEnd
                     else:
                         if DEBUG:
-                            print("DEBUG: CGC_compare says, Unrecognized strand:", geneCall.strand) 
+                            print("CGC_compare says, DEBUG: Unrecognized strand:", geneCall.strand) 
                     contig_strand_start_stop = geneCall.contig + '|' + geneCall.strand + '|' + str(start) + '|' + str(stop) 
                     contig_strand_stop       = geneCall.contig + '|' + geneCall.strand + '|'                    + str(stop)
 
@@ -310,8 +310,8 @@ class Comparison(object):
                         if callTally[contig_strand_stop] > 1:               # must be at least 2 similars 
                             geneScore_b = 0.5 / float(geneCallerCount)      # at a fractional score to "boost" due to similarity
                     if DEBUG:
-                        print("geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop) 
-                        print("geneScore_b is", geneScore_b, "for gene call", contig_strand_stop)
+                        print("CGC_compare says, geneScore_a is", geneScore_a, "for gene call", contig_strand_start_stop) 
+                        print("CGC_compare says, geneScore_b is", geneScore_b, "for gene call", contig_strand_stop)
 
                     # Compute and record final gene-call score
                     geneCall.score1 = geneScore_a + geneScore_b
@@ -395,7 +395,7 @@ class Comparison(object):
                     end    = str(callList[0].leftEnd)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print("WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand)
+                        print("CGC_compare says, WARNING: Unexpected value for strand:", callList[0].strand)
                 if len(callList) == len(self.callerList):      # all callers agreed
                     attributes = 'unanimous call'
                     source     = 'all callers'
@@ -424,11 +424,11 @@ class Comparison(object):
                     end    = str(callList[0].leftEnd)
                 else:
                     if CGC_WARNINGS == 'True':
-                        print("WARNING: CGC_compare says, Unexpected value for strand:", callList[0].strand)
+                        print("CGC_compare says, WARNING: Unexpected value for strand:", callList[0].strand)
                 FILE_H.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (seqid,source,type,start,end,strand,phase,attributes))
         else:
             if CGC_WARNINGS == 'True':
-                print("WARNING: CGC_compare says, dataSet not recognized:", dataSet) 
+                print("CGC_compare says, WARNING: dataSet not recognized:", dataSet) 
         return
 
     def PrintMergeList(self):

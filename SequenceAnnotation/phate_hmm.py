@@ -141,14 +141,14 @@ class multiHMM(object):
             self.hmmProgram = 'hmmscan'
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module:  Unrecognized HMM program:", hmmProgram) 
+                print("phate_hmm says, WARNING:  Unrecognized HMM program:", hmmProgram) 
 
     def setTopHitCount(self,number):
         if (int(number) >= 1 and int(number) <= HIT_COUNT_MAX):
             self.topHitCount = int(number)
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module: You may capture from 1 to", HIT_COUNT_MAX, "hits per query. If this is insufficient, you may change HIT_COUNT_MAX in phate_blast.py.")
+                print("phate_hmm says, WARNING: You may capture from 1 to", HIT_COUNT_MAX, "hits per query. If this is insufficient, you may change HIT_COUNT_MAX in phate_blast.py.")
 
     def setOutputFormat(self,outfmt):
         if outfmt == XML or str(outfmt) == str(XML) or outfmt.lower() == 'xml':
@@ -159,7 +159,7 @@ class multiHMM(object):
             self.outputFormat = TBL 
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module: Only acceptable output format is TBL or", TBL) 
+                print("phate_hmm says, WARNING: Only acceptable output format is TBL or", TBL) 
 
     def setGeneCallDir(self,geneCallDir):
         self.geneCallDir = geneCallDir
@@ -213,7 +213,7 @@ class multiHMM(object):
         if command == '':  # set to 'jackhmmer' (only hmm code currently supported)
             command = HMM_HOME + "jackhmmer --tblout " + seqOutfile + ' --domtblout ' + domOutfile + ' ' + fastaFile + ' ' + database
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module: HMM program not currently supported: ", self.hmmProgram, "Program was set to jackhmmer.")
+                print("phate_hmm says, WARNING: HMM program not currently supported: ", self.hmmProgram, "Program was set to jackhmmer.")
         if PHATE_OUT == 'True':
             p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
             output = p.stdout.read() 
@@ -265,7 +265,7 @@ class multiHMM(object):
 
         if self.outputFormat == XML or self.outputFormat == LIST:
             if PHATE_WARNINGS == 'True':
-                print("ERROR in hmm module:  only TBL format is currently being used for jackhmmer output parsing")
+                print("phate_hmm says, ERROR:  only TBL format is currently being used for jackhmmer output parsing")
 
         elif self.outputFormat == TBL:
 
@@ -314,31 +314,31 @@ class multiHMM(object):
                     targetDescription = ' '.join(fields[18:]);  targetDescription = targetDescription.rstrip()
 
                     if DEBUG:
-                        print("DEBUG in phate_hmm.py / sequence parsing")
-                        print("targetAccession:", targetAccession)
-                        print("hitCount:", hitCount, "targetName:", targetName, "queryName:", queryName)
-                        print("queryAccession:", queryAccession, "seqEvalue:", seqEvalue, "seqScore:", seqScore, "seqBias:", seqBias)
-                        print("dom1evalue:", dom1evalue, "dom1score:", dom1score, "dom1bias:", dom1bias)
-                        print("dom1exp:", dom1exp, "dom1reg:", dom1reg, "dom1clu:", dom1clu, "dom1ov:", dom1ov, "dom1env:", dom1env)
-                        print("dom1dom:", dom1dom, "dom1rep:", dom1rep, "dom1inc:", dom1inc)
-                        print("targetDescription:", targetDescription)
+                        print("phate_hmm says, DEBUG: sequence parsing...")
+                        print("  targetAccession:", targetAccession)
+                        print("  hitCount:", hitCount, "targetName:", targetName, "queryName:", queryName)
+                        print("  queryAccession:", queryAccession, "seqEvalue:", seqEvalue, "seqScore:", seqScore, "seqBias:", seqBias)
+                        print("  dom1evalue:", dom1evalue, "dom1score:", dom1score, "dom1bias:", dom1bias)
+                        print("  dom1exp:", dom1exp, "dom1reg:", dom1reg, "dom1clu:", dom1clu, "dom1ov:", dom1ov, "dom1env:", dom1env)
+                        print("  dom1dom:", dom1dom, "dom1rep:", dom1rep, "dom1inc:", dom1inc)
+                        print("  targetDescription:", targetDescription)
                         
                     # Collect pVOG identifiers for this hmm search hit; fasta header of target may have >= 1 pVOG identifier
                     vogIDs = ''; pVOGlist = []
                     if DEBUG:
-                        print("DEBUG: targetName is", targetName)
+                        print("phate_hmm says, DEBUG: targetName is", targetName)
                     pVOGlist = re.findall('VOG\d+', targetName)
                     if DEBUG:
-                        print("DEBUG: VOG IDs found, pVOGlist is", pVOGlist)
+                        print("phate_hmm says, DEBUG: VOG IDs found, pVOGlist is", pVOGlist)
                     if pVOGlist:
                         for pVOG in pVOGlist:
                             vogIDs += pVOG + ' '
                         vogIDs.rstrip()
                         if DEBUG:
-                            print("DEBUG: vogIDs is", vogIDs)
+                            print("phate_hmm says, DEBUG: vogIDs is", vogIDs)
                     else:
                         if DEBUG:
-                            print("DEBUG: pVOGlist is empty")
+                            print("phate_hmm says, DEBUG: pVOGlist is empty")
                      
                     # Create new hitDataSet object and store data (note: some data may not be stored)
                     newSequenceDataSet = copy.deepcopy(sequenceDataSet)
@@ -366,7 +366,7 @@ class multiHMM(object):
                         tempVOGlist.append(vog)  # Now we have a complete (super)set of all pVOG identifiers found in hmm search 
             nrVOGlist = list(set(tempVOGlist)) # create a set, then convert back to list: presto! non-redundant list
             if DEBUG:
-                print("DEBUG: nrVOGlist is", nrVOGlist)
+                print("phate_hmm says, DEBUG: nrVOGlist is", nrVOGlist)
 
             # Parse the domain-level hmm data
             # There can be multiple domain-level hits for a given sequence (global) hit (above)
@@ -406,13 +406,13 @@ class multiHMM(object):
                     targetDescription = fields[22]; targetDescription = targetDescription.rstrip()
                     
                     if DEBUG:
-                        print("DEBUG in phate_hmm.py / domain parsing")
-                        print("targetName:", targetName, "targetAccession:", targetAccession, "targetLength:", targetLength, "queryName:", queryName)
-                        print("queryAccession:", queryAccession, "queryLength:", queryLength, "fullSeqEvalue:", fullSeqEvalue)
-                        print("fullSeqScore:", fullSeqScore, "fullSeqBias:", fullSeqBias, "domainNumber:", domainNumber)
-                        print("cEvalue:", cEvalue, "domOf:", domOf, "iEvalue:", iEvalue, "score:", score, "bias:", bias)
-                        print("hmmFrom:", hmmFrom, "hmmTo:", hmmTo, "alignFrom:", alignFrom, "envFrom:", envFrom, "envTo:", envTo, "acc:", acc)
-                        print("targetDescription:", targetDescription) 
+                        print("phate_hmm says, DEBUG: domain parsing...")
+                        print("  targetName:", targetName, "targetAccession:", targetAccession, "targetLength:", targetLength, "queryName:", queryName)
+                        print("  queryAccession:", queryAccession, "queryLength:", queryLength, "fullSeqEvalue:", fullSeqEvalue)
+                        print("  fullSeqScore:", fullSeqScore, "fullSeqBias:", fullSeqBias, "domainNumber:", domainNumber)
+                        print("  cEvalue:", cEvalue, "domOf:", domOf, "iEvalue:", iEvalue, "score:", score, "bias:", bias)
+                        print("  hmmFrom:", hmmFrom, "hmmTo:", hmmTo, "alignFrom:", alignFrom, "envFrom:", envFrom, "envTo:", envTo, "acc:", acc)
+                        print("  targetDescription:", targetDescription) 
 
                     # Create new domDataSet object and store data 
                     newDomainDataSet = copy.deepcopy(domainDataSet)
@@ -436,7 +436,7 @@ class multiHMM(object):
                             FOUND = True
                     if not FOUND:
                         if PHATE_WARNINGS == 'True':
-                            print("WARNING in hmm module: sequence data object not found for domain object", targetName)
+                            print("phate_hmm says, WARNING: sequence data object not found for domain object", targetName)
 
             # Close HMM output files
             seqOutfileH.close()
@@ -486,7 +486,7 @@ class multiHMM(object):
         # Requested HMM output format not supported
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module: Output format", self.outputFormat, "not yet supported in phate_hmm.py/hmm1fasta(). Use hmm out TBL format for now.")
+                print("phate_hmm says, WARNING: Output format", self.outputFormat, "not yet supported in phate_hmm.py/hmm1fasta(). Use hmm out TBL format for now.")
 
     def runHmm(self,fastaSet,dbType="protein"): # fastaSet is a phate_fastaSequence.multiFasta object
 
@@ -500,7 +500,7 @@ class multiHMM(object):
             GENE = True
         else:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module: unrecognized database type in runBlast:", dbType)
+                print("phate_hmm says, WARNING: unrecognized database type in runBlast:", dbType)
             return
                
         # Set database variable, invoke HMM program for each fasta 
@@ -508,7 +508,7 @@ class multiHMM(object):
 
         if GENOME:
             if PHATE_WARNINGS == 'True':
-                print("WARNING in hmm module:  Currently genome HMM search is not supported.")
+                print("phate_hmm says, WARNING:  Currently genome HMM search is not supported.")
 
         if GENE:
             if self.REFSEQ_GENE_HMM:
@@ -516,7 +516,7 @@ class multiHMM(object):
                 dbName   = 'refseqGene'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running Refseq gene hmm search:", database, dbName)
+                    print("phate_hmm says, Running Refseq gene hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_refseqGene_" + str(count)
@@ -528,7 +528,7 @@ class multiHMM(object):
                 dbName   = 'nr'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running NR hmm search:", database, dbName)
+                    print("phate_hmm says, Running NR hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_nr_" + str(count)
@@ -539,7 +539,7 @@ class multiHMM(object):
                 dbName   = 'ncbiVirusProtein'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running NCBI_VIRUS_PROTEIN hmm search:", database, dbName)
+                    print("phate_hmm says, Running NCBI_VIRUS_PROTEIN hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_ncbiVirProt_" + str(count)
@@ -550,7 +550,7 @@ class multiHMM(object):
                 dbName   = 'refseqProtein'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running Refseq protein hmm search:", database, dbName)
+                    print("phate_hmm says, Running Refseq protein hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_refseqProtein_" + str(count)
@@ -561,7 +561,7 @@ class multiHMM(object):
                 dbName   = 'phantome'
                 count = 0 
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running PHANTOME hmm search:", database, dbName)
+                    print("phate_hmm says, Running PHANTOME hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_phantome_" +str(count)
@@ -572,7 +572,7 @@ class multiHMM(object):
                 dbName   = 'kegg'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running KEGG hmm search:", database, dbName)
+                    print("phate_hmm says, Running KEGG hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_kegg_" + str(count)
@@ -583,7 +583,7 @@ class multiHMM(object):
                 dbName   = 'uniparc'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running UNIPARC hmm search:", database, dbName)
+                    print("phate_hmm says, Running UNIPARC hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_uniparc_" + str(count)
@@ -594,7 +594,7 @@ class multiHMM(object):
                 dbName   = 'swissprot'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running Swissprot hmm search:", database, dbName)
+                    print("phate_hmm says, Running Swissprot hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_swissprot_" + str(count)
@@ -605,15 +605,15 @@ class multiHMM(object):
                 dbName   = 'pVOGs'
                 count = 0
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Running pVOGs hmm search:", database, dbName)
+                    print("phate_hmm says, Running pVOGs hmm search:", database, dbName)
                 for fasta in fastaSet.fastaList:
                     count += 1
                     outfile = self.hmmOutDir + self.hmmProgram + "_pvog_" + str(count)
                     self.hmm1fasta(fasta,outfile,database,dbName)
 
                 if PHATE_PROGRESS == 'True':
-                    print("Hmm module says: Done!")
-                    print("Hmm module says: Collecting and saving pVOG sequences corresponding to hmm hit(s)")
+                    print("phate_hmm says, Done!")
+                    print("phate_hmm says, Collecting and saving pVOG sequences corresponding to hmm hit(s)")
 
                 # Next you want to create pVOG fasta group files so user can do alignments
                 # You need only one "alignment" file per pVOG group that the fasta hit (under blast cutoffs)
@@ -621,7 +621,7 @@ class multiHMM(object):
                 pVOGs_h = open(database,"r")
                 pVOGlines = pVOGs_h.read().splitlines()
                 if DEBUG:
-                    print("There are", len(pVOGlines), "pVOG database lines to search")
+                    print("phate_hmm says, DEBUG: There are", len(pVOGlines), "pVOG database lines to search")
                 count = 0; countA = 0
                 for fasta in fastaSet.fastaList:
                     pvogPrintedList = []  # keeps track of pVOGs that have already been printed for current fasta
@@ -629,10 +629,10 @@ class multiHMM(object):
                     countA = 0
                     for annot in fasta.annotationList:
                         if DEBUG:
-                            print("DEBUG: pVOGlist is", annot.pVOGlist)
+                            print("phate_hmm says, DEBUG: pVOGlist is", annot.pVOGlist)
                         for pVOG in annot.pVOGlist:  # There may be multiple annotations to inspect
                             if DEBUG:
-                                print("DEBUG: Processing pVOG", pVOG)
+                                print("phate_hmm says, DEBUG: Processing pVOG", pVOG)
                             match_good = re.search('VOG',pVOG)
                             if match_good:
                                 # Avoid redundancy in printing pVOG groups for this fasta; only once per pVOG ID that was an hmm hit
@@ -642,7 +642,7 @@ class multiHMM(object):
                                     countA += 1 
                                     outfilePVOG = self.pVOGsOutDir + "hmm_pvogGroup_" + str(count) + '_' + str(countA) + '.faa' 
                                     if DEBUG:
-                                        print("Writing to outfile", outfilePVOG, "pVOG group", pVOG, "pvogPrintedList:", pvogPrintedList)
+                                        print("phate_hmm says, DEBUG: Writing to outfile", outfilePVOG, "pVOG group", pVOG, "pvogPrintedList:", pvogPrintedList)
                                     # open file and write current fasta pluse each corresponding pVOG fasta
                                     outfilePVOG_h = open(outfilePVOG,'w')
                                     outfilePVOG_h.write("%c%s\n%s\n" % ('>',fasta.header,fasta.sequence)) # write the current peptide fasta,
@@ -650,11 +650,11 @@ class multiHMM(object):
                                     outfilePVOG_h.close()
                             else:
                                 if DEBUG:
-                                    print("WARNING: unexpected pVOG identifier:", pVOG)        
+                                    print("phate_hmm says, DEBUG/WARNING: unexpected pVOG identifier:", pVOG)        
 
         if CLEAN_RAW_DATA == 'True':
             if PHATE_PROGRESS == 'True':
-                print("Hmm module says: Removing raw data files.")
+                print("phate_hmm says, Removing raw data files.")
             self.cleanHmmOutDir()
 
     def writePVOGsequences2file(self,FILE_H,lines,pVOG):
@@ -667,7 +667,7 @@ class multiHMM(object):
             if match_header:   
                 if GET_SEQ:
                     if DEBUG:
-                        print("Writing sequence to file for header", pVOGheader)
+                        print("phate_hmm says, DEBUG: Writing sequence to file for header", pVOGheader)
                     FILE_H.write("%s\n%s\n" % (pVOGheader,pVOGsequence))
                     pVOGheader = ""; pVOGsequence = ""
                     GET_SEQ = False
@@ -687,7 +687,7 @@ class multiHMM(object):
         (rawresult, err) = proc.communicate()
         result = rawresult.decode('utf-8')    # Python3
         if DEBUG:
-            print("Result of listing hmm out dir,", self.hmmOutDir) 
+            print("phate_hmm says, DEBUG: Result of listing hmm out dir,", self.hmmOutDir) 
         fileList = result.split('\n')
         for filename in fileList:
             file2delete = self.hmmOutDir + filename
