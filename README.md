@@ -252,6 +252,8 @@ Plans include adding additional functionality to the pipeline:
 
 Feel free to report bugs or problems, or to suggest future improvements, by posting an issue on the project github page (click on the Issues tab), or by emailing the developers at:  zhou4@llnl.gov. Thank you for using multiPhATE.
 
+A second version of multiPhATE is under development at https://github.com/carolzhou/multiPhATE2/. Feel free to visit that repository to view upgrades that have been added to the code. Although multiPhATE2 is "beta", and is therefore not yet deemed production code, it is available for download and preliminary testing. Feel free to make suggestions for improvements and additional features in that repository's Issues tab. Thank you for using multiPhATE.
+
 #### PUBLICATION
 
 If you use multiPhATE in your research, kindly reference our paper:  "multiPhATE: bioinformatics pipeline for functional annotation of phage isolates", by Carol E Zhou, Stephanie A Malfatti, Jeffrey A Kimbrel, Casandra W Philipson, Katelyn E McNair, Theron C Hamilton, Robert A Edwards, and Brian E Souza, 2019, Bioinformatics 35(21):4402-4404, doi.org/10.1093/bioinformatics/btz258. If you run PHANOTATE "under the hood", please also reference, "PHANOTATE: a novel approach to gene identification in phage genomes", by Katelyn McNair, Carol Zhou, Elizabeth A Dinsdale, Brian Souza, and Robert A Edwards, Bioinformatics, btz265, https://doi.org/10.1093/bioinformatics/btz265. 
