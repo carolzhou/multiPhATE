@@ -6,7 +6,7 @@
 #
 # Last Update:  09 April 2020
 #
-# Description: Script multiPhate.py runs the phate annotation pipeline over a set of input phage genomes.  This code runs under 
+# Description: Script multiPhate.py runs the phate annotation pipeline over a set of input phage genomes.  This code runs under
 #    Python 3.7, and requires dependent packages and databases as listed in the README file.
 #    multiPhate.py inputs a configuration file (see sample_ multiPhate.config), and uses it to construct a set of
 #    configuration files, one for each genome. Then, multiPhate.py executes phate_runPipeline.py over all of the genomes in the set.
@@ -23,11 +23,12 @@
 
 import sys, os, re, string, copy, time, datetime
 import subprocess
+from multiprocessing import Pool
 
 # CONFIGURABLE
 # 1) If you are running multiPhATE on a high-performance computing (HPC) system (e.g., using SLURM), you will need to quiet the multiPhate log.
 # Set HPC = True to prevent multiPhATE from writing the multiPhate.log file, as each process attempting to write to this one file will cause
-# contention for I/O. 
+# contention for I/O.
 HPC = False
 # 2) If you are running under a linux system, set PHATE_OUT and PHATE_ERR to 'True'. This will capture standard errors to files. Cannot
 # guarantee this will work under other operating systems.
@@ -51,14 +52,14 @@ BLASTP_HIT_COUNT_DEFAULT = '3'
 BLASTN_HIT_COUNT_DEFAULT = '3'
 
 # Constants; defaults will apply if not specified in config file
-# Leave all this stuff alone! 
+# Leave all this stuff alone!
 
 # Standard directories
 BASE_DIR_DEFAULT            = os.path.join(os.getcwd(),"")    # Ex: /Home/MyName/MyCodeDirectory/multiPhATE/
-DATABASE_DIR_DEFAULT        = BASE_DIR_DEFAULT + "Databases/" 
-SOFTWARE_DIR_DEFAULT        = BASE_DIR_DEFAULT + "ExternalCodes/" 
-PIPELINE_INPUT_DIR_DEFAULT  = BASE_DIR_DEFAULT + "PipelineInput/"    
-PIPELINE_OUTPUT_DIR_DEFAULT = BASE_DIR_DEFAULT + "PipelineOutput/"   
+DATABASE_DIR_DEFAULT        = BASE_DIR_DEFAULT + "Databases/"
+SOFTWARE_DIR_DEFAULT        = BASE_DIR_DEFAULT + "ExternalCodes/"
+PIPELINE_INPUT_DIR_DEFAULT  = BASE_DIR_DEFAULT + "PipelineInput/"
+PIPELINE_OUTPUT_DIR_DEFAULT = BASE_DIR_DEFAULT + "PipelineOutput/"
 
 PHATE_PIPELINE_CODE         = 'phate_runPipeline.py'
 CONSENSUS_CALLS_FILE        = 'phanotate.cgc' #*** For now this is PHANOTATE calls, though may be consensus calls in future
@@ -70,14 +71,14 @@ GENOME_TYPE                 = 'phage'     # default is phage; could be 'bacteriu
 NAME                        = 'unknown'   # user provided
 CONTIG_NAME                 = 'unknown'   # user provided: temporary, finished genomes/single contig only for now
 SPECIES                     = 'unknown'   # user provided
- 
+
 # gene callers
 GENEMARKS_CALLS_DEFAULT     = False     # Requires license
 PRODIGAL_CALLS_DEFAULT      = False
 GLIMMER_CALLS_DEFAULT       = False
 PHANOTATE_CALLS_DEFAULT     = False
 
-GENEMARKS_PATH              = ''        # Available via license	 
+GENEMARKS_PATH              = ''        # Available via license
 GLIMMER_PATH                = ''        # Can install using Conda
 PRODIGAL_PATH               = ''        # Can install using Conda
 PHANOTATE_PATH              = ''
@@ -126,8 +127,8 @@ PSAT_FILE                        = ""
 
 # ENVIRONMENT VARIABLES
 # It is most convenient to locate the supporting software codes and databases in the above-indicated subdirectories.
-# However, if any of your supporting databases or softwares reside elsewhere, then explicit locations will need to 
-# be filled in in the multiPhate.config file. This will likely be the case for large databases that you may already 
+# However, if any of your supporting databases or softwares reside elsewhere, then explicit locations will need to
+# be filled in in the multiPhate.config file. This will likely be the case for large databases that you may already
 # have on your compute cluster (e.g, NR), and for software packages, such as EMBOSS or gene finders that you may
 # already have installed on your system. Parameters that differ from defaults will be re-assigned based on information
 # provided in the users' multiPhate.config file.
@@ -137,13 +138,13 @@ PIPELINE_OUTPUT_DIR                         = BASE_DIR_DEFAULT + PIPELINE_OUTPUT
 PHATE_BASE_DIR                              = BASE_DIR_DEFAULT
 EMBOSS_CODE                                 = ""  # Modify this for the version you have
 EMBOSS_PHATE_HOME                           = SOFTWARE_DIR_DEFAULT + EMBOSS_CODE     # if installed in SOFTWARE_DIR, else enter actual location
-os.environ["BASE_DIR"]                      = BASE_DIR_DEFAULT  
+os.environ["BASE_DIR"]                      = BASE_DIR_DEFAULT
 os.environ["DATABASE_DIR"]                  = DATABASE_DIR_DEFAULT
 os.environ["SOFTWARE_DIR"]                  = SOFTWARE_DIR_DEFAULT
 os.environ["PIPELINE_INPUT_DIR"]            = PIPELINE_INPUT_DIR
 os.environ["PIPELINE_OUTPUT_DIR"]           = PIPELINE_OUTPUT_DIR
 os.environ["PHATE_BASE_DIR"]                = PHATE_BASE_DIR
-os.environ["EMBOSS_PHATE_HOME"]             = EMBOSS_PHATE_HOME 
+os.environ["EMBOSS_PHATE_HOME"]             = EMBOSS_PHATE_HOME
 os.environ["PIPELINE_DIR"]                  = BASE_DIR_DEFAULT
 os.environ["PSAT_OUT_DIR"]                  = BASE_DIR_DEFAULT
 
@@ -187,7 +188,7 @@ os.environ["tRNAscanSE_HOME"]               = ""    # global, if installed via c
 
 # Blast
 #os.environ["BLAST_HOME"]                    = SOFTWARE_DIR_DEFAULT + "/ncbi-blast-2.7.1+/bin/"
-os.environ["BLAST_HOME"]                    = ""    # global, if installed via conda; use blast+, not legacy blast 
+os.environ["BLAST_HOME"]                    = ""    # global, if installed via conda; use blast+, not legacy blast
 os.environ["MIN_BLASTP_IDENTITY"]           = str(MIN_BLASTP_IDENTITY)
 os.environ["MAX_BLASTP_HIT_COUNT"]          = str(MAX_BLASTP_HIT_COUNT)
 os.environ["MAX_BLASTN_HIT_COUNT"]          = str(MAX_BLASTN_HIT_COUNT)
@@ -215,7 +216,7 @@ os.environ["CGC_PROGRESS"]                  = CGC_PROGRESS_DEFAULT
 CODE_BASE   = "multiPhate"
 CODE        = CODE_BASE + ".py"
 CONFIG_FILE = "multiPhate.config"            # by default, but user should name their own, ending in ".config"
-SAMPLE_CONFIG_FILE = "sample_" + CONFIG_FILE # Sample config file; user should copy, then modify. 
+SAMPLE_CONFIG_FILE = "sample_" + CONFIG_FILE # Sample config file; user should copy, then modify.
 
 # HELP STRINGS
 
@@ -349,7 +350,7 @@ else:
         configFile = sys.argv[1]
         if not HPC:
             LOG.write("%s%s\n" % ("Config file is ",configFile))
-    else: 
+    else:
         match_input  = re.search(p_input,  sys.argv[1].lower())
         match_usage  = re.search(p_usage,  sys.argv[1].lower())
         match_detail = re.search(p_detail, sys.argv[1].lower())
@@ -430,8 +431,8 @@ psatAnnotation        = PSAT_ANNOTATION_DEFAULT
 
 # Capture user's configured values
 
-FIRST_GENOME = True  
-DATA_ITEMS_NUM = 6 
+FIRST_GENOME = True
+DATA_ITEMS_NUM = 6
 genomeDataDict = {
     "genomeNumber"  : "",
     "genomeFile"    : "",
@@ -442,7 +443,7 @@ genomeDataDict = {
     }
 genomeList      = []  # List of genomeData objects
 genomeNumber    = ""  # Number of current genome; assigned by user; could be a string
-genomeDataItems = 0   # Number of data items collected for current genome; should be DATA_ITEMS_NUM 
+genomeDataItems = 0   # Number of data items collected for current genome; should be DATA_ITEMS_NUM
 BEGIN_GENOME_LIST = False
 nextGenomeData = genomeDataDict
 
@@ -530,17 +531,17 @@ for cLine in cLines:
     match_cgcMessages              = re.search(p_cgcMessages,cLine)
     match_cgcProgress              = re.search(p_cgcProgress,cLine)
     match_cleanRawData             = re.search(p_cleanRawData,cLine)
- 
+
     ##### Capture list of genomes and associated data #####
 
     if (match_comment or match_blank):
-        pass 
+        pass
 
     elif match_genomeList:  # Capture all genomes listed; for each, gather genome file, genome type, species, name, output subdir
-        pass 
+        pass
 
-    elif match_genomeNumber:  # The next genome's data 
-        # First, record previous genome data, if this is not the first genome 
+    elif match_genomeNumber:  # The next genome's data
+        # First, record previous genome data, if this is not the first genome
         if not FIRST_GENOME:
             #if not HPC:
             #    LOG.write("%s\n" % ("Appending a genome data set"))
@@ -562,7 +563,7 @@ for cLine in cLines:
     elif match_genomeFile:
         value = match_genomeFile.group(1)
         if value != '':
-            GENOME_FILE = value 
+            GENOME_FILE = value
         else:
             GENOME_FILE = "unknown"
             if PHATE_WARNINGS:
@@ -575,11 +576,11 @@ for cLine in cLines:
     elif match_genomeType:
         value = match_genomeType.group(1)
         if value.lower() == 'phage' or value.lower() == 'bacteriophage':
-            nextGenomeData["genomeType"] = 'phage' 
+            nextGenomeData["genomeType"] = 'phage'
         elif value.lower() == 'virus' or value.lower() == 'viral' or value.lower() == 'viridae':
             nextGenomeData["genomeType"] = 'virus'
         elif value.lower() == 'bacteria' or value.lower() == 'bacterium' or value.lower() == 'bacterial':
-            nextGenomeData["genomeType"] = 'bacterium' 
+            nextGenomeData["genomeType"] = 'bacterium'
         else:
             nextGenomeData["genomeType"] = 'other'
         #if not HPC:
@@ -589,13 +590,13 @@ for cLine in cLines:
     elif match_species:
         species = match_species.group(1)
         nextGenomeData["genomeSpecies"] = species
-        #if not HPC: 
+        #if not HPC:
         #    LOG.write("%s%s\n" % ("Species is ",species))
         genomeDataItems += 1
 
     elif match_name:
         name = match_name.group(1)
-        nextGenomeData["genomeName"] = name 
+        nextGenomeData["genomeName"] = name
         #if not HPC:
         #    LOG.write("%s%s\n" % ("genome name is ",name))
         genomeDataItems += 1
@@ -619,9 +620,9 @@ for cLine in cLines:
             value = value + '/'
             nextGenomeData["outputSubdir"] = value
         else:
-            nextGenomeData["outputSubdir"] = "unknown" 
+            nextGenomeData["outputSubdir"] = "unknown"
             if PHATE_WARNINGS:
-                print("multiPhate says, WARNING: pipeline output subdir is ", "unknown") 
+                print("multiPhate says, WARNING: pipeline output subdir is ", "unknown")
         genomeDataItems += 1
 
     elif match_end:  # List of genomes complete; record last genome's data
@@ -753,7 +754,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
              nrBlast = True
         else:
-             nrBlast = False 
+             nrBlast = False
 
     elif match_refseqProteinBlast:
         value = match_refseqProteinBlast.group(1)
@@ -774,7 +775,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
             phantomeBlast = True
         else:
-            phantomeBlast = False 
+            phantomeBlast = False
 
     elif match_pvogsBlast:
         value = match_pvogsBlast.group(1)
@@ -813,7 +814,7 @@ for cLine in cLines:
         else:
             if PHATE_WARNINGS == 'True':
                 print("multiPhate says, WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
-            hmmProgram = HMM_PROGRAM_DEFAULT 
+            hmmProgram = HMM_PROGRAM_DEFAULT
 
     elif match_ncbiVirusHmm:
         value = match_ncbiVirusHmm.group(1)
@@ -841,7 +842,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
              nrHmm = True
         else:
-             nrHmm = False 
+             nrHmm = False
 
     elif match_refseqProteinHmm:
         value = match_refseqProteinHmm.group(1)
@@ -855,7 +856,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
             phantomeHmm = True
         else:
-            phantomeHmm = False 
+            phantomeHmm = False
 
     elif match_pvogsHmm:
         value = match_pvogsHmm.group(1)
@@ -900,7 +901,7 @@ for cLine in cLines:
     elif match_psatFile:
         value = match_psatFile.group(1)
         if value != '':
-            PSAT_FILE = value 
+            PSAT_FILE = value
             PSAT = True   # Yes, a psat file will be passed to subordinate code
         else:
             PSAT_FILE = ""
@@ -917,7 +918,7 @@ for cLine in cLines:
 
     elif match_embossHome:
         if match_embossHome.group(1) != '':
-            os.environ["EMBOSS_PHATE_HOME"] = match_embossHome.group(1) 
+            os.environ["EMBOSS_PHATE_HOME"] = match_embossHome.group(1)
 
     elif match_tRNAscanSEhome:
         if match_tRNAscanSEhome.group(1) != '':
@@ -926,7 +927,7 @@ for cLine in cLines:
     elif match_glimmerHome:
         if match_glimmerHome.group(1) != '':
             os.environ["GLIMMER_PATH"] = match_glimmerHome.group(1)
- 
+
     elif match_prodigalHome:
         if match_prodigalHome.group(1) != '':
             os.environ["PRODIGAL_PATH"] = match_prodigalHome.group(1)
@@ -943,34 +944,34 @@ for cLine in cLines:
 
     elif match_ncbiVirusDatabase:
         if match_ncbiVirusDatabase.group(1) != '':
-            os.environ["NCBI_VIRUS_BLAST_HOME"] = match_ncbiVirusDatabase.group(1) 
+            os.environ["NCBI_VIRUS_BLAST_HOME"] = match_ncbiVirusDatabase.group(1)
 
     elif match_refseqGeneDatabase:
         if match_refseqGeneDatabase.group(1) != '':
-            os.environ["REFSEQ_GENE_BLAST_HOME"] = match_refseqGeneDatabase.group(1) 
-  
+            os.environ["REFSEQ_GENE_BLAST_HOME"] = match_refseqGeneDatabase.group(1)
+
     elif match_ncbiVirusProteinDatabase:
         if match_ncbiVirusProteinDatabase.group(1) != '':
-            os.environ["NCBI_VIRUS_PROTEIN_BLAST_HOME"] = match_ncbiVirusProteinDatabase.group(1) 
-  
+            os.environ["NCBI_VIRUS_PROTEIN_BLAST_HOME"] = match_ncbiVirusProteinDatabase.group(1)
+
     elif match_keggVirusDatabase:
         if match_keggVirusDatabase.group(1) != '':
-            os.environ["KEGG_VIRUS_BLAST_HOME"] = match_keggVirusDatabase.group(1) 
-            os.environ["KEGG_VIRUS_BASE_DIR"] = os.path.dirname(match_keggVirusDatabase.group(1)) + '/' 
+            os.environ["KEGG_VIRUS_BLAST_HOME"] = match_keggVirusDatabase.group(1)
+            os.environ["KEGG_VIRUS_BASE_DIR"] = os.path.dirname(match_keggVirusDatabase.group(1)) + '/'
 
     elif match_phantomeDatabase:
         if match_phantomeDatabase.group(1) != '':
-            os.environ["PHANTOME_BLAST_HOME"] = match_phantomeDatabase.group(1) 
-            os.environ["PHANTOME_BASE_DIR"] = os.path.dirname(match_phantomeDatabase.group(1)) + '/' 
- 
+            os.environ["PHANTOME_BLAST_HOME"] = match_phantomeDatabase.group(1)
+            os.environ["PHANTOME_BASE_DIR"] = os.path.dirname(match_phantomeDatabase.group(1)) + '/'
+
     elif match_pvogsDatabase:
         if match_pvogsDatabase.group(1) != '':
-            os.environ["PVOGS_BLAST_HOME"] = match_pvogsDatabase.group(1) 
-            os.environ["PVOGS_HMM_HOME"]   = match_pvogsDatabase.group(1) 
+            os.environ["PVOGS_BLAST_HOME"] = match_pvogsDatabase.group(1)
+            os.environ["PVOGS_HMM_HOME"]   = match_pvogsDatabase.group(1)
 
     elif match_swissprotDatabase:
         if match_swissprotDatabase.group(1) != '':
-            os.environ["SWISSPROT_BLAST_HOME"] = match_swissprotDatabase.group(1) 
+            os.environ["SWISSPROT_BLAST_HOME"] = match_swissprotDatabase.group(1)
 
     elif match_refseqProteinDatabase:
         if match_refseqProteinDatabase.group(1) != '':
@@ -978,58 +979,58 @@ for cLine in cLines:
 
     elif match_nrDatabase:
         if match_nrDatabase.group(1) != '':
-            os.environ["NR_BLAST_HOME"] = match_nrDatabase.group(1) 
+            os.environ["NR_BLAST_HOME"] = match_nrDatabase.group(1)
 
     ##### VERBOSITY #####
 
     elif match_phateWarnings:
         value = match_phateWarnings.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["PHATE_WARNINGS"] = 'True' 
+            os.environ["PHATE_WARNINGS"] = 'True'
         else:
             os.environ["PHATE_WARNINGS"] = 'False'
 
     elif match_phateMessages:
         value = match_phateMessages.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["PHATE_MESSAGES"] = 'True' 
+            os.environ["PHATE_MESSAGES"] = 'True'
         else:
-            os.environ["PHATE_MESSAGES"] = 'False' 
+            os.environ["PHATE_MESSAGES"] = 'False'
 
     elif match_phateProgress:
         value = match_phateProgress.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["PhATE_PROGRESS"] = 'True' 
+            os.environ["PhATE_PROGRESS"] = 'True'
         else:
-            os.environ["PhATE_PROGRESS"] = 'False' 
+            os.environ["PhATE_PROGRESS"] = 'False'
 
     elif match_cgcWarnings:
         value = match_cgcWarnings.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["CGC_WARNINGS"] = 'True' 
+            os.environ["CGC_WARNINGS"] = 'True'
         else:
-            os.environ["CGC_WARNINGS"] = 'False' 
- 
+            os.environ["CGC_WARNINGS"] = 'False'
+
     elif match_cgcMessages:
         value = match_cgcMessages.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["CGC_MESSAGES"] = 'True' 
+            os.environ["CGC_MESSAGES"] = 'True'
         else:
-            os.environ["CGC_MESSAGES"] = 'False' 
+            os.environ["CGC_MESSAGES"] = 'False'
 
     elif match_cgcProgress:
         value = match_cgcProgress.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["CGC_PROGRESS"] = 'True' 
+            os.environ["CGC_PROGRESS"] = 'True'
         else:
-            os.environ["CGC_PROGRESS"] = 'False' 
+            os.environ["CGC_PROGRESS"] = 'False'
 
     elif match_cleanRawData:
         value = match_cleanRawData.group(1)
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
-            os.environ["CLEAN_RAW_DATA"] = 'True' 
+            os.environ["CLEAN_RAW_DATA"] = 'True'
         else:
-            os.environ["CLEAN_RAW_DATA"] = 'False' 
+            os.environ["CLEAN_RAW_DATA"] = 'False'
 
     else:
         if not HPC:
@@ -1142,71 +1143,82 @@ for genome in genomeList:
             LOG.write("%s%s%s\n" % ("WARNING: problem with fasta file: ",genome["genomeFile"]," This genome not processed!"))
         continue
     NEXT_CONFIG = open(nextConfigFile,"w")
-    NEXT_CONFIG.write("%s%s%s%s\n" % ("# Config file for genome ",genome["genomeNumber"]," AKA ",genome["genomeName"])) 
-    NEXT_CONFIG.write("\n%s\n" % ("# Processing information")) 
+    NEXT_CONFIG.write("%s%s%s%s\n" % ("# Config file for genome ",genome["genomeNumber"]," AKA ",genome["genomeName"]))
+    NEXT_CONFIG.write("\n%s\n" % ("# Processing information"))
     NEXT_CONFIG.write("%s%c%s%c\n" % ("genome_file=","'",genome["genomeFile"],"'"))
     NEXT_CONFIG.write("%s%c%s%c\n" % ("genome_type=","'",genome["genomeType"],"'"))
     NEXT_CONFIG.write("%s%c%s%c\n" % ("species=","'",genome["genomeSpecies"],"'"))
     NEXT_CONFIG.write("%s%c%s%c\n" % ("name=","'",genome["genomeName"],"'"))
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("output_subdir=","'",genome["outputSubdir"],"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("genetic_code=","'",geneticCode,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("translate_only=","'",TRANSLATE_ONLY,"'")) 
-    NEXT_CONFIG.write("\n%s\n" % ("# Gene callers")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("gene_caller=","'",geneCaller,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("genemarks_calls=","'",genemarksCalls,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("prodigal_calls=","'",prodigalCalls,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("glimmer_calls=","'",glimmerCalls,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("phanotate_calls=","'",phanotateCalls,"'")) 
-    NEXT_CONFIG.write("\n%s\n" % ("# Blast parameters")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("blast_identity=","'",blastpIdentity,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("blastn_hit_count=","'",blastnHitCount,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("blastp_hit_count=","'",blastpHitCount,"'")) 
-    NEXT_CONFIG.write("%s\n" % ("# Blast databases to set")) 
-    NEXT_CONFIG.write("%s\n" % ("# Genomes: ncbi_virus_blast")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("ncbi_virus_blast=","'",ncbiVirusBlast,"'")) 
-    NEXT_CONFIG.write("%s\n" % ("# Genes: refseq_gene_blast")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("refseq_gene_blast=","'",refseqGeneBlast,"'")) 
-    NEXT_CONFIG.write("%s\n" % ("# Proteins: ncbi_virus_protein_blast, kegg_virus_blast, nr_blast, refseq_protein_blast, phantome_blast, pvogs_blast")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("ncbi_virus_protein_blast=","'",ncbiVirusProteinBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("kegg_virus_blast=","'",keggVirusBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("phantome_blast=","'",phantomeBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("pvogs_blast=","'",pvogsBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("swissprot_blast=","'",swissprotBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("refseq_protein_blast=","'",refseqProteinBlast,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("nr_blast=","'",nrBlast,"'")) 
-    NEXT_CONFIG.write("\n%s\n" % ("# HMM database(s) to set")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("hmm_program=","'",hmmProgram,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("pvogs_hmm=","'",pvogsHmm,"'")) 
-    NEXT_CONFIG.write("\n%s\n" % ("# Other, external annotation")) 
-    NEXT_CONFIG.write("%s\n" % ("# If you have PSAT output, include the file")) 
-    NEXT_CONFIG.write("%s\n" % ("# Otherwise, set to 'false' and set psat file to ''")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("psat_annotation=","'",psatAnnotation,"'")) 
-    NEXT_CONFIG.write("%s%c%s%c\n" % ("psat_file=","'",PSAT_FILE,"'")) 
-    NEXT_CONFIG.close() 
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("output_subdir=","'",genome["outputSubdir"],"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("genetic_code=","'",geneticCode,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("translate_only=","'",TRANSLATE_ONLY,"'"))
+    NEXT_CONFIG.write("\n%s\n" % ("# Gene callers"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("gene_caller=","'",geneCaller,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("genemarks_calls=","'",genemarksCalls,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("prodigal_calls=","'",prodigalCalls,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("glimmer_calls=","'",glimmerCalls,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("phanotate_calls=","'",phanotateCalls,"'"))
+    NEXT_CONFIG.write("\n%s\n" % ("# Blast parameters"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("blast_identity=","'",blastpIdentity,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("blastn_hit_count=","'",blastnHitCount,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("blastp_hit_count=","'",blastpHitCount,"'"))
+    NEXT_CONFIG.write("%s\n" % ("# Blast databases to set"))
+    NEXT_CONFIG.write("%s\n" % ("# Genomes: ncbi_virus_blast"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("ncbi_virus_blast=","'",ncbiVirusBlast,"'"))
+    NEXT_CONFIG.write("%s\n" % ("# Genes: refseq_gene_blast"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("refseq_gene_blast=","'",refseqGeneBlast,"'"))
+    NEXT_CONFIG.write("%s\n" % ("# Proteins: ncbi_virus_protein_blast, kegg_virus_blast, nr_blast, refseq_protein_blast, phantome_blast, pvogs_blast"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("ncbi_virus_protein_blast=","'",ncbiVirusProteinBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("kegg_virus_blast=","'",keggVirusBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("phantome_blast=","'",phantomeBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("pvogs_blast=","'",pvogsBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("swissprot_blast=","'",swissprotBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("refseq_protein_blast=","'",refseqProteinBlast,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("nr_blast=","'",nrBlast,"'"))
+    NEXT_CONFIG.write("\n%s\n" % ("# HMM database(s) to set"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("hmm_program=","'",hmmProgram,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("pvogs_hmm=","'",pvogsHmm,"'"))
+    NEXT_CONFIG.write("\n%s\n" % ("# Other, external annotation"))
+    NEXT_CONFIG.write("%s\n" % ("# If you have PSAT output, include the file"))
+    NEXT_CONFIG.write("%s\n" % ("# Otherwise, set to 'false' and set psat file to ''"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("psat_annotation=","'",psatAnnotation,"'"))
+    NEXT_CONFIG.write("%s%c%s%c\n" % ("psat_file=","'",PSAT_FILE,"'"))
+    NEXT_CONFIG.close()
 
 # Run the pipeline (phate_runPipeline.py) over each genome; The code below runs in serial; Modify this section to implement in parallel on your cluster
 
 if not HPC:
-    LOG.write("%s%s\n" % ("Processing genomes through PhATE. Begin processing at ",datetime.datetime.now()))
-for configFile in configList:
+    LOG.write("%s%s\n" %
+              ("Processing genomes through PhATE. Begin processing at ", datetime.datetime.now()))
+
+# multithreaded
+
+def phate_threaded(configFile):
+    print(os.getpid())
+
     if not HPC:
-        LOG.write("%s%s\n" % ("Running PhATE using genome config file ",configFile))
+        LOG.write("%s%s\n" % ("Running PhATE using genome config file ", configFile))
         if PHATE_PROGRESS == 'True':
-            print("multiPhate says, Running PhATE using genome config file ",configFile)
-    command = "python " + PHATE_BASE_DIR + PHATE_PIPELINE_CODE + " " + configFile 
+            print("multiPhate says, Running PhATE using genome config file ", configFile)
+    command = "python " + PHATE_BASE_DIR + PHATE_PIPELINE_CODE + " " + configFile
     if PHATE_PROGRESS == 'True':
-        print("multiPhate says, command is ",command)
+        print("multiPhate says, command is ", command)
     if not HPC:
-        LOG.write("%s%s\n" % ("Command is ",command))
-        LOG.write("%s%s\n" % ("Begin processing at ",datetime.datetime.now()))
+        LOG.write("%s%s\n" % ("Command is ", command))
+        LOG.write("%s%s\n" % ("Begin processing at ", datetime.datetime.now()))
     result = os.system(command)
     if not HPC:
-        LOG.write("%s%s\n" % ("End processing at ",datetime.datetime.now()))
+        LOG.write("%s%s\n" % ("End processing at ", datetime.datetime.now()))
 
-##### CLEAN UP
+
+pool = Pool()
+pool.map(phate_threaded, configList)
+pool.close()
+
+# CLEAN UP
 
 if not HPC:
-    LOG.write("%s%s\n" % ("End log file ",datetime.datetime.now()))
+    LOG.write("%s%s\n" % ("End log file ", datetime.datetime.now()))
     LOG.close()
     if PHATE_PROGRESS == 'True':
         print("multiPhate says, Done!")
