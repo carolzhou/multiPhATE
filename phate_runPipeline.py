@@ -23,7 +23,7 @@
 # Programmer's Notes:
 #    This code uses a running log; need to occasionally clean it out
 #
-# Programmers: 
+# Programmers:
 #    Carol E. Zhou - pipeline programmer: CompareCalls/, DatabasePrep/, SequenceAnnotation/, phate_runPipeline.py
 #    Jeff Kimbrel  - GeneCalling/
 #
@@ -40,17 +40,17 @@ import subprocess
 
 # CONSTANTS and CONFIGURABLES
 
-# Output file names 
+# Output file names
 CONSENSUS_CALLS_FILE     = 'phanotate.cgc' #*** For now this is PHANOTATE calls, though may be consensus calls in future
 GENE_FILE                = 'gene.fnt'                              #
 PROTEIN_FILE             = 'protein.faa'                           #
 
 # DEFAULTS
 
-# Organism 
-GENETIC_CODE_DEFAULT          = 11               # Bacterial 
-GENE_CALLER_DEFAULT           = 'phanotate' 
-GENOME_TYPE_DEFAULT           = 'phage' 
+# Organism
+GENETIC_CODE_DEFAULT          = 11               # Bacterial
+GENE_CALLER_DEFAULT           = 'phanotate'
+GENOME_TYPE_DEFAULT           = 'phage'
 NAME_DEFAULT                  = 'unknown'
 CONTIG_NAME_DEFAULT           = 'unknown'
 SPECIES_DEFAULT               = 'unknown'
@@ -105,17 +105,17 @@ BASE_DIR                      = os.environ["BASE_DIR"]
 DATABASE_DIR                  = os.environ["DATABASE_DIR"]
 SOFTWARE_DIR                  = os.environ["SOFTWARE_DIR"]
 
-EMBOSS_HOME                   = os.environ["EMBOSS_PHATE_HOME"] 
-PIPELINE_DIR                  = os.environ["PIPELINE_DIR"] 
-PSAT_OUT_DIR                  = os.environ["PSAT_OUT_DIR"] 
+EMBOSS_HOME                   = os.environ["EMBOSS_PHATE_HOME"]
+PIPELINE_DIR                  = os.environ["PIPELINE_DIR"]
+PSAT_OUT_DIR                  = os.environ["PSAT_OUT_DIR"]
 
 # Data sets
-KEGG_VIRUS_BASE_DIR           = os.environ["KEGG_VIRUS_BASE_DIR"] 
+KEGG_VIRUS_BASE_DIR           = os.environ["KEGG_VIRUS_BASE_DIR"]
 KEGG_VIRUS_BLAST_HOME         = os.environ["KEGG_VIRUS_BLAST_HOME"]
-NCBI_VIRUS_BASE_DIR           = os.environ["NCBI_VIRUS_BASE_DIR"] 
+NCBI_VIRUS_BASE_DIR           = os.environ["NCBI_VIRUS_BASE_DIR"]
 NCBI_VIRUS_BLAST_HOME         = os.environ["NCBI_VIRUS_BLAST_HOME"]
 NCBI_VIRUS_PROTEIN_BLAST_HOME = os.environ["NCBI_VIRUS_PROTEIN_BLAST_HOME"]
-NCBI_TAXON_DIR                = os.environ["NCBI_TAXON_DIR"] 
+NCBI_TAXON_DIR                = os.environ["NCBI_TAXON_DIR"]
 PHANTOME_BASE_DIR             = os.environ["PHANTOME_BASE_DIR"]
 PHANTOME_BLAST_HOME           = os.environ["PHANTOME_BLAST_HOME"]
 PVOGS_BASE_DIR                = os.environ["PVOGS_BASE_DIR"]
@@ -138,15 +138,15 @@ PFAM_BLAST_HOME               = os.environ["PFAM_BLAST_HOME"]
 # Gene calling
 PRODIGAL_PATH                 = os.environ["PRODIGAL_PATH"]
 GLIMMER_PATH                  = os.environ["GLIMMER_PATH"]
-GENEMARKS_PATH                = os.environ["GENEMARKS_PATH"]  
+GENEMARKS_PATH                = os.environ["GENEMARKS_PATH"]
 PHANOTATE_PATH                = os.environ["PHANOTATE_PATH"]
 CGC_PATH                      = os.environ["CGC_PATH"]
 
 # Blast
 BLAST_HOME                    = os.environ["BLAST_HOME"]
 MIN_BLASTP_IDENTITY           = os.environ["MIN_BLASTP_IDENTITY"]
-MAX_BLASTP_HIT_COUNT          = os.environ["MAX_BLASTP_HIT_COUNT"] 
-MAX_BLASTN_HIT_COUNT          = os.environ["MAX_BLASTN_HIT_COUNT"] 
+MAX_BLASTP_HIT_COUNT          = os.environ["MAX_BLASTP_HIT_COUNT"]
+MAX_BLASTN_HIT_COUNT          = os.environ["MAX_BLASTN_HIT_COUNT"]
 BLASTP_IDENTITY_DEFAULT       = os.environ["BLASTP_IDENTITY_DEFAULT"]
 BLASTP_HIT_COUNT_DEFAULT      = os.environ["BLASTP_HIT_COUNT_DEFAULT"]
 BLASTN_HIT_COUNT_DEFAULT      = os.environ["BLASTN_HIT_COUNT_DEFAULT"]
@@ -165,7 +165,7 @@ CGC_WARNINGS                  = os.environ["CGC_WARNINGS"]
 CGC_MESSAGES                  = os.environ["CGC_MESSAGES"]
 CGC_PROGRESS                  = os.environ["CGC_PROGRESS"]
 
-# Constants 
+# Constants
 
 CODE_BASE   = "phate_runPipeline"
 CODE        = CODE_BASE + ".py"
@@ -183,13 +183,13 @@ DEFAULT_PIPELINE_INPUT_DIR  = 'PipelineInput/'                        # Default
 DEFAULT_PIPELINE_OUTPUT_DIR = 'PipelineOutput/'                       # Default
 PIPELINE_INPUT_DIR          = BASE_DIR + DEFAULT_PIPELINE_INPUT_DIR   # Default
 PIPELINE_OUTPUT_DIR         = BASE_DIR + DEFAULT_PIPELINE_OUTPUT_DIR  # Default
-PIPELINE_OUTPUT_SUBDIR      = 'unknown'                               # Will be read in from phate.config file 
+PIPELINE_OUTPUT_SUBDIR      = 'unknown'                               # Will be read in from phate.config file
 GENOME_FILE                 = 'unknown'                               # Will be read in from phate.config file
 GENOME_DIR                  = PIPELINE_INPUT_DIR                      # Default; can be overridden via phate.config
 PSAT_FILE                   = 'unknown'                               # Will be read in from phate.config file, if specified
-PSAT_DIR                    = PIPELINE_INPUT_DIR                      # Default; can be overridden via phate.config 
+PSAT_DIR                    = PIPELINE_INPUT_DIR                      # Default; can be overridden via phate.config
 
-# In/out files 
+# In/out files
 
 logfile = PIPELINE_OUTPUT_DIR + CODE_BASE + ".log" #*** Should be converted to a generic pipeline log
 outfile = PIPELINE_OUTPUT_DIR + CODE_BASE + ".out"
@@ -222,7 +222,7 @@ p_config                = re.compile("config")
 p_outputSubdir          = re.compile("output_subdir='(.*)'")
 p_genomeFile            = re.compile("genome_file='(.*)'")
 p_genomeType            = re.compile("genome_type='(.*)'")
-p_name                  = re.compile("name='(.*)'")  
+p_name                  = re.compile("name='(.*)'")
 p_contig                = re.compile("contig='(.*)'")  #*** For now, finished genome, single contig only
 p_species               = re.compile("species='(.*)'")
 
@@ -270,7 +270,7 @@ p_nrHmm                 = re.compile("nr_hmm='(.*)'")
 p_psatAnnotation        = re.compile("psat_annotation='(.*)'")
 p_psatFile              = re.compile("psat_file='(.*)'")
 
-# BOOLEANS 
+# BOOLEANS
 
 # DEBUG messages control (local)
 #DEBUG = True
@@ -302,7 +302,7 @@ else:
     if match_config:
         configFile = sys.argv[1]
         LOGFILE.write("%s%s\n" % ("Config file is ",configFile))
-    else: 
+    else:
         match_input  = re.search(p_input,  sys.argv[1].lower())
         match_usage  = re.search(p_usage,  sys.argv[1].lower())
         match_detail = re.search(p_detail, sys.argv[1].lower())
@@ -428,9 +428,9 @@ for cLine in cLines:
     match_glimmerCalls          = re.search(p_glimmerCalls,cLine)
     match_phanotateCalls        = re.search(p_phanotateCalls,cLine)
     match_psatAnnotation        = re.search(p_psatAnnotation,cLine)
- 
+
     if (match_comment or match_blank):
-        continue 
+        continue
 
     elif match_outputSubdir: #*** Note that if the output dir is not read before subdir; depends on user not changing order in config - Clean this up!
         value = match_outputSubdir.group(1)
@@ -443,13 +443,13 @@ for cLine in cLines:
     elif match_genomeFile:
         value = match_genomeFile.group(1)
         if value != '':
-            GENOME_FILE = value 
+            GENOME_FILE = value
         LOGFILE.write("%s%s\n" % ("GENOME_FILE is ",GENOME_FILE))
 
     elif match_psatFile:
         value = match_psatFile.group(1)
         if value != '':
-            PSAT_FILE = value 
+            PSAT_FILE = value
             PSAT = True   # Yes, a psat file will be passed to subordinate code
         LOGFILE.write("%s%s\n" % ("PSAT_FILE is ",PSAT_FILE))
 
@@ -498,11 +498,11 @@ for cLine in cLines:
     elif match_genomeType:
         value = match_genomeType.group(1)
         if value.lower() == 'phage' or value.lower() == 'bacteriophage':
-            genomeType = 'phage' 
+            genomeType = 'phage'
         elif value.lower() == 'virus' or value.lower() == 'viral' or value.lower() == 'viridae':
             genomeType = 'virus'
         elif value.lower() == 'bacteria' or value.lower() == 'bacterium' or value.lower() == 'bacterial':
-            genomeType = 'bacterium' 
+            genomeType = 'bacterium'
 
     elif match_name:
         value = match_name.group(1)
@@ -589,7 +589,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
              nrBlast = True
         else:
-             nrBlast = False 
+             nrBlast = False
 
     elif match_refseqProteinBlast:
         value = match_refseqProteinBlast.group(1)
@@ -610,7 +610,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
             phantomeBlast = True
         else:
-            phantomeBlast = False 
+            phantomeBlast = False
 
     elif match_pvogsBlast:
         value = match_pvogsBlast.group(1)
@@ -649,7 +649,7 @@ for cLine in cLines:
         else:
             if PHATE_WARNINGS == 'True':
                 print("phate_runPipeline says, WARNING: currenly only jackhmmer hmm search is supported; running jackhmmer")
-            hmmProgram = HMM_PROGRAM_DEFAULT 
+            hmmProgram = HMM_PROGRAM_DEFAULT
 
     elif match_ncbiVirusHmm:
         value = match_ncbiVirusHmm.group(1)
@@ -677,7 +677,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
              nrHmm = True
         else:
-             nrHmm = False 
+             nrHmm = False
 
     elif match_refseqProteinHmm:
         value = match_refseqProteinHmm.group(1)
@@ -691,7 +691,7 @@ for cLine in cLines:
         if value.lower() == 'true' or value.lower() == 'yes' or value.lower() == 'on':
             phantomeHmm = True
         else:
-            phantomeHmm = False 
+            phantomeHmm = False
 
     elif match_pvogsHmm:
         value = match_pvogsHmm.group(1)
@@ -758,7 +758,7 @@ else:
         LOGFILE.write("%s%s%s%s\n" % ("ERROR: could not open runLog file: ",runLog, " at ",datetime.datetime.now()))
         LOGFILE.close(); exit(0)
 
-# Create objects for passing genecall, blast, and hmm parameters to subordinate codes 
+# Create objects for passing genecall, blast, and hmm parameters to subordinate codes
 
 genecallParameters = {
     "genemarksCalls"        : genemarksCalls,
@@ -805,7 +805,7 @@ if genomeType.lower() == 'phage' and CONSENSUS_CALLS_FILE != 'phanotate.cgc':
 CONFIG.close()
 
 # Turn PSAT back to False if the user only needs translations (even if they provided a .psat file)
-if PSAT and TRANSLATE_ONLY:  
+if PSAT and TRANSLATE_ONLY:
     PSAT = False
 
 if PHATE_MESSAGES == 'True':
@@ -816,22 +816,22 @@ if PHATE_MESSAGES == 'True':
     print("  GENOME_FILE is", GENOME_FILE)
     print("  GENE_FILE is", GENE_FILE)
     print("  PROTEIN_FILE is", PROTEIN_FILE)
-    print("  genomeType is", genomeType) 
-    print("  name is", name) 
+    print("  genomeType is", genomeType)
+    print("  name is", name)
     print("  contigName is", contigName)
-    print("  species is", species) 
+    print("  species is", species)
 
-    print("  geneticCode is", geneticCode) 
+    print("  geneticCode is", geneticCode)
     print("  Status of boolean TRANSLATE_ONLY is", TRANSLATE_ONLY)
-    print("  geneCaller is", geneCaller) 
+    print("  geneCaller is", geneCaller)
     print("  genemarksCalls is", genemarksCalls)
     print("  prodigalCalls is", prodigalCalls)
     print("  glimmerCalls is", glimmerCalls)
     print("  phanotateCalls is", phanotateCalls)
     print("  CONSENSUS_CALLS_FILE is", CONSENSUS_CALLS_FILE)
 
-    print("  blastpIdentity is", blastpIdentity) 
-    print("  blastpHitCount is", blastpHitCount) 
+    print("  blastpIdentity is", blastpIdentity)
+    print("  blastpHitCount is", blastpHitCount)
     print("  blastnHitCount is", blastnHitCount)
     print("  ncbiVirusBlast is", ncbiVirusBlast)
     print("  ncbiVirusProteinBlast is", ncbiVirusProteinBlast)
@@ -859,7 +859,7 @@ if PHATE_MESSAGES == 'True':
     if PSAT:
         print("  PSAT_FILE is", PSAT_FILE)
     else:
-        print("  PSAT_FILE was not provided.") 
+        print("  PSAT_FILE was not provided.")
 
 RUNLOG.write("%s\n" % ("Input parameters:"))
 RUNLOG.write("%s%s\n" % ("   PIPELINE_INPUT_DIR: ", PIPELINE_INPUT_DIR))
@@ -959,7 +959,7 @@ try:
     GENOME_H = open(genomeFile,"r")
 except IOError as e:
     fileError = True
-    print(e) 
+    print(e)
 
 if fileError:
     print(USAGE_STRING)
@@ -1051,7 +1051,7 @@ if blastParameters['swissprotBlast']:
 
 hmmParameterString = ''
 if hmmParameters['hmmProgram']:
-    hmmParameterString += '_program=' + hmmProgram 
+    hmmParameterString += '_program=' + hmmProgram
 if hmmParameters['ncbiVirusHmm']:
     hmmParameterString += '_ncbiVirusGenome'
 if hmmParameters['ncbiVirusProteinHmm']:
@@ -1088,7 +1088,7 @@ if TRANSLATE_ONLY:
 elif PSAT:
     command = commandRoot + " -P " + psatFile  # including a PSAT results file
 else:
-    command = commandRoot 
+    command = commandRoot
 
 # Communicate and execute
 if PHATE_PROGRESS == 'True':

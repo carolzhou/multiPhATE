@@ -1188,37 +1188,34 @@ for genome in genomeList:
 # Run the pipeline (phate_runPipeline.py) over each genome; The code below runs in serial; Modify this section to implement in parallel on your cluster
 
 if not HPC:
-    LOG.write("%s%s\n" %
-              ("Processing genomes through PhATE. Begin processing at ", datetime.datetime.now()))
+    LOG.write("%s%s\n" % ("Processing genomes through PhATE. Begin processing at ",datetime.datetime.now()))
 
 # multithreaded
 
 def phate_threaded(configFile):
     print(os.getpid())
-
     if not HPC:
-        LOG.write("%s%s\n" % ("Running PhATE using genome config file ", configFile))
+        LOG.write("%s%s\n" % ("Running PhATE using genome config file ",configFile))
         if PHATE_PROGRESS == 'True':
-            print("multiPhate says, Running PhATE using genome config file ", configFile)
+            print("multiPhate says, Running PhATE using genome config file ",configFile)
     command = "python " + PHATE_BASE_DIR + PHATE_PIPELINE_CODE + " " + configFile
     if PHATE_PROGRESS == 'True':
-        print("multiPhate says, command is ", command)
+        print("multiPhate says, command is ",command)
     if not HPC:
-        LOG.write("%s%s\n" % ("Command is ", command))
-        LOG.write("%s%s\n" % ("Begin processing at ", datetime.datetime.now()))
+        LOG.write("%s%s\n" % ("Command is ",command))
+        LOG.write("%s%s\n" % ("Begin processing at ",datetime.datetime.now()))
     result = os.system(command)
     if not HPC:
-        LOG.write("%s%s\n" % ("End processing at ", datetime.datetime.now()))
-
+        LOG.write("%s%s\n" % ("End processing at ",datetime.datetime.now()))
 
 pool = Pool()
 pool.map(phate_threaded, configList)
 pool.close()
 
-# CLEAN UP
+##### CLEAN UP
 
 if not HPC:
-    LOG.write("%s%s\n" % ("End log file ", datetime.datetime.now()))
+    LOG.write("%s%s\n" % ("End log file ",datetime.datetime.now()))
     LOG.close()
     if PHATE_PROGRESS == 'True':
         print("multiPhate says, Done!")
