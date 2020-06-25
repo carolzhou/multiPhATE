@@ -209,7 +209,6 @@ os.environ["CGC_WARNINGS"]                  = CGC_WARNINGS_DEFAULT
 os.environ["CGC_MESSAGES"]                  = CGC_MESSAGES_DEFAULT
 os.environ["CGC_PROGRESS"]                  = CGC_PROGRESS_DEFAULT
 
-
 # Constants
 
 CODE_BASE   = "multiPhate"
@@ -1113,6 +1112,7 @@ if not HPC:
     LOG.write("%s\n" % ("List of genomes to be processed:"))
 
 PHATE_PROGRESS = os.environ["PHATE_PROGRESS"]
+PHATE_WARNINGS = os.environ["PHATE_WARNINGS"]
 
 for genome in genomeList:
     if not HPC:
