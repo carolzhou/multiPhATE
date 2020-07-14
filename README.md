@@ -5,6 +5,10 @@ This code was developed by Carol L. Ecale Zhou and Jeffrey Kimbrel at Lawrence L
 
 THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS.
 
+#### ANNOUNCEMENTS
+
+The getDBs.py script (see below) is provided as a convenience for users to download and format databases used by multiPhATE. However, because the structures of data sets at NCBI have changed, the getDBs.py script is currently seriously broken. I am working on overhauling the script to conform to the changes at NCBI. Therefore, it might be necessary to exert some manual effort in setting up the data for running multiPhATE. I will post a new getDBs.py when it is ready, and will update this message accordingly. Thank you for your patience, and thank you for your interest in using multiPhATE.
+
 #### ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
 MultiPhATE is a throughput version of PhATE, which is described below. The multiPhate.py code is a command-line program that takes a single argument (hereafter referred to as, "multiPhate.config"; use sample.multiPhate.config as starting point) and uses it to generate a phate.config file (suitably named) for each genome being annotated. Then, multiPhate.py invokes the PhATE pipeline (via phate_runPipeline.py) for each genome.
