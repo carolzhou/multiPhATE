@@ -2,7 +2,7 @@
 
 #############################################################################
 #
-# program: dbPrep_getDBs.py
+# program: dbPrep_getDBs.py  (modified for use with multiPhATE1)
 #
 # programmer:  C. E. Zhou
 #
@@ -11,7 +11,7 @@
 #
 # Summary:  This script facilitates the downloading of databases to be used with multiPhATE.
 #
-# Most recent update:  31 July 2020
+# Most recent update:  30 July 2020
 #
 ##############################################################################
 
@@ -201,8 +201,8 @@ if not os.path.exists(pVOGsDir):
     os.mkdir(pVOGsDir)
 #if not os.path.exists(pVOGhmmsDir):
 #    os.mkdir(pVOGhmmsDir)
-#if not os.path.exists(VOGsDir):
-#    os.mkdir(VOGsDir)
+if not os.path.exists(VOGsDir):
+    os.mkdir(VOGsDir)
 #if not os.path.exists(VOGhmmsDir):
 #    os.mkdir(VOGhmmsDir)
 #if not os.path.exists(CAZyDir):
@@ -221,6 +221,7 @@ vogGenes_config         = os.path.join(VOGsDir,          vogGenes)
 vogProteins_config      = os.path.join(VOGsDir,          vogProteins)
 vogProteinHmms_config   = os.path.join(VOGhmmsDir,       vogProteinHmms)
 cazyProteins_config     = os.path.join(CAZyDir,          cazyProteins)
+cazyAnnotation_config   = os.path.join(CAZyDir,          cazyFamActivities)
 
 # Write database path/files to file for user's benefit in constructing config file
 dataFile = './' + CODE_BASE + '.lst'
@@ -237,22 +238,23 @@ DATA_H.write("%s\n" % (pvog_config))
 DATA_H.write("%s\n" % (vogProteins_config))
 #DATA_H.write("%s\n" % (vogProteinHmms_config))
 #DATA_H.write("%s\n" % (cazyProteins_config))
+#DATA_H.write("%s\n" % (cazyAnnotation_config))
 DATA_H.close()
 
 # Pre-set download instructions; skip user input
 if REMOTE:
     BLAST               = True 
-    NCBI_VIRUS_GENOME   = False 
-    NCBI_VIRUS_PROTEIN  = False
-    REFSEQ_PROTEIN      = False
-    SWISSPROT           = False 
+    NCBI_VIRUS_GENOME   = True 
+    NCBI_VIRUS_PROTEIN  = True 
+    REFSEQ_PROTEIN      = True 
+    SWISSPROT           = True 
     NR                  = False
-    PHANTOME            = False   # Provided in distribution
-    PVOGS               = False   # Provided in distribution
-    PVOG_HMMS           = False
-    VOGS                = False
-    VOG_HMMS            = False
-    CAZY                = False 
+    PHANTOME            = True   # Provided in distribution
+    PVOGS               = True   # Provided in distribution
+    PVOG_HMMS           = True 
+    VOGS                = True 
+    VOG_HMMS            = True 
+    CAZY                = True 
 
 # Determine download instructions via user input
 elif INTERACTIVE:
@@ -917,7 +919,7 @@ if VOGS:
         try:
             # The dbPrep_vogTagFastas.py code will tag gene and protein sequence headers
             print ("Reformatting sequence headers with VOG identifiers.")
-            print ("This may take a long time (perhap 8 hours).")
+            print ("This may take a long time (perhap hours).")
             try:
                 command = "python3 dbPrep_vogTagFastas.py " + VOGsDir 
                 success = os.system(command)
@@ -954,7 +956,7 @@ if VOGS:
     LOG_H.flush()
 
 ##### Install VOG HMMS
-"""
+
 if VOG_HMMS:
     myTime = datetime.datetime.now()
     LOG_H.write("%s%s\n" % ("Vog Hmms download begin processing at ",myTime))
@@ -1028,10 +1030,10 @@ if VOG_HMMS:
     myTime = datetime.datetime.now()
     LOG_H.write("%s%s\n" % ("Vog Hmms download finish processing at ",myTime))
     LOG_H.flush()
-"""
+
 ##############################################################################
 # Prepare PVOG HMMs
-"""
+
 if PVOG_HMMS:
     myTime = datetime.datetime.now()
     LOG_H.write("%s%s\n" % ("pVog Hmms download begin processing at ",myTime))
@@ -1120,10 +1122,10 @@ if PVOG_HMMS:
     myTime = datetime.datetime.now()
     LOG_H.write("%s%s\n" % ("Pvog Hmms downloading finish processing at ",myTime))
     LOG_H.flush()
-"""
+
 ################
 # Download and format CAZy sequence database and associated files
-"""
+
 if CAZY:
     myTime = datetime.datetime.now()
     LOG_H.write("%s%s\n" % ("CAZy download begin processing at ",myTime))
@@ -1144,7 +1146,7 @@ if CAZY:
         success = os.system(command)
     except:
         print ("WARNING: Could not download ",cazyFamActivities)
-
+    """
     try:
         print ("Downloading ",cazyFamSubfamEC)
         command = 'wget "' + cazyFamSubfamEC_httpAddr + '"'
@@ -1165,7 +1167,7 @@ if CAZY:
         success = os.system(command)
     except:
         print ("WARNING: Could not download ",cazyPrWithEC)
-
+    """
     # Format CAZy protein database for Blast
     try:
         print ("Formatting CAZy protein database for blast.")
@@ -1179,7 +1181,7 @@ if CAZY:
     LOG_H.write("%s%s\n" % ("CAZy download finish processing at ",myTime))
     LOG_H.flush()
     os.chdir(cwd)
-"""
+
 ##############################################################################
 # Run makeblastdb on the Phantome and pVOGs databases
 
