@@ -86,11 +86,11 @@ NCBI virus genomes - ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/. If using 
 
 NCBI-associated file:  accession2taxid file - ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz. If using a web browser, go to ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/. Then, select "Allow" to "Do you want to allow this page to open 'Finder'?". Connect as "Guest". Select the volumes to mount: "OK". This should download the zip file.
 
-NCBI Refseq Protein - download using blast+: /bin/update_blastdb.pl refseq_protein
+NCBI Refseq Protein - download using blast+: /bin/update_blastdb.pl refseq_protein. Beware: This database appears to be having the same issue as swissprot (see below).
 
 NCBI Refseq Gene - download using blast+: /bin/update_blastdb.pl refseqgene. This database contains primarily human sequences. To acquire bacterial gene sequences you may need to download them via http://ncbi.nlm.nih.gov/gene and process the data to generate a fasta data set. Support for doing this is not provided with the multiPhATE distribution.
 
-NCBI Swissprot - download using blast+: /bin/update_blastdb.pl swissprot
+NCBI Swissprot - download using blast+: /bin/update_blastdb.pl swissprot - CORRECTION: We now suggest downloading the swissprot sequence database from Uniprot and formatting the data for blastp by hand:  wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz - unpack and format for protein blast. Beware, as we have found that blast+ fails to find or recognize some databases downloaded using its own download script.
 
 NR - ftp://ftp.ncbi.nlm.nih.gov/nr/
 
