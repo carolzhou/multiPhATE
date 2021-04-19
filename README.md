@@ -7,9 +7,9 @@ THIS CODE IS COVERED BY THE BSD LICENSE. SEE INCLUDED FILE BSD-3.pdf FOR DETAILS
 
 #### ANNOUNCEMENTS
 
-This code will soon be deprecated, as the new version (multiPhATE2) is close to being released. You are encouraged to use the code at https://github.com/carolzhou/multiPhATE2/. 
+This code will soon be deprecated, as the new version (multiPhATE2) is now released. You are encouraged to use the code at https://github.com/carolzhou/multiPhATE2/. The multiPhATE2 code has additional features not found in multiPhATE version 1.0.
 
-The getDBs.py script (see below) is provided as a convenience for users to download and format databases used by multiPhATE. However, because the structures of data sets at NCBI have changed, the getDBs.py script is currently seriously broken. I am working on overhauling the script to conform to the changes at NCBI. Therefore, it might be necessary to exert some manual effort in setting up the data for running multiPhATE. I will post a new getDBs.py when it is ready, and will update this message accordingly. Thank you for your patience, and thank you for your interest in using multiPhATE.
+The getDBs.py script (see below) is provided as a convenience for users to download and format databases used by multiPhATE. However, this script can break when the source URLs change. Therefore, it might be necessary to exert some manual effort in setting up the data for running multiPhATE. Thank you for your patience, and thank you for your interest in using multiPhATE. The codes and scripts at multiPhATE2 are being updated regularly. It is recommended that you now use the new version (multiPhATE2).
 
 #### ABOUT THE MULTI-PHATE PIPELINE DRIVER
 
